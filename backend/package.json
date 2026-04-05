@@ -1,0 +1,19 @@
+{
+  "name": "nexora-backend",
+  "version": "1.0.0",
+  "description": "Nexora backend API",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/server.ts",
+    "start": "node dist/server.js"
+  },
+  "engines": {
+    "node": ">=22.0.0 <25.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.8.0",
+    "ts-node": "^10.9.0"
+  }
+}
