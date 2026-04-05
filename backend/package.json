@@ -8,15 +8,31 @@
     "dev": "tsx watch --inspect --env-file=.env.development src/server.ts",
     "start": "node dist/server.js",
     "typecheck": "tsc --noEmit",
-    "format": "prettier --write \"src/**/*\" \"tests/**/*\" --no-error-on-unmatched-pattern"
+    "format": "prettier --write \"src/**/*\" \"tests/**/*\" --no-error-on-unmatched-pattern",
+    "lint": "eslint \"src/**/*.{ts,tsx}\"",
+    "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix"
   },
   "engines": {
     "node": ">=22.0.0 <25.0.0"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/node": "^22.0.0",
-    "prettier": "3.8.1",
+    "@typescript-eslint/eslint-plugin": "^8.58.0",
+    "@typescript-eslint/parser": "^8.58.0",
+    "eslint": "^10.2.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-import-resolver-typescript": "^4.4.4",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-n": "^17.24.0",
+    "eslint-plugin-prettier": "^5.5.5",
+    "eslint-plugin-promise": "^7.2.1",
+    "eslint-plugin-security": "^4.0.0",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
+    "eslint-plugin-sonarjs": "^4.0.2",
+    "eslint-plugin-unicorn": "^64.0.0",
+    "prettier": "^3.8.1",
     "tsx": "^4.0.0",
-    "typescript": "^5.8.0"
+    "typescript": "^6.0.2"
   }
 }
