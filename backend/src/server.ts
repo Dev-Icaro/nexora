@@ -1,5 +1,5 @@
 const main = (): void => {
-  console.log("Nexora backend started");
+  console.log('Nexora backend started');
 };
 
 main();
