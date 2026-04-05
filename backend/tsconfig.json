@@ -75,7 +75,7 @@
     // "verbatimModuleSyntax": true,           /* (TS 5.0) Do not transform or elide any imports or exports not marked as type-only, ensuring they are written in the output file's format based on the 'module' setting. */
 
     /* ─── Interop Constraints ─────────────────────────────────────────────── */
-    // "isolatedModules": true,                /* (TS 1.5) Ensure that each file can be safely transpiled without relying on other imports. */
+    "isolatedModules": true,                   /* (TS 1.5) Ensure that each file can be safely transpiled without relying on other imports. Required by tsx (esbuild transpiles files individually without full type information). */
     // "verbatimModuleSyntax": true,           /* (TS 5.0) Do not transform or elide any imports or exports not marked as type-only. */
     // "isolatedDeclarations": true,           /* (TS 5.5) Require sufficient annotation on exports so other tools can trivially generate declaration files. */
     // "allowSyntheticDefaultImports": true,   /* (TS 1.8) Allow 'import x from y' when a module doesn't have a default export. */
