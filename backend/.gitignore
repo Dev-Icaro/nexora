@@ -121,6 +121,7 @@ compose.dev.yaml
 *.swo
 .cursorrules
 .cursor
+.claude/**/*
 .claude
 
 #cypress dev config file
