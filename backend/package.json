@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Nexora backend API",
   "main": "dist/server.js",
+  "license": "MIT",
   "scripts": {
     "build": "tsc",
     "dev": "tsx watch --inspect --env-file=.env.development src/server.ts",
@@ -37,7 +38,9 @@
   },
   "dependencies": {
     "express-http-context": "^2.0.1",
+    "inversify": "6.2.2",
     "mongoose": "^9.4.1",
+    "reflect-metadata": "^0.2.2",
     "winston": "^3.19.0",
     "winston-daily-rotate-file": "^5.0.0",
     "zod": "^4.3.6"

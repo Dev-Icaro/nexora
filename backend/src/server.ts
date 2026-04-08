@@ -1,3 +1,5 @@
+import '@/ioc/container';
+
 import connectDatabase from '@/config/database';
 import logger from '@/utils/logger';
 
