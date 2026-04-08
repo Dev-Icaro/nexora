@@ -26,7 +26,17 @@ module.exports = [
   },
   sonarjs.configs.recommended,
   promise.configs['flat/recommended'],
-  n.configs['flat/recommended-script'],
+  {
+    ...n.configs['flat/recommended-script'],
+    settings: {
+      n: {
+        tryExtensions: ['.ts', '.tsx', '.js', '.json', '.node'],
+        convertPath: {
+          'src/**/*.ts': ['^src/(.+)\\.ts$', 'src/$1.ts'],
+        },
+      },
+    },
+  },
   prettierRecommended,
   {
     files: ['src/**/*.{ts,tsx}'],

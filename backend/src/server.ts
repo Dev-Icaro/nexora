@@ -1,5 +1,7 @@
-const main = (): void => {
-  console.log('Nexora backend started');
+import connectDatabase from '@/config/database';
+
+const bootstrap = async (): Promise<void> => {
+  await connectDatabase();
 };
 
-main();
+bootstrap().catch(error => console.error(error));
