@@ -6,12 +6,10 @@ variables using zod schema the object is located at @/config/environment.ts
 ## Envs explanation
 
 `MONGODB_URI` Mongo DB connection URI.
-
 `NODE_ENV` Application environment. Accepted values: `development`, `production`, `test`. Defaults to `development`.
-
 `LOG_LEVEL` Minimum log level to output. Accepted values: `error`, `warn`, `info`, `http`, `verbose`, `query`, `debug`, `silly`. Defaults to `info`.
-
 `LOG_SILENT` When `true`, suppresses all log output. Defaults to `false`.
+`APP_PORT` Port that appollo server will start
 
 ## Rules
 

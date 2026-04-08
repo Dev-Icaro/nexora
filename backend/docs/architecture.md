@@ -37,7 +37,18 @@ always use mongoose.Schema method and export the defined model as default in thi
 
 All models should be located at @/models folder, the file name convention is <entityName>.model.ts
 
-## 2.0 - IoC
+## 2.0 - GraphQL
+
+In the project we use GraphQL with Apollo driver, all graphql related file are located in @/graphql folder.
+Inside graphql folder we have mutations, queries, resolvers, and root files like context.ts and typeDefs.ts
+
+mutations -> All mutations should be located there using always repository layer.
+queries -> All queries should be located there using always repository layer.
+resolvers -> All resolvers should be located there.
+context.ts -> The graphql context definition should be located here.
+typeDefs -> All typeDefs should be located here.
+
+## 3.0 - IoC
 
 As dependency injection container, we use inversify, all related definitions should be located at @/ioc folder, we do not
 have to abstract all the things in the application, just the important peaces, like database access, or external tool access

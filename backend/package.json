@@ -37,7 +37,9 @@
     "typescript": "^6.0.2"
   },
   "dependencies": {
+    "@apollo/server": "^5.5.0",
     "express-http-context": "^2.0.1",
+    "graphql": "^16.13.2",
     "inversify": "6.2.2",
     "mongoose": "^9.4.1",
     "reflect-metadata": "^0.2.2",
