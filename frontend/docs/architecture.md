@@ -221,3 +221,50 @@ We enforce clear separation:
 - Prefer feature isolation over global abstractions
 - Keep shared folder minimal and generic
 - Use TypeScript types for all API responses
+-
+
+## 11.0 Form Validation
+
+All forms in the application must use React Hook Form as the default form library.
+
+Form UI integration must always be done using the ShadCN UI `Form` components.
+
+This pattern ensures:
+
+- Consistent form structure across the application
+- Better scalability for complex forms
+- Easy integration with validation libraries
+- Better maintainability and readability
+
+### Rules
+
+- Always use `react-hook-form` for form state management
+- Always use ShadCN UI `Form` wrapper and related form components
+- Avoid managing form state manually with `useState` for standard forms
+- Keep validation logic close to the form definition
+- Prefer schema-based validation when possible
+
+### Recommended structure
+
+Forms should normally be organized inside the related feature:
+
+features/<feature>/components/
+
+Example:
+
+features/auth/components/login-form.tsx  
+features/auth/components/register-form.tsx
+
+### Integration pattern
+
+A form should usually include:
+
+- `useForm` from React Hook Form
+- `Form` from ShadCN UI
+- `FormField`
+- `FormItem`
+- `FormLabel`
+- `FormControl`
+- `FormMessage`
+
+This should be the default standard for all new forms in the project.
