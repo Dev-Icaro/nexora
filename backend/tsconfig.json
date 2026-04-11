@@ -24,11 +24,12 @@
 
     /* ─── Modules ─────────────────────────────────────────────────────────── */
     "module": "CommonJS" /* (TS 1.0) Specify what module code is generated. */,
-    // "rootDir": "./src",                     /* (TS 1.5) Specify the root folder within your source files. */
+    "rootDir": "./src" /* (TS 1.5) Specify the root folder within your source files. */,
     // "moduleResolution": "node10",           /* (TS 1.6) Specify how TypeScript looks up a file from a given module specifier. */
-    // "baseUrl": "./",                        /* (TS 1.8) Specify the base directory to resolve non-relative module names. */
+    "baseUrl": "./src" /* (TS 1.8) Specify the base directory to resolve non-relative module names. */,
     "paths": {
-      /* (TS 2.0) Specify a set of entries that re-map imports to additional lookup locations. */ "@/*": ["./src/*"]
+      /* (TS 2.0) Specify a set of entries that re-map imports to additional lookup locations. */
+      "@/*": ["./*"]
     },
     // "rootDirs": [],                         /* (TS 2.0) Allow multiple folders to be treated as one when resolving modules. */
     // "typeRoots": [],                        /* (TS 2.0) Specify multiple folders that act like './node_modules/@types'. */
@@ -111,7 +112,8 @@
 
     /* ─── Completeness ────────────────────────────────────────────────────── */
     // "skipDefaultLibCheck": true,            /* (TS 1.0) Skip type checking .d.ts files that are included with TypeScript. */
-    "skipLibCheck": true /* (TS 2.0) Skip type checking all .d.ts files. */
+    "skipLibCheck": true /* (TS 2.0) Skip type checking all .d.ts files. */,
+    "ignoreDeprecations": "6.0" /* Required to keep baseUrl support (deprecated in TS 6, still needed for tsc-alias path resolution). */
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]

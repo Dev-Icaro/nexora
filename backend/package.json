@@ -5,9 +5,9 @@
   "main": "dist/server.js",
   "license": "MIT",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && tsc-alias",
     "dev": "tsx watch --inspect --env-file=.env.development src/server.ts",
-    "start": "node dist/server.js",
+    "start": "node --env-file=.env.production dist/server.js",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write \"src/**/*\" \"tests/**/*\" --no-error-on-unmatched-pattern",
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
@@ -33,6 +33,7 @@
     "eslint-plugin-sonarjs": "^4.0.2",
     "eslint-plugin-unicorn": "^64.0.0",
     "prettier": "^3.8.1",
+    "tsc-alias": "^1.8.16",
     "tsx": "^4.0.0",
     "typescript": "^6.0.2"
   },
