@@ -1,8 +1,9 @@
-import { Eye, EyeOff } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
+import { PasswordInput } from '@/shared/components/ui/password-input';
 import { Separator } from '@/shared/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/shared/components/ui/tooltip';
 
@@ -14,8 +15,6 @@ type LoginFormProps = {
 export function LoginForm({ onSubmit, onGithubLogin }: LoginFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     onSubmit(email, password);
@@ -43,34 +42,13 @@ export function LoginForm({ onSubmit, onGithubLogin }: LoginFormProps) {
         <label htmlFor="password" className="text-xs font-medium">
           Password
         </label>
-        <div className="relative">
-          <Input
-            id="password"
-            type={showPassword ? 'text' : 'password'}
-            placeholder="••••••••"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            autoComplete="current-password"
-            className="pr-9"
-          />
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                  onClick={() => setShowPassword(prev => !prev)}
-                  className="absolute right-1 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="top">{showPassword ? 'Hide password' : 'Show password'}</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
+        <PasswordInput
+          id="password"
+          placeholder="••••••••"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          autoComplete="current-password"
+        />
       </div>
 
       <Button type="submit" className="w-full" disabled={isSubmitDisabled}>
@@ -79,9 +57,9 @@ export function LoginForm({ onSubmit, onGithubLogin }: LoginFormProps) {
 
       <p className="text-center text-xs text-muted-foreground">
         Don&rsquo;t have an account?{' '}
-        <a href="#" className="font-medium text-primary hover:underline">
+        <Link to="/signup" className="font-medium text-primary hover:underline">
           Sign up
-        </a>
+        </Link>
         <br />
         <a href="#" className="text-left font-medium text-primary hover:underline">
           Forgot password?
