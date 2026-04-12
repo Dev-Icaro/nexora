@@ -43,8 +43,15 @@ export const typeDefs = `#graphql
     getPost(postId: ID!): Post
   }
 
+  type RegisterOutput {
+    code: Int!
+    message: String!
+    success: Boolean!
+    user: User
+  }
+
   type Mutation {
-    register(registerInput: RegisterInput): User!
+    register(registerInput: RegisterInput): RegisterOutput!
     login(username: String!, password: String!): User!
 
     createPost(body: String!): Post!
