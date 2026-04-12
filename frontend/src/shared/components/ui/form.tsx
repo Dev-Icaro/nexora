@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { type FieldPath, type FieldValues, FormProvider, Controller, useFormContext } from 'react-hook-form';
+import { Controller, type FieldPath, type FieldValues, FormProvider, useFormContext } from 'react-hook-form';
 
 import { cn } from '@/shared/lib/utils';
 
@@ -113,4 +113,5 @@ function FormMessage({ className, children, ...props }: React.ComponentProps<'p'
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, useFormField };

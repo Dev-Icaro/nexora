@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { Link } from 'react-router-dom';
 import { z } from 'zod';
 
@@ -7,6 +7,9 @@ import { Button } from '@/shared/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/components/ui/form';
 import { Input } from '@/shared/components/ui/input';
 import { PasswordInput } from '@/shared/components/ui/password-input';
+import { PasswordStrengthIndicator } from '@/shared/components/ui/password-strength-indicator';
+
+import { getPasswordStrength } from '../utils/password-strength';
 
 const signupSchema = z
   .object({
@@ -32,8 +35,9 @@ export function SignupForm({ onSubmit }: SignupFormProps) {
     mode: 'onChange',
     defaultValues: { username: '', email: '', password: '', confirmPassword: '' },
   });
-
   const { isValid } = form.formState;
+  const password = useWatch({ control: form.control, name: 'password', defaultValue: '' });
+  const strength = getPasswordStrength(password);
 
   return (
     <Form {...form}>
@@ -75,6 +79,9 @@ export function SignupForm({ onSubmit }: SignupFormProps) {
               <FormControl>
                 <PasswordInput placeholder="••••••••" autoComplete="new-password" {...field} />
               </FormControl>
+              {password.length > 0 && (
+                <PasswordStrengthIndicator score={strength.score} level={strength.level} label={strength.label} />
+              )}
               <FormMessage />
             </FormItem>
           )}
