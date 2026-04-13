@@ -48,7 +48,42 @@ resolvers -> All resolvers should be located there.
 context.ts -> The graphql context definition should be located here.
 typeDefs -> All typeDefs should be located here.
 
-## 3.0 - IoC
+## 3.0 - Error Handling
+
+The application uses a typed exception hierarchy to handle domain errors consistently across all resolvers.
+
+### 3.1 - Exceptions
+
+All exceptions are located at `@/exceptions`. Every domain error should extend `AppException`, which extends the native `Error` object and adds a `statusCode` property (default: 400).
+
+Common exceptions available out of the box:
+
+| Class | Status Code |
+|---|---|
+| `BadRequestException` | 400 |
+| `UnauthorizedException` | 401 |
+| `ForbiddenException` | 403 |
+| `NotFoundException` | 404 |
+| `ConflictException` | 409 |
+
+### 3.2 - withErrorHandling
+
+Resolvers should never handle error-to-response mapping manually. Instead, wrap the resolver with the `withErrorHandling` higher-order function located at `@/graphql/with-error-handling.ts`.
+
+It works as follows:
+- If the thrown error is an instance of `AppException`, it catches it and returns an `ApiResponse` (`{ code, success: false, message }`) automatically.
+- Any other error is re-thrown and bubbles up to Apollo.
+
+Usage:
+
+```typescript
+register: withErrorHandling(async (_, { registerRequest }) => {
+  if (condition) throw new BadRequestException('Passwords do not match');
+  // ...
+})
+```
+
+## 4.0 - IoC
 
 As dependency injection container, we use inversify, all related definitions should be located at @/ioc folder, we do not
 have to abstract all the things in the application, just the important peaces, like database access, or external tool access
