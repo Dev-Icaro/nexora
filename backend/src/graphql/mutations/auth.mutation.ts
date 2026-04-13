@@ -1,24 +1,22 @@
+import RegisterRequest from '@/dtos/register-request.dto';
+import RegisterResponse from '@/dtos/register-response.dto';
 import { User } from '@/models/user.model';
 import { hashPassword } from '@/utils/crypto';
 
-interface RegisterInput {
-  username: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-}
-
 export const authMutations = {
-  register: async (_: unknown, { registerInput }: { registerInput: RegisterInput }) => {
-    const { username, email, password, confirmPassword } = registerInput;
+  register: async (
+    _: unknown,
+    { registerRequest }: { registerRequest: RegisterRequest },
+  ): Promise<RegisterResponse> => {
+    const { username, email, password, confirmPassword } = registerRequest;
 
     if (password !== confirmPassword) {
-      return { code: 400, success: false, message: 'Passwords do not match', user: null };
+      return { code: 400, success: false, message: 'Passwords do not match' };
     }
 
     const existing = await User.findOne({ email });
     if (existing) {
-      return { code: 409, success: false, message: 'Email is already registered', user: null };
+      return { code: 409, success: false, message: 'Email is already registered' };
     }
 
     const hashedPassword = await hashPassword(password);
@@ -31,9 +29,9 @@ export const authMutations = {
       success: true,
       message: 'Account created successfully',
       user: {
-        id: newUser.id,
-        email: newUser.email,
-        username: newUser.username,
+        id: newUser.id as string,
+        email: newUser.email ?? '',
+        username: newUser.username ?? '',
         token: '', // JWT generation is out of scope — implemented in a future task
         createdAt,
       },

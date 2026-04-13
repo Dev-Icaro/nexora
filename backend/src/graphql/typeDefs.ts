@@ -31,7 +31,7 @@ export const typeDefs = `#graphql
     createdAt: String!
   }
 
-  input RegisterInput {
+  input RegisterRequest {
     username: String!
     password: String!
     confirmPassword: String!
@@ -43,7 +43,7 @@ export const typeDefs = `#graphql
     getPost(postId: ID!): Post
   }
 
-  type RegisterOutput {
+  type RegisterResponse {
     code: Int!
     message: String!
     success: Boolean!
@@ -51,7 +51,7 @@ export const typeDefs = `#graphql
   }
 
   type Mutation {
-    register(registerInput: RegisterInput): RegisterOutput!
+    register(registerInput: RegisterRequest): RegisterResponse!
     login(username: String!, password: String!): User!
 
     createPost(body: String!): Post!

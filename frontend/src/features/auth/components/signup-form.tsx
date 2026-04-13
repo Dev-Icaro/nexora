@@ -5,6 +5,7 @@ import { z } from 'zod';
 
 import { Button } from '@/shared/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/components/ui/form';
+import { FormError } from '@/shared/components/ui/form-error';
 import { Input } from '@/shared/components/ui/input';
 import { PasswordInput } from '@/shared/components/ui/password-input';
 import { PasswordStrengthIndicator } from '@/shared/components/ui/password-strength-indicator';
@@ -26,10 +27,12 @@ const signupSchema = z
 type SignupFormValues = z.infer<typeof signupSchema>;
 
 type SignupFormProps = {
-  onSubmit: (values: SignupFormValues) => void;
+  onSubmit: (values: SignupFormValues) => void | Promise<void>;
+  error?: string | null;
+  isLoading?: boolean;
 };
 
-export function SignupForm({ onSubmit }: SignupFormProps) {
+export function SignupForm({ onSubmit, error, isLoading }: SignupFormProps) {
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
     mode: 'onChange',
@@ -101,7 +104,9 @@ export function SignupForm({ onSubmit }: SignupFormProps) {
           )}
         />
 
-        <Button type="submit" className="w-full" disabled={!isValid}>
+        {error && <FormError message={error} />}
+
+        <Button type="submit" className="w-full" disabled={!isValid || isLoading}>
           Create account
         </Button>
 
