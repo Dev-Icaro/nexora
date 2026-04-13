@@ -17,7 +17,7 @@ the data access with those drivers.
 ### 1.2 - Resolvers
 
 GraphQL resolver should acts like a controller, thin as possible, in most of time just getting the
-correct repository from ioc container and then making the correct request, avoiding aways as possible
+correct service from the GraphQL context and then making the correct request, avoiding aways as possible
 to introduce N+1 queries.
 
 ### 1.3 - Repositories
@@ -83,8 +83,12 @@ register: withErrorHandling(async (_, { registerRequest }) => {
 })
 ```
 
-## 4.0 - IoC
+## 4.0 - Services
 
-As dependency injection container, we use inversify, all related definitions should be located at @/ioc folder, we do not
-have to abstract all the things in the application, just the important peaces, like database access, or external tool access
-to avoid breaking some thing in the future.
+The application uses a service layer to hold all business logic, keeping resolvers thin. All services are located at `@/services`, and their interfaces are located at `@/services/interfaces`.
+
+Each service must implement its corresponding interface (e.g. `AuthService implements IAuthService`). Services are instantiated directly in the GraphQL context (`createContext`) and made available to resolvers via `context.dataSources`.
+
+File naming convention:
+- Implementation: `@/services/<name>.service.ts`
+- Interface: `@/services/interfaces/<name>.service.interface.ts`
