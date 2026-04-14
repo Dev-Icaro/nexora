@@ -1,8 +1,8 @@
 import { gql } from '@apollo/client';
 
 export const REGISTER_MUTATION = gql`
-  mutation Register($registerInput: RegisterRequest!) {
-    register(registerInput: $registerInput) {
+  mutation Register($registerRequest: RegisterRequest!) {
+    register(registerRequest: $registerRequest) {
       code
       message
       success

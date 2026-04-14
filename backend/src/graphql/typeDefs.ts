@@ -51,7 +51,7 @@ export const typeDefs = `#graphql
   }
 
   type Mutation {
-    register(registerInput: RegisterRequest): RegisterResponse!
+    register(registerRequest: RegisterRequest): RegisterResponse!
     login(username: String!, password: String!): User!
 
     createPost(body: String!): Post!

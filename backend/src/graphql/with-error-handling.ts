@@ -1,5 +1,6 @@
 import { AppException } from '@/exceptions';
 import type { ApiResponse } from '@/types/api-reponse';
+import logger from '@/utils/logger';
 
 import type { GraphQLContext } from './context';
 
@@ -12,6 +13,7 @@ export function withErrorHandling<TArgs, TResult extends ApiResponse, TContext =
     try {
       return await fn(parent, args, context);
     } catch (error) {
+      logger.error(error);
       if (error instanceof AppException) {
         return { code: error.statusCode, success: false, message: error.message };
       }

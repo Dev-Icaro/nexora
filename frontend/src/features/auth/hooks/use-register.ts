@@ -19,7 +19,7 @@ export function useRegister(): UseRegisterResult {
   const errorMessage = useMemo(() => getApiErrorMessage(error, data), [data, error]);
 
   const register = async (input: RegisterRequest) => {
-    await registerMutation({ variables: { registerInput: input } });
+    await registerMutation({ variables: { registerRequest: input } });
   };
 
   return { register, loading, error: errorMessage, data };
