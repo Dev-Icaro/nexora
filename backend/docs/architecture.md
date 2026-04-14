@@ -17,7 +17,7 @@ the data access with those drivers.
 ### 1.2 - Resolvers
 
 GraphQL resolver should acts like a controller, thin as possible, in most of time just getting the
-correct repository from ioc container and then making the correct request, avoiding aways as possible
+correct service from the GraphQL context and then making the correct request, avoiding aways as possible
 to introduce N+1 queries.
 
 ### 1.3 - Repositories
@@ -48,8 +48,47 @@ resolvers -> All resolvers should be located there.
 context.ts -> The graphql context definition should be located here.
 typeDefs -> All typeDefs should be located here.
 
-## 3.0 - IoC
+## 3.0 - Error Handling
 
-As dependency injection container, we use inversify, all related definitions should be located at @/ioc folder, we do not
-have to abstract all the things in the application, just the important peaces, like database access, or external tool access
-to avoid breaking some thing in the future.
+The application uses a typed exception hierarchy to handle domain errors consistently across all resolvers.
+
+### 3.1 - Exceptions
+
+All exceptions are located at `@/exceptions`. Every domain error should extend `AppException`, which extends the native `Error` object and adds a `statusCode` property (default: 400).
+
+Common exceptions available out of the box:
+
+| Class | Status Code |
+|---|---|
+| `BadRequestException` | 400 |
+| `UnauthorizedException` | 401 |
+| `ForbiddenException` | 403 |
+| `NotFoundException` | 404 |
+| `ConflictException` | 409 |
+
+### 3.2 - withErrorHandling
+
+Resolvers should never handle error-to-response mapping manually. Instead, wrap the resolver with the `withErrorHandling` higher-order function located at `@/graphql/with-error-handling.ts`.
+
+It works as follows:
+- If the thrown error is an instance of `AppException`, it catches it and returns an `ApiResponse` (`{ code, success: false, message }`) automatically.
+- Any other error is re-thrown and bubbles up to Apollo.
+
+Usage:
+
+```typescript
+register: withErrorHandling(async (_, { registerRequest }) => {
+  if (condition) throw new BadRequestException('Passwords do not match');
+  // ...
+})
+```
+
+## 4.0 - Services
+
+The application uses a service layer to hold all business logic, keeping resolvers thin. All services are located at `@/services`, and their interfaces are located at `@/services/interfaces`.
+
+Each service must implement its corresponding interface (e.g. `AuthService implements IAuthService`). Services are instantiated directly in the GraphQL context (`createContext`) and made available to resolvers via `context.dataSources`.
+
+File naming convention:
+- Implementation: `@/services/<name>.service.ts`
+- Interface: `@/services/interfaces/<name>.service.interface.ts`

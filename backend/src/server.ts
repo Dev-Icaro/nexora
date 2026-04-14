@@ -1,7 +1,9 @@
-import '@/ioc/container';
-
 import { ApolloServer } from '@apollo/server';
-import { startStandaloneServer } from '@apollo/server/standalone';
+import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
+import { expressMiddleware } from '@as-integrations/express5';
+import cors from 'cors';
+import express from 'express';
+import http from 'http';
 
 import connectDatabase from '@/config/database';
 import env from '@/config/environment';
@@ -18,13 +20,26 @@ const resolvers = [postResolver, mutationResolver, userResolver, commentResolver
 const bootstrap = async (): Promise<void> => {
   await connectDatabase();
 
-  const server = new ApolloServer<GraphQLContext>({ typeDefs, resolvers });
-  const { url } = await startStandaloneServer(server, {
-    context: createContext,
-    listen: { port: env.APP_PORT },
+  const app = express();
+  const httpServer = http.createServer(app);
+
+  const server = new ApolloServer<GraphQLContext>({
+    typeDefs,
+    resolvers,
+    plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
   });
 
-  logger.info(`GraphQL server ready at ${url}`);
+  await server.start();
+
+  app.use(
+    '/graphql',
+    cors<cors.CorsRequest>({ origin: env.CORS_ORIGIN, credentials: true }),
+    express.json(),
+    expressMiddleware(server, { context: createContext }),
+  );
+
+  await new Promise<void>(resolve => httpServer.listen({ port: env.APP_PORT }, resolve));
+  logger.info(`GraphQL server ready at http://localhost:${env.APP_PORT}/graphql`);
 };
 
 bootstrap().catch(error => logger.error(error));

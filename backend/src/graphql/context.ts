@@ -1,7 +1,14 @@
-// GraphQLContext is extended per feature (e.g. authenticated user, dataloaders)
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface GraphQLContext {}
+import { AuthService } from '@/services/auth.service';
+import type { IAuthService } from '@/services/interfaces/auth.service.interface';
 
-export const createContext = async (): Promise<GraphQLContext> => {
-  return {};
-};
+export interface GraphQLContext {
+  dataSources: {
+    authService: IAuthService;
+  };
+}
+
+export const createContext = async (): Promise<GraphQLContext> => ({
+  dataSources: {
+    authService: new AuthService(),
+  },
+});

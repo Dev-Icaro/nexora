@@ -9,6 +9,7 @@ const environmentSchema = z.object({
     .string()
     .default('false')
     .transform(v => v === 'true'),
+  CORS_ORIGIN: z.string().url().default('http://localhost:5173'),
 });
 
 export default environmentSchema.parse(process.env);

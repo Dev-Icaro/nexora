@@ -1,13 +1,5 @@
-import * as LabelPrimitive from '@radix-ui/react-label';
 import * as React from 'react';
-import {
-  Controller,
-  type ControllerProps,
-  type FieldPath,
-  type FieldValues,
-  FormProvider,
-  useFormContext,
-} from 'react-hook-form';
+import { Controller, type FieldPath, type FieldValues, FormProvider, useFormContext } from 'react-hook-form';
 
 import { cn } from '@/shared/lib/utils';
 
@@ -25,7 +17,7 @@ const FormFieldContext = React.createContext<FormFieldContextValue>({} as FormFi
 function FormField<
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
->({ ...props }: ControllerProps<TFieldValues, TName>) {
+>({ ...props }: React.ComponentProps<typeof Controller<TFieldValues, TName>>) {
   return (
     <FormFieldContext.Provider value={{ name: props.name }}>
       <Controller {...props} />
@@ -64,7 +56,6 @@ const FormItemContext = React.createContext<FormItemContextValue>({} as FormItem
 
 function FormItem({ className, ...props }: React.ComponentProps<'div'>) {
   const id = React.useId();
-
   return (
     <FormItemContext.Provider value={{ id }}>
       <div data-slot="form-item" className={cn('flex flex-col gap-1.5', className)} {...props} />
@@ -72,14 +63,12 @@ function FormItem({ className, ...props }: React.ComponentProps<'div'>) {
   );
 }
 
-function FormLabel({ className, ...props }: React.ComponentProps<typeof LabelPrimitive.Root>) {
+function FormLabel({ className, ...props }: React.ComponentProps<'label'>) {
   const { error, formItemId } = useFormField();
-
   return (
-    <LabelPrimitive.Root
+    <label
       data-slot="form-label"
-      data-error={!!error}
-      className={cn('text-xs font-medium data-[error=true]:text-destructive', className)}
+      className={cn('text-xs font-medium', error && 'text-destructive', className)}
       htmlFor={formItemId}
       {...props}
     />
@@ -88,7 +77,6 @@ function FormLabel({ className, ...props }: React.ComponentProps<typeof LabelPri
 
 function FormControl({ ...props }: React.ComponentProps<'div'>) {
   const { error, formItemId, formDescriptionId, formMessageId } = useFormField();
-
   return (
     <div
       data-slot="form-control"
@@ -102,30 +90,28 @@ function FormControl({ ...props }: React.ComponentProps<'div'>) {
 
 function FormDescription({ className, ...props }: React.ComponentProps<'p'>) {
   const { formDescriptionId } = useFormField();
-
   return (
     <p
       data-slot="form-description"
       id={formDescriptionId}
-      className={cn('text-muted-foreground text-xs', className)}
+      className={cn('text-xs text-muted-foreground', className)}
       {...props}
     />
   );
 }
 
-function FormMessage({ className, ...props }: React.ComponentProps<'p'>) {
+function FormMessage({ className, children, ...props }: React.ComponentProps<'p'>) {
   const { error, formMessageId } = useFormField();
-  const body = error ? String(error?.message ?? '') : props.children;
+  const body = error ? String(error?.message ?? '') : children;
 
-  if (!body) {
-    return null;
-  }
+  if (!body) return null;
 
   return (
-    <p data-slot="form-message" id={formMessageId} className={cn('text-destructive text-xs', className)} {...props}>
+    <p data-slot="form-message" id={formMessageId} className={cn('text-xs text-destructive', className)} {...props}>
       {body}
     </p>
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, useFormField };
