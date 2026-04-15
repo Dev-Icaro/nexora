@@ -14,10 +14,20 @@ import { getPasswordStrength } from '../utils/password-strength';
 
 const signupSchema = z
   .object({
-    username: z.string().min(1, 'Username is required'),
-    email: z.string().min(1, 'Email is required').email('Enter a valid email address'),
-    password: z.string().min(1, 'Password is required'),
-    confirmPassword: z.string().min(1, 'Please confirm your password'),
+    username: z
+      .string()
+      .min(1, 'Username is required')
+      .max(32, 'Username must be at most 32 characters')
+      .regex(/^[a-zA-Z0-9_.-]+$/, 'Username may only contain letters, numbers, underscores, hyphens, and dots')
+      .trim(),
+    email: z
+      .string()
+      .min(1, 'Email is required')
+      .max(254, 'Email is too long')
+      .email('Enter a valid email address')
+      .trim(),
+    password: z.string().min(1, 'Password is required').max(128, 'Password is too long'),
+    confirmPassword: z.string().min(1, 'Please confirm your password').max(128, 'Password is too long'),
   })
   .refine(data => data.password === data.confirmPassword, {
     message: 'Passwords do not match',

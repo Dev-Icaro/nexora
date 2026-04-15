@@ -12,8 +12,13 @@ import { Separator } from '@/shared/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/shared/components/ui/tooltip';
 
 const loginSchema = z.object({
-  email: z.string().min(1, 'Email is required').email('Enter a valid email address'),
-  password: z.string().min(1, 'Password is required'),
+  email: z
+    .string()
+    .min(1, 'Email is required')
+    .max(254, 'Email is too long')
+    .email('Enter a valid email address')
+    .trim(),
+  password: z.string().min(1, 'Password is required').max(128, 'Password is too long'),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
