@@ -1,4 +1,4 @@
-import crypto from 'node:crypto';
+import { createHash } from 'node:crypto';
 
 import bcrypt from 'bcrypt';
 
@@ -9,7 +9,7 @@ const BCRYPT_ROUNDS = 12;
  * This prevents bcrypt's silent 72-byte truncation on long passwords.
  */
 function preHash(password: string): string {
-  return crypto.createHash('sha256').update(password).digest('hex');
+  return createHash('sha256').update(password).digest('hex');
 }
 
 export async function hashPassword(password: string): Promise<string> {

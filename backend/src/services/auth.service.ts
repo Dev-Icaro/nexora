@@ -1,12 +1,19 @@
+import settings from '@/config/settings';
+import type LoginRequest from '@/dtos/login-request.dto';
+import type LoginResponse from '@/dtos/login-response.dto';
 import type RegisterRequest from '@/dtos/register-request.dto';
 import type RegisterResponse from '@/dtos/register-response.dto';
-import { BadRequestException, ConflictException } from '@/exceptions';
+import { BadRequestException, ConflictException, UnauthorizedException } from '@/exceptions';
 import { User } from '@/models/user.model';
-import { hashPassword } from '@/utils/crypto';
+import { createAccessToken, createHashForRefreshToken, createRefreshToken } from '@/utils/auth';
+import { comparePassword, hashPassword } from '@/utils/crypto';
 
 import type { IAuthService } from './interfaces/auth.service.interface';
+import type { IUserService } from './interfaces/user.service.interface';
 
 export class AuthService implements IAuthService {
+  constructor(private readonly userService: IUserService) {}
+
   async register({ username, email, password, confirmPassword }: RegisterRequest): Promise<RegisterResponse> {
     if (password !== confirmPassword) throw new BadRequestException('Passwords do not match');
 
@@ -26,8 +33,37 @@ export class AuthService implements IAuthService {
         id: newUser.id as string,
         email: newUser.email ?? '',
         username: newUser.username ?? '',
-        token: '', // JWT generation is out of scope — implemented in a future task
         createdAt,
+      },
+    };
+  }
+
+  async login({ email, password }: LoginRequest): Promise<LoginResponse & { refreshToken: string }> {
+    const user = await this.userService.findByEmail(email);
+    if (!user) throw new UnauthorizedException('Unauthorized');
+
+    const passwordMatch = await comparePassword(password, user.password ?? '');
+    if (!passwordMatch) throw new UnauthorizedException('Unauthorized');
+
+    const tokenInfo = { userId: user.id };
+    const accessToken = createAccessToken(tokenInfo);
+    const refreshToken = createRefreshToken(tokenInfo);
+    const refreshTokenHash = createHashForRefreshToken(refreshToken);
+    const expiresAt = new Date(Date.now() + settings.REFRESH_TOKEN_DURATION_MINUTES * 60 * 1000);
+
+    await this.userService.saveRefreshTokenHash(user.id, refreshTokenHash, expiresAt);
+
+    return {
+      code: 200,
+      success: true,
+      message: 'Login successful',
+      accessToken,
+      refreshToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        createdAt: user.createdAt,
       },
     };
   }

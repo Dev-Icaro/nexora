@@ -1,3 +1,5 @@
+import settings from '@/config/settings';
+import type LoginRequest from '@/dtos/login-request.dto';
 import type RegisterRequest from '@/dtos/register-request.dto';
 
 import type { GraphQLContext } from '../context';
@@ -9,7 +11,18 @@ export const authMutations = {
       dataSources.authService.register(registerRequest),
   ),
 
-  login: async () => {
-    throw new Error('Not implemented');
-  },
+  login: withErrorHandling(
+    async (_, { loginRequest }: { loginRequest: LoginRequest }, { dataSources, res }: GraphQLContext) => {
+      const { refreshToken, ...response } = await dataSources.authService.login(loginRequest);
+
+      res.cookie(settings.REFRESH_TOKEN_COOKIE_NAME, refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: settings.REFRESH_TOKEN_DURATION_MINUTES * 60 * 1000,
+      });
+
+      return response;
+    },
+  ),
 };

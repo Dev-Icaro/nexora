@@ -5,7 +5,6 @@ type RegisterResponse = ApiResponse & {
     id: string;
     email: string;
     username: string;
-    token: string;
     createdAt: string;
   };
 };

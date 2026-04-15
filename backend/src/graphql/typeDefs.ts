@@ -26,7 +26,6 @@ export const typeDefs = `#graphql
   type User {
     id: ID!
     email: String!
-    token: String!
     username: String!
     createdAt: String!
   }
@@ -36,6 +35,19 @@ export const typeDefs = `#graphql
     password: String!
     confirmPassword: String!
     email: String!
+  }
+
+  input LoginRequest {
+    email: String!
+    password: String!
+  }
+
+  type LoginResponse {
+    code: Int!
+    message: String!
+    success: Boolean!
+    accessToken: String
+    user: User
   }
 
   type Query {
@@ -52,7 +64,7 @@ export const typeDefs = `#graphql
 
   type Mutation {
     register(registerRequest: RegisterRequest): RegisterResponse!
-    login(username: String!, password: String!): User!
+    login(loginRequest: LoginRequest!): LoginResponse!
 
     createPost(body: String!): Post!
     deletePost(postId: ID!): String!

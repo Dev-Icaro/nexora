@@ -9,7 +9,13 @@ const environmentSchema = z.object({
     .string()
     .default('false')
     .transform(v => v === 'true'),
-  CORS_ORIGIN: z.string().url().default('http://localhost:5173'),
+  CORS_ORIGIN: z
+    .string()
+    // eslint-disable-next-line sonarjs/no-clear-text-protocols
+    .default('http://localhost:5173,https://studio.apollographql.com')
+    .transform(v => v.split(',').map(s => s.trim())),
+  ACCESS_TOKEN_SECRET: z.string().min(1),
+  REFRESH_TOKEN_SECRET: z.string().min(1),
 });
 
 export default environmentSchema.parse(process.env);
