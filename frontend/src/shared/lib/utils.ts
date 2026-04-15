@@ -12,6 +12,12 @@ export function getApiErrorMessage(
   error?: ErrorLike | null,
   data?: Record<string, ApiResponse | null | undefined> | null,
 ): string | undefined {
-  const responseMessage = data ? !Object.values(data)[0]?.success && Object.values(data)[0]?.message : undefined;
-  return responseMessage ?? error?.message;
+  if (data) {
+    const firstValue = Object.values(data)[0];
+    if (!firstValue?.success) {
+      return firstValue?.message ?? error?.message;
+    }
+  }
+
+  return error?.message;
 }

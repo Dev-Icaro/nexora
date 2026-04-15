@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMemo } from 'react';
 import { useForm } from 'react-hook-form';
+import { Link } from 'react-router-dom';
 import { z } from 'zod';
 
 import { Button } from '@/shared/components/ui/button';
@@ -72,9 +73,9 @@ export function LoginForm({ onSubmit, onGithubLogin }: LoginFormProps) {
 
         <p className="text-center text-xs text-muted-foreground">
           Don&rsquo;t have an account?{' '}
-          <a href="#" className="font-medium text-primary hover:underline">
+          <Link to={'/signup'} className="font-medium text-primary hover:underline">
             Sign up
-          </a>
+          </Link>
           <br />
           <a href="#" className="text-left font-medium text-primary hover:underline">
             Forgot password?

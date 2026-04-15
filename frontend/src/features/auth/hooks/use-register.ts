@@ -10,7 +10,7 @@ type UseRegisterResult = {
   register: (input: RegisterRequest) => Promise<void>;
   loading: boolean;
   error: string | undefined;
-  data: RegisterResponse;
+  data: RegisterResponse | null | undefined;
 };
 
 export function useRegister(): UseRegisterResult {

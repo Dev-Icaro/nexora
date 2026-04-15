@@ -10,7 +10,8 @@
     "format": "prettier --write \"src/**/*.{ts,tsx,css,json}\" --no-error-on-unmatched-pattern",
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
-    "test:unit": "vitest run"
+    "test:unit": "vitest run",
+    "typecheck": "tsc -b"
   },
   "dependencies": {
     "@apollo/client": "^4.1.7",
