@@ -9,3 +9,19 @@ export const REGISTER_MUTATION = gql`
     }
   }
 `;
+
+export const LOGIN_MUTATION = gql`
+  mutation Login($loginRequest: LoginRequest!) {
+    login(loginRequest: $loginRequest) {
+      code
+      message
+      success
+      accessToken
+      user {
+        id
+        email
+        username
+      }
+    }
+  }
+`;

@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react';
 import { createContext, useContext, useReducer } from 'react';
 
+import { setAccessToken } from '@/shared/lib/token-store';
+
 import type { AuthState, AuthUser } from './auth-reducer';
 import { authReducer, initialAuthState } from './auth-reducer';
 
@@ -20,10 +22,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [state, dispatch] = useReducer(authReducer, initialAuthState);
 
   const login = (user: AuthUser, token: string) => {
+    setAccessToken(token);
     dispatch({ type: 'LOGIN', payload: { user, token } });
   };
 
   const logout = () => {
+    setAccessToken(null);
     dispatch({ type: 'LOGOUT' });
   };
 

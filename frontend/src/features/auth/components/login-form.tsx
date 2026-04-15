@@ -1,15 +1,17 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMemo } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { Link } from 'react-router-dom';
 import { z } from 'zod';
 
 import { Button } from '@/shared/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/components/ui/form';
+import { FormError } from '@/shared/components/ui/form-error';
 import { Input } from '@/shared/components/ui/input';
 import { PasswordInput } from '@/shared/components/ui/password-input';
 import { Separator } from '@/shared/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/shared/components/ui/tooltip';
+
+import type { LoginRequest } from '../api/auth.types';
 
 const loginSchema = z.object({
   email: z
@@ -24,26 +26,27 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 type LoginFormProps = {
-  onSubmit: (email: string, password: string) => void;
+  onSubmit: (values: LoginRequest) => void | Promise<void>;
   onGithubLogin: () => void;
+  error?: string | null;
+  isLoading?: boolean;
 };
 
-export function LoginForm({ onSubmit, onGithubLogin }: LoginFormProps) {
+export function LoginForm({ onSubmit, onGithubLogin, error, isLoading }: LoginFormProps) {
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
+    mode: 'onChange',
     defaultValues: { email: '', password: '' },
   });
+  const { isValid } = form.formState;
+  const email = useWatch({ control: form.control, name: 'email', defaultValue: '' });
+  const password = useWatch({ control: form.control, name: 'password', defaultValue: '' });
 
-  const handleSubmit = form.handleSubmit(({ email, password }) => {
-    onSubmit(email, password);
-  });
-
-  const formValues = form.getValues();
-  const inputsFilled = useMemo(() => !!formValues.email && !!formValues.password, [formValues]);
+  const inputsFilled = !!email && !!password;
 
   return (
     <Form {...form}>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <FormField
           control={form.control}
           name="email"
@@ -72,7 +75,9 @@ export function LoginForm({ onSubmit, onGithubLogin }: LoginFormProps) {
           )}
         />
 
-        <Button type="submit" className="w-full" disabled={!inputsFilled}>
+        {error && <FormError message={error} />}
+
+        <Button type="submit" className="w-full" disabled={!inputsFilled || !isValid || isLoading}>
           Sign in
         </Button>
 
@@ -103,6 +108,7 @@ export function LoginForm({ onSubmit, onGithubLogin }: LoginFormProps) {
                   size="icon"
                   aria-label="Sign in with GitHub"
                   onClick={onGithubLogin}
+                  disabled={isLoading}
                   className="size-10 rounded-full"
                 >
                   <img src="/github.svg" alt="GitHub" className="size-8 dark:invert" />

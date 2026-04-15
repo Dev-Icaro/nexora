@@ -7,6 +7,22 @@ export type RegisterRequest = {
   confirmPassword: string;
 };
 
+export type LoginRequest = {
+  email: string;
+  password: string;
+};
+
 export type RegisterResponse = {
   register: ApiResponse;
+};
+
+export type LoginResponse = {
+  login: ApiResponse & {
+    accessToken: string | null;
+    user?: {
+      id: string;
+      email: string;
+      username: string;
+    };
+  };
 };
