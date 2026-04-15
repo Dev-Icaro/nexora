@@ -2,9 +2,8 @@ import { createHmac } from 'node:crypto';
 
 import jwt from 'jsonwebtoken';
 
+import env from '@/config/environment';
 import settings from '@/config/settings';
-
-const { ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET } = process.env;
 
 export interface IUserTokenInfo {
   userId: string;
@@ -20,7 +19,7 @@ export interface IUserTokenInfo {
  * @returns - The generated access token.
  */
 export const createAccessToken = (user: IUserTokenInfo) => {
-  return jwt.sign({ ...user }, ACCESS_TOKEN_SECRET!, {
+  return jwt.sign({ ...user }, env.ACCESS_TOKEN_SECRET, {
     audience: 'urn:jwt:type:access',
     issuer: 'urn:system:token-issuer:type:access',
     expiresIn: `${settings.ACCESS_TOKEN_DURATION_MINUTES}m`,
@@ -37,7 +36,7 @@ export const createAccessToken = (user: IUserTokenInfo) => {
  * @returns - The generated refresh token.
  */
 export const createRefreshToken = (user: IUserTokenInfo) => {
-  return jwt.sign({ userId: user.userId }, REFRESH_TOKEN_SECRET!, {
+  return jwt.sign({ userId: user.userId }, env.REFRESH_TOKEN_SECRET, {
     audience: 'urn:jwt:type:refresh',
     issuer: 'urn:system:token-issuer:type:refresh',
     expiresIn: `${settings.REFRESH_TOKEN_DURATION_MINUTES}m`,
@@ -54,5 +53,5 @@ export const createRefreshToken = (user: IUserTokenInfo) => {
  * @returns - The hash of the refresh token.
  */
 export const createHashForRefreshToken = (token: string) => {
-  return createHmac('sha512', REFRESH_TOKEN_SECRET!).update(token).digest('hex');
+  return createHmac('sha512', env.REFRESH_TOKEN_SECRET).update(token).digest('hex');
 };

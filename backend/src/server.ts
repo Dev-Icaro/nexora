@@ -17,8 +17,6 @@ import logger from '@/utils/logger';
 
 const resolvers = [postResolver, mutationResolver, userResolver, commentResolver];
 
-console.log(env);
-
 const bootstrap = async (): Promise<void> => {
   await connectDatabase();
 

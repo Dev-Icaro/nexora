@@ -1,3 +1,4 @@
+import env from '@/config/environment';
 import settings from '@/config/settings';
 import type LoginRequest from '@/dtos/login-request.dto';
 import type RegisterRequest from '@/dtos/register-request.dto';
@@ -17,7 +18,7 @@ export const authMutations = {
 
       res.cookie(settings.REFRESH_TOKEN_COOKIE_NAME, refreshToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+        secure: env.NODE_ENV === 'production',
         sameSite: 'strict',
         maxAge: settings.REFRESH_TOKEN_DURATION_MINUTES * 60 * 1000,
       });
