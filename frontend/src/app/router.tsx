@@ -6,18 +6,28 @@ import { SignupPage } from '@/pages/signup/signup-page';
 
 import { AuthLayout } from './layouts/auth-layout';
 import { RootLayout } from './layouts/root-layout';
+import { ProtectedRoute } from './routes/protected-route';
+import { PublicOnlyRoute } from './routes/public-only-route';
 
 export const router = createBrowserRouter([
   {
     path: '/',
     element: <RootLayout />,
     children: [
-      { index: true, element: <HomePage /> },
       {
-        element: <AuthLayout />,
+        element: <ProtectedRoute />,
+        children: [{ index: true, element: <HomePage /> }],
+      },
+      {
+        element: <PublicOnlyRoute />,
         children: [
-          { path: 'login', element: <LoginPage /> },
-          { path: 'signup', element: <SignupPage /> },
+          {
+            element: <AuthLayout />,
+            children: [
+              { path: 'login', element: <LoginPage /> },
+              { path: 'signup', element: <SignupPage /> },
+            ],
+          },
         ],
       },
     ],

@@ -1,7 +1,8 @@
 import { useMutation } from '@apollo/client/react';
 import { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-import { useAuth } from '@/features/auth/state/auth-context';
+import { useAuth } from '@/features/auth/hooks/use-auth';
 import { getApiErrorMessage } from '@/shared/lib/utils';
 
 import { LOGIN_MUTATION } from '../api/auth.mutations';
@@ -15,6 +16,7 @@ type UseLoginResult = {
 
 export function useLogin(): UseLoginResult {
   const auth = useAuth();
+  const navigate = useNavigate();
   const [loginMutation, { loading, error, data }] = useMutation<LoginResponse>(LOGIN_MUTATION);
 
   const errorMessage = useMemo(() => getApiErrorMessage(error, data), [data, error]);
@@ -25,6 +27,7 @@ export function useLogin(): UseLoginResult {
 
     if (loginData?.success && loginData.user && loginData.accessToken) {
       auth.login(loginData.user, loginData.accessToken);
+      navigate('/');
     }
   };
 

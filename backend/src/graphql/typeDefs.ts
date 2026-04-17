@@ -55,6 +55,7 @@ export const typeDefs = `#graphql
     message: String!
     success: Boolean!
     accessToken: String
+    user: User
   }
 
   type LogoutResponse {

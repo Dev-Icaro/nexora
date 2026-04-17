@@ -61,6 +61,12 @@ export class AuthService implements IAuthService {
       message: 'Token refreshed',
       accessToken,
       refreshToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        createdAt: user.createdAt,
+      },
     };
   }
 
