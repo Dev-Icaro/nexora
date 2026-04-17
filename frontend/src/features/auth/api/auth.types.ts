@@ -26,3 +26,18 @@ export type LoginResponse = {
     };
   };
 };
+
+export type RefreshResponse = {
+  refresh: ApiResponse & {
+    accessToken: string | null;
+    user?: {
+      id: string;
+      email: string;
+      username: string;
+    };
+  };
+};
+
+export type LogoutResponse = {
+  logout: ApiResponse;
+};

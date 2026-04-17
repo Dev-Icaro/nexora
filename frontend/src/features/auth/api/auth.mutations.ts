@@ -25,3 +25,29 @@ export const LOGIN_MUTATION = gql`
     }
   }
 `;
+
+export const REFRESH_MUTATION = gql`
+  mutation Refresh {
+    refresh {
+      code
+      message
+      success
+      accessToken
+      user {
+        id
+        email
+        username
+      }
+    }
+  }
+`;
+
+export const LOGOUT_MUTATION = gql`
+  mutation Logout {
+    logout {
+      code
+      message
+      success
+    }
+  }
+`;
