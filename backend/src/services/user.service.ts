@@ -21,4 +21,24 @@ export class UserService implements IUserService {
       $push: { tokens: { refreshTokenHash: hash, expiresAt } },
     });
   }
+
+  async findByRefreshTokenHash(hash: string): Promise<UserDto | null> {
+    const user = await User.findOne({
+      tokens: { $elemMatch: { refreshTokenHash: hash, expiresAt: { $gt: new Date() } } },
+    });
+    if (!user) return null;
+    return {
+      id: user.id as string,
+      email: user.email,
+      username: user.username,
+      password: user.password,
+      createdAt: user.createdAt,
+    };
+  }
+
+  async removeRefreshTokenHash(userId: string, hash: string): Promise<void> {
+    await User.findByIdAndUpdate(userId, {
+      $pull: { tokens: { refreshTokenHash: hash } },
+    });
+  }
 }

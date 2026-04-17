@@ -6,6 +6,7 @@ import type { IUserService } from '@/services/interfaces/user.service.interface'
 import { UserService } from '@/services/user.service';
 
 export interface GraphQLContext {
+  req: ExpressRequest;
   res: ExpressResponse;
   dataSources: {
     authService: IAuthService;
@@ -14,6 +15,7 @@ export interface GraphQLContext {
 }
 
 export const createContext = async ({
+  req,
   res,
 }: {
   req: ExpressRequest;
@@ -21,6 +23,7 @@ export const createContext = async ({
 }): Promise<GraphQLContext> => {
   const userService = new UserService();
   return {
+    req,
     res,
     dataSources: {
       authService: new AuthService(userService),

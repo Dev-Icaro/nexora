@@ -50,6 +50,13 @@ export const typeDefs = `#graphql
     user: User
   }
 
+  type RefreshResponse {
+    code: Int!
+    message: String!
+    success: Boolean!
+    accessToken: String
+  }
+
   type Query {
     getPosts: [Post]
     getPost(postId: ID!): Post
@@ -65,6 +72,7 @@ export const typeDefs = `#graphql
   type Mutation {
     register(registerRequest: RegisterRequest): RegisterResponse!
     login(loginRequest: LoginRequest!): LoginResponse!
+    refresh: RefreshResponse!
 
     createPost(body: String!): Post!
     deletePost(postId: ID!): String!

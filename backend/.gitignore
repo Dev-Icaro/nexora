@@ -123,6 +123,7 @@ compose.dev.yaml
 .cursor
 .claude/**/*
 .claude
+.codex
 
 #cypress dev config file
 cypress.dev.ts

@@ -1,6 +1,7 @@
 import { ApolloServer } from '@apollo/server';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
 import { expressMiddleware } from '@as-integrations/express5';
+import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express from 'express';
 import http from 'http';
@@ -35,6 +36,7 @@ const bootstrap = async (): Promise<void> => {
     '/graphql',
     cors<cors.CorsRequest>({ origin: env.CORS_ORIGIN, credentials: true }),
     express.json(),
+    cookieParser(),
     expressMiddleware(server, { context: createContext }),
   );
 
