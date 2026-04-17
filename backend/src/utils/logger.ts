@@ -1,3 +1,14 @@
+/**
+ * @module logger
+ * Configures and exports the application-wide Winston logger singleton.
+ * Import the default export to log messages at any supported level.
+ *
+ * @example
+ * ```typescript
+ * import logger from '@/utils/logger';
+ * logger.info('User registered', { userId });
+ * ```
+ */
 import 'winston-daily-rotate-file';
 
 import httpContext from 'express-http-context';

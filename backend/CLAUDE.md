@@ -110,6 +110,30 @@ Never catch and manually map errors in resolvers — that is `withErrorHandling`
 
 ---
 
+## Documentation
+
+TSDoc is required for all public API surface in:
+
+### `src/utils/`
+All exported functions must include:
+- A brief one-line description.
+- `@param` for every parameter.
+- `@returns` describing the resolved/returned value.
+- `@internal` for non-exported helpers that warrant documentation.
+
+### `src/services/interfaces/`
+All interface files must include:
+- A brief description comment on the interface itself.
+- `@param` and `@returns` on every method.
+
+### General rules
+- Interface/type declarations forming a public contract (e.g., `GraphQLContext`) need a minimum one-line description.
+- HOFs (e.g., `withErrorHandling`) must document generics with `@typeParam`.
+- Do not add TSDoc to private implementation details unless the logic is non-obvious.
+- Follow `src/utils/auth.ts` as the reference style pattern.
+
+---
+
 ## Environment Variables
 
 All env vars are validated at startup via Zod in `src/config/environment.ts`. Access them through the exported `env` object — **never use `process.env` directly** in business logic.
