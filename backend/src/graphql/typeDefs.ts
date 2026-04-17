@@ -57,6 +57,12 @@ export const typeDefs = `#graphql
     accessToken: String
   }
 
+  type LogoutResponse {
+    code: Int!
+    message: String!
+    success: Boolean!
+  }
+
   type Query {
     getPosts: [Post]
     getPost(postId: ID!): Post
@@ -73,6 +79,7 @@ export const typeDefs = `#graphql
     register(registerRequest: RegisterRequest): RegisterResponse!
     login(loginRequest: LoginRequest!): LoginResponse!
     refresh: RefreshResponse!
+    logout: LogoutResponse!
 
     createPost(body: String!): Post!
     deletePost(postId: ID!): String!

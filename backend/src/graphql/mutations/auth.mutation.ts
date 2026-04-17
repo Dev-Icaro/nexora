@@ -43,4 +43,16 @@ export const authMutations = {
 
     return response;
   }),
+
+  logout: withErrorHandling(async (_, __, { dataSources, req, res }: GraphQLContext) => {
+    const token = req.cookies[settings.REFRESH_TOKEN_COOKIE_NAME] as string | undefined;
+
+    const response = token
+      ? await dataSources.authService.logout(token)
+      : { code: 200, success: true, message: 'Logged out successfully' };
+
+    res.clearCookie(settings.REFRESH_TOKEN_COOKIE_NAME);
+
+    return response;
+  }),
 };

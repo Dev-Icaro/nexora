@@ -1,6 +1,7 @@
 import settings from '@/config/settings';
 import type LoginRequest from '@/dtos/login-request.dto';
 import type LoginResponse from '@/dtos/login-response.dto';
+import type LogoutResponse from '@/dtos/logout-response.dto';
 import type RefreshResponse from '@/dtos/refresh-response.dto';
 import type RegisterRequest from '@/dtos/register-request.dto';
 import type RegisterResponse from '@/dtos/register-response.dto';
@@ -61,6 +62,17 @@ export class AuthService implements IAuthService {
       accessToken,
       refreshToken,
     };
+  }
+
+  async logout(refreshToken: string): Promise<LogoutResponse> {
+    const hash = createHashForRefreshToken(refreshToken);
+    const user = await this.userService.findByRefreshTokenHash(hash);
+
+    if (user) {
+      await this.userService.removeRefreshTokenHash(user.id, hash);
+    }
+
+    return { code: 200, success: true, message: 'Logged out successfully' };
   }
 
   async login({ email, password }: LoginRequest): Promise<LoginResponse & { refreshToken: string }> {
