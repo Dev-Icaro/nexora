@@ -55,3 +55,18 @@ export const createRefreshToken = (user: IUserTokenInfo) => {
 export const createHashForRefreshToken = (token: string) => {
   return createHmac('sha512', env.REFRESH_TOKEN_SECRET).update(token).digest('hex');
 };
+
+/**
+ * Verifies an access token and returns its decoded payload.
+ *
+ * @param token - The raw JWT string to verify.
+ * @returns The decoded {@link IUserTokenInfo} payload.
+ * @throws {JsonWebTokenError} if the token signature or claims are invalid.
+ * @throws {TokenExpiredError} if the token has expired.
+ */
+export const verifyAccessToken = (token: string): IUserTokenInfo => {
+  return jwt.verify(token, env.ACCESS_TOKEN_SECRET, {
+    audience: 'urn:jwt:type:access',
+    issuer: 'urn:system:token-issuer:type:access',
+  }) as IUserTokenInfo;
+};
