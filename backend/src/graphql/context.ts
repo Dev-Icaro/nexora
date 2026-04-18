@@ -1,5 +1,5 @@
 import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
-import { GraphQLError } from 'graphql';
+import { GraphQLError } from 'graphql/error';
 
 import { AuthService } from '@/services/auth.service';
 import type { IAuthService } from '@/services/interfaces/auth.service.interface';
