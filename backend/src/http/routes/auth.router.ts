@@ -9,6 +9,7 @@ import { OAuthProviderFactory } from '@/services/oauth/oauth-provider.factory';
 import { UserService } from '@/services/user.service';
 
 export const authRouter = Router();
+const authService = new AuthService(new UserService());
 
 function getCallbackUrl(provider: string): string {
   return `${env.BACKEND_URL}/auth/${provider}/callback`;
@@ -35,7 +36,6 @@ authRouter.get('/:provider/callback', async (req: ExpressRequest<{ provider: str
   const accessToken = await oauthProvider.generateAccessToken(code, callbackUrl);
   const oauthUser = await oauthProvider.getUser(accessToken);
 
-  const authService = new AuthService(new UserService());
   const { refreshToken } = await authService.loginWithOAuth(provider, oauthUser);
 
   res.cookie(settings.REFRESH_TOKEN_COOKIE_NAME, refreshToken, {

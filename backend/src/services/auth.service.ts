@@ -111,10 +111,10 @@ export class AuthService implements IAuthService {
 
   async login({ email, password }: LoginRequest): Promise<LoginResponse & { refreshToken: string }> {
     const user = await this.userService.findByEmail(email);
-    if (!user) throw new UnauthorizedException('Unauthorized');
+    if (!user) throw new UnauthorizedException('Invalid credentials');
 
     const passwordMatch = await comparePassword(password, user.password ?? '');
-    if (!passwordMatch) throw new UnauthorizedException('Unauthorized');
+    if (!passwordMatch) throw new UnauthorizedException('Invalid credentials');
 
     const tokenInfo = { userId: user.id };
     const accessToken = createAccessToken(tokenInfo);

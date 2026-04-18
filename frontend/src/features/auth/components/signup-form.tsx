@@ -148,7 +148,7 @@ export function SignupForm({ onSubmit, onGithubLogin, onGoogleLogin, error, isLo
                   aria-label="Sign up with GitHub"
                   onClick={onGithubLogin}
                   disabled={isLoading}
-                  className="size-10 rounded-full"
+                  className="size-10 rounded-full cursor-pointer"
                 >
                   <img src="/github.svg" alt="GitHub" className="size-8 dark:invert" />
                 </Button>
@@ -167,7 +167,7 @@ export function SignupForm({ onSubmit, onGithubLogin, onGoogleLogin, error, isLo
                   aria-label="Sign up with Google"
                   onClick={onGoogleLogin}
                   disabled={isLoading}
-                  className="size-10 rounded-full"
+                  className="size-10 rounded-full cursor-pointer"
                 >
                   <img src="/google.svg" alt="Google" className="size-6" />
                 </Button>

@@ -110,7 +110,7 @@ export function LoginForm({ onSubmit, onGithubLogin, onGoogleLogin, error, isLoa
                   aria-label="Sign in with GitHub"
                   onClick={onGithubLogin}
                   disabled={isLoading}
-                  className="size-10 rounded-full"
+                  className="size-10 rounded-full cursor-pointer"
                 >
                   <img src="/github.svg" alt="GitHub" className="size-8 dark:invert" />
                 </Button>
@@ -129,7 +129,7 @@ export function LoginForm({ onSubmit, onGithubLogin, onGoogleLogin, error, isLoa
                   aria-label="Sign in with Google"
                   onClick={onGoogleLogin}
                   disabled={isLoading}
-                  className="size-10 rounded-full"
+                  className="size-10 rounded-full cursor-pointer"
                 >
                   <img src="/google.svg" alt="Google" className="size-6" />
                 </Button>
