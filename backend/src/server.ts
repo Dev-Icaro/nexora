@@ -14,7 +14,10 @@ import { mutationResolver } from '@/graphql/resolvers/mutation.resolver';
 import { postResolver } from '@/graphql/resolvers/post.resolver';
 import { userResolver } from '@/graphql/resolvers/user.resolver';
 import { typeDefs } from '@/graphql/typeDefs';
+import { authRouter } from '@/routes/auth.router';
 import logger from '@/utils/logger';
+
+import errorHandler from './http/middlewares/error-handler';
 
 const resolvers = [postResolver, mutationResolver, userResolver, commentResolver];
 
@@ -22,6 +25,10 @@ const bootstrap = async (): Promise<void> => {
   await connectDatabase();
 
   const app = express();
+  app.use(cors<cors.CorsRequest>({ origin: env.CORS_ORIGIN, credentials: true }));
+  app.use(cookieParser());
+  app.use(express.json());
+
   const httpServer = http.createServer(app);
 
   const server = new ApolloServer<GraphQLContext>({
@@ -32,13 +39,10 @@ const bootstrap = async (): Promise<void> => {
 
   await server.start();
 
-  app.use(
-    '/graphql',
-    cors<cors.CorsRequest>({ origin: env.CORS_ORIGIN, credentials: true }),
-    express.json(),
-    cookieParser(),
-    expressMiddleware(server, { context: createContext }),
-  );
+  app.use('/auth', authRouter);
+  app.use('/graphql', expressMiddleware(server, { context: createContext }));
+
+  app.use(errorHandler);
 
   await new Promise<void>(resolve => httpServer.listen({ port: env.APP_PORT }, resolve));
   logger.info(`GraphQL server ready at http://localhost:${env.APP_PORT}/graphql`);

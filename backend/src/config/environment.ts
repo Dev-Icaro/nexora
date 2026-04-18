@@ -16,6 +16,12 @@ const environmentSchema = z.object({
     .transform(v => v.split(',').map(s => s.trim())),
   ACCESS_TOKEN_SECRET: z.string().min(1),
   REFRESH_TOKEN_SECRET: z.string().min(1),
+  GITHUB_CLIENT_ID: z.string().min(1),
+  GITHUB_CLIENT_SECRET: z.string().min(1),
+  GOOGLE_CLIENT_ID: z.string().min(1),
+  GOOGLE_CLIENT_SECRET: z.string().min(1),
+  BACKEND_URL: z.string().url().default('http://localhost:4000'),
+  FRONTEND_URL: z.string().url().default('http://localhost:5173'),
 });
 
 export default environmentSchema.parse(process.env);

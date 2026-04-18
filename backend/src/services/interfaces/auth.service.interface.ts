@@ -4,6 +4,7 @@ import type LogoutResponse from '@/dtos/logout-response.dto';
 import type RefreshResponse from '@/dtos/refresh-response.dto';
 import type RegisterRequest from '@/dtos/register-request.dto';
 import type RegisterResponse from '@/dtos/register-response.dto';
+import type { OAuthUserInfo } from '@/services/oauth/oauth-provider.interface';
 
 /** Defines the contract for authentication operations: registration, login, and token refresh. */
 export interface IAuthService {
@@ -38,4 +39,16 @@ export interface IAuthService {
    * @returns A promise resolving to a {@link LogoutResponse}.
    */
   logout(refreshToken: string): Promise<LogoutResponse>;
+
+  /**
+   * Authenticates or provisions a user via an OAuth provider.
+   *
+   * Looks up the user by their OAuth account first; if not found, falls back to email matching
+   * (linking the provider to an existing account) or creates a new account if no match exists.
+   *
+   * @param provider - The OAuth provider name (e.g. `'github'`, `'google'`).
+   * @param oauthUser - The normalized user profile returned by the provider.
+   * @returns A promise resolving to an object containing the issued `refreshToken`.
+   */
+  loginWithOAuth(provider: string, oauthUser: OAuthUserInfo): Promise<{ refreshToken: string }>;
 }

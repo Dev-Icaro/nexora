@@ -10,7 +10,17 @@ export function LoginPage() {
         <h1 className="text-3xl font-semibold text-shadow-muted-foreground">Sign in</h1>
         <p className="text-sm text-muted-foreground">Welcome back &mdash; let&rsquo;s get you in.</p>
       </div>
-      <LoginForm onSubmit={login} onGithubLogin={() => {}} error={error} isLoading={loading} />
+      <LoginForm
+        onSubmit={login}
+        onGithubLogin={() => {
+          window.location.href = `${import.meta.env.VITE_BACKEND_URL}/auth/github`;
+        }}
+        onGoogleLogin={() => {
+          window.location.href = `${import.meta.env.VITE_BACKEND_URL}/auth/google`;
+        }}
+        error={error}
+        isLoading={loading}
+      />
     </>
   );
 }

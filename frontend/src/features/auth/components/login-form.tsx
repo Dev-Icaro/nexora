@@ -28,11 +28,12 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 type LoginFormProps = {
   onSubmit: (values: LoginRequest) => void | Promise<void>;
   onGithubLogin: () => void;
+  onGoogleLogin: () => void;
   error?: string | null;
   isLoading?: boolean;
 };
 
-export function LoginForm({ onSubmit, onGithubLogin, error, isLoading }: LoginFormProps) {
+export function LoginForm({ onSubmit, onGithubLogin, onGoogleLogin, error, isLoading }: LoginFormProps) {
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     mode: 'onChange',
@@ -98,7 +99,7 @@ export function LoginForm({ onSubmit, onGithubLogin, error, isLoading }: LoginFo
           <Separator className="flex-1" />
         </div>
 
-        <div className="flex flex-col items-center gap-3">
+        <div className="flex items-center justify-center gap-3">
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -115,6 +116,25 @@ export function LoginForm({ onSubmit, onGithubLogin, error, isLoading }: LoginFo
                 </Button>
               </TooltipTrigger>
               <TooltipContent side="bottom">Sign in with GitHub</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  aria-label="Sign in with Google"
+                  onClick={onGoogleLogin}
+                  disabled={isLoading}
+                  className="size-10 rounded-full"
+                >
+                  <img src="/google.svg" alt="Google" className="size-6" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">Sign in with Google</TooltipContent>
             </Tooltip>
           </TooltipProvider>
         </div>

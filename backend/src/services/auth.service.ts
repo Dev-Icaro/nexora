@@ -7,6 +7,7 @@ import type RegisterRequest from '@/dtos/register-request.dto';
 import type RegisterResponse from '@/dtos/register-response.dto';
 import { BadRequestException, ConflictException, UnauthorizedException } from '@/exceptions';
 import { User } from '@/models/user.model';
+import type { OAuthUserInfo } from '@/services/oauth/oauth-provider.interface';
 import { createAccessToken, createHashForRefreshToken, createRefreshToken } from '@/utils/auth';
 import { comparePassword, hashPassword } from '@/utils/crypto';
 
@@ -79,6 +80,33 @@ export class AuthService implements IAuthService {
     }
 
     return { code: 200, success: true, message: 'Logged out successfully' };
+  }
+
+  async loginWithOAuth(provider: string, oauthUser: OAuthUserInfo): Promise<{ refreshToken: string }> {
+    let user = await this.userService.findByOAuthAccount(provider, oauthUser.providerId);
+
+    if (!user) {
+      user = await this.userService.findByEmail(oauthUser.email);
+      if (user) {
+        await this.userService.linkOAuthAccount(user.id, provider, oauthUser.providerId);
+      } else {
+        user = await this.userService.create({
+          username: oauthUser.name,
+          email: oauthUser.email,
+          provider,
+          providerId: oauthUser.providerId,
+        });
+      }
+    }
+
+    const tokenInfo = { userId: user.id };
+    const refreshToken = createRefreshToken(tokenInfo);
+    const refreshTokenHash = createHashForRefreshToken(refreshToken);
+    const expiresAt = new Date(Date.now() + settings.REFRESH_TOKEN_DURATION_MINUTES * 60 * 1000);
+
+    await this.userService.saveRefreshTokenHash(user.id, refreshTokenHash, expiresAt);
+
+    return { refreshToken };
   }
 
   async login({ email, password }: LoginRequest): Promise<LoginResponse & { refreshToken: string }> {

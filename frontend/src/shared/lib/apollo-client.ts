@@ -3,7 +3,7 @@ import { ApolloClient, ApolloLink, HttpLink, InMemoryCache } from '@apollo/clien
 import { getAccessToken } from './token-store';
 
 const httpLink = new HttpLink({
-  uri: import.meta.env.VITE_GRAPHQL_URL,
+  uri: `${import.meta.env.VITE_BACKEND_URL}/graphql`,
   credentials: 'include',
 });
 

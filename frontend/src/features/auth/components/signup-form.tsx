@@ -9,6 +9,8 @@ import { FormError } from '@/shared/components/ui/form-error';
 import { Input } from '@/shared/components/ui/input';
 import { PasswordInput } from '@/shared/components/ui/password-input';
 import { PasswordStrengthIndicator } from '@/shared/components/ui/password-strength-indicator';
+import { Separator } from '@/shared/components/ui/separator';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/shared/components/ui/tooltip';
 
 import { getPasswordStrength } from '../utils/password-strength';
 
@@ -38,11 +40,13 @@ type SignupFormValues = z.infer<typeof signupSchema>;
 
 type SignupFormProps = {
   onSubmit: (values: SignupFormValues) => void | Promise<void>;
+  onGithubLogin: () => void;
+  onGoogleLogin: () => void;
   error?: string | null;
   isLoading?: boolean;
 };
 
-export function SignupForm({ onSubmit, error, isLoading }: SignupFormProps) {
+export function SignupForm({ onSubmit, onGithubLogin, onGoogleLogin, error, isLoading }: SignupFormProps) {
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
     mode: 'onChange',
@@ -126,6 +130,52 @@ export function SignupForm({ onSubmit, error, isLoading }: SignupFormProps) {
             Sign in
           </Link>
         </p>
+
+        <div className="flex items-center gap-3">
+          <Separator className="flex-1" />
+          <span className="text-xs text-muted-foreground">Or continue with</span>
+          <Separator className="flex-1" />
+        </div>
+
+        <div className="flex items-center justify-center gap-3">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  aria-label="Sign up with GitHub"
+                  onClick={onGithubLogin}
+                  disabled={isLoading}
+                  className="size-10 rounded-full"
+                >
+                  <img src="/github.svg" alt="GitHub" className="size-8 dark:invert" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">Sign up with GitHub</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  aria-label="Sign up with Google"
+                  onClick={onGoogleLogin}
+                  disabled={isLoading}
+                  className="size-10 rounded-full"
+                >
+                  <img src="/google.svg" alt="Google" className="size-6" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">Sign up with Google</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
       </form>
     </Form>
   );
