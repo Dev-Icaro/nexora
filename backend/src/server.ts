@@ -14,10 +14,9 @@ import { mutationResolver } from '@/graphql/resolvers/mutation.resolver';
 import { postResolver } from '@/graphql/resolvers/post.resolver';
 import { userResolver } from '@/graphql/resolvers/user.resolver';
 import { typeDefs } from '@/graphql/typeDefs';
+import errorHandler from '@/http/middlewares/error-handler';
 import { authRouter } from '@/http/routes/auth.router';
 import logger from '@/utils/logger';
-
-import errorHandler from './http/middlewares/error-handler';
 
 const resolvers = [postResolver, mutationResolver, userResolver, commentResolver];
 
