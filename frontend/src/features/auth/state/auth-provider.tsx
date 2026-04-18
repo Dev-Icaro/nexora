@@ -1,10 +1,10 @@
 import { useApolloClient } from '@apollo/client/react';
 import type { ReactNode } from 'react';
-import { useEffect, useReducer } from 'react';
+import { useCallback, useEffect, useReducer } from 'react';
 
 import { LOGOUT_MUTATION, REFRESH_MUTATION } from '@/features/auth/api/auth.mutations';
 import type { LogoutResponse, RefreshResponse } from '@/features/auth/api/auth.types';
-import { setAccessToken } from '@/shared/lib/token-store';
+import { setAccessToken, setOnUnauthenticated } from '@/shared/lib/token-store';
 
 import { AuthContext } from './auth-context';
 import type { AuthUser } from './auth-reducer';
@@ -46,11 +46,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
     dispatch({ type: 'LOGIN', payload: { user, token } });
   };
 
-  const logout = () => {
+  const logout = useCallback(() => {
     setAccessToken(null);
     dispatch({ type: 'LOGOUT' });
     apolloClient.mutate<LogoutResponse>({ mutation: LOGOUT_MUTATION }).catch(() => {});
-  };
+  }, [apolloClient]);
+
+  useEffect(() => {
+    setOnUnauthenticated(logout);
+    return () => setOnUnauthenticated(() => {});
+  }, [logout]);
 
   return <AuthContext value={{ state, login, logout }}>{children}</AuthContext>;
 }
