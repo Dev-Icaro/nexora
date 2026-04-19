@@ -2,19 +2,11 @@ import type { LucideIcon } from 'lucide-react';
 import { Home, Settings2 } from 'lucide-react';
 import { Link, NavLink } from 'react-router-dom';
 
+import { useAuth } from '@/features/auth/hooks/use-auth';
 import { cn } from '@/shared/lib/utils';
 
 import { Separator } from './ui/separator';
 import { UserProfileSection } from './user-profile-section';
-
-const MOCK_PROFILE = {
-  avatarUrl: undefined,
-  name: 'Jessica Cambridge',
-  isVerified: true,
-  role: 'College Doctor',
-  bio: 'Guiding the next generation through the journey of health and knowledge!',
-  stats: { posts: 368, followers: 184300, following: 1040000 },
-};
 
 interface NavItemProps {
   to: string;
@@ -42,6 +34,10 @@ function NavItem({ to, icon: Icon, label, end }: NavItemProps) {
 }
 
 export function Sidebar() {
+  const {
+    state: { user },
+  } = useAuth();
+
   return (
     <aside className="flex h-screen w-60 shrink-0 flex-col border-r border-sidebar bg-sidebar px-4 py-6">
       <Link to="/" className="flex items-center gap-2">
@@ -49,7 +45,13 @@ export function Sidebar() {
         <span className="text-md font-semibold text-sidebar-foreground">Nexora</span>
       </Link>
 
-      <UserProfileSection {...MOCK_PROFILE} />
+      <UserProfileSection
+        name={user?.username ?? 'Unknown'}
+        isVerified={true}
+        role="College Doctor"
+        bio="Guiding the next generation through the journey of health and knowledge!"
+        stats={{ posts: 368, followers: 184300, following: 1040000 }}
+      />
 
       <Separator />
 
