@@ -4,6 +4,7 @@ const { Schema } = mongoose;
 
 const postSchema = new Schema({
   body: String,
+  mediaUrl: String,
   username: String,
   createdAt: String,
   comments: [

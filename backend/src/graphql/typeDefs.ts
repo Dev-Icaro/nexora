@@ -2,6 +2,7 @@ export const typeDefs = `#graphql
   type Post {
     id: ID!
     body: String!
+    mediaUrl: String
     createdAt: String!
     username: String!
     comments: [Comment]!
@@ -76,13 +77,20 @@ export const typeDefs = `#graphql
     user: User
   }
 
+  type CreatePostResponse {
+    code: Int!
+    message: String!
+    success: Boolean!
+    post: Post
+  }
+
   type Mutation {
     register(registerRequest: RegisterRequest): RegisterResponse!
     login(loginRequest: LoginRequest!): LoginResponse!
     refresh: RefreshResponse!
     logout: LogoutResponse!
 
-    createPost(body: String!): Post!
+    createPost(body: String!, mediaUrl: String): CreatePostResponse!
     deletePost(postId: ID!): String!
 
     createComment(postId: String!, body: String!): Post!
