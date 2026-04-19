@@ -4,6 +4,7 @@ import { HomePage } from '@/pages/home/home-page';
 import { LoginPage } from '@/pages/login/login-page';
 import { SignupPage } from '@/pages/signup/signup-page';
 
+import { AppLayout } from './layouts/app-layout';
 import { AuthLayout } from './layouts/auth-layout';
 import { RootLayout } from './layouts/root-layout';
 import { ProtectedRoute } from './routes/protected-route';
@@ -16,7 +17,12 @@ export const router = createBrowserRouter([
     children: [
       {
         element: <ProtectedRoute />,
-        children: [{ index: true, element: <HomePage /> }],
+        children: [
+          {
+            element: <AppLayout />,
+            children: [{ index: true, element: <HomePage /> }],
+          },
+        ],
       },
       {
         element: <PublicOnlyRoute />,
