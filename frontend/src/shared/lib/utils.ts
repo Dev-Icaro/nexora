@@ -8,6 +8,10 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export function formatCompactNumber(n: number): string {
+  return Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 }).format(n);
+}
+
 export function getApiErrorMessage(
   error?: ErrorLike | null,
   data?: Record<string, ApiResponse | null | undefined> | null,
