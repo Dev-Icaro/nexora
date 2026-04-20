@@ -4,6 +4,7 @@ export class AppException extends Error {
     public readonly statusCode: number = 400,
   ) {
     super(message);
+    this.statusCode = statusCode;
     this.name = this.constructor.name;
   }
 }

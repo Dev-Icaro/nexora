@@ -46,12 +46,20 @@ export const createContext = async ({
   if (!GRAPHQL_AUTH_WHITELIST.has(operationName ?? '')) {
     const authHeader = req.headers.authorization;
     if (!authHeader?.startsWith('Bearer ')) {
-      throw new GraphQLError('Unauthorized', { extensions: { code: 'UNAUTHENTICATED' } });
+      throw new GraphQLError('Unauthorized', {
+        extensions: {
+          code: 'UNAUTHORIZED',
+        },
+      });
     }
     try {
       currentUser = verifyAccessToken(authHeader.slice(7));
     } catch {
-      throw new GraphQLError('Unauthorized', { extensions: { code: 'UNAUTHENTICATED' } });
+      throw new GraphQLError('Unauthorized', {
+        extensions: {
+          code: 'UNAUTHORIZED',
+        },
+      });
     }
   }
 
