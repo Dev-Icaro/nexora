@@ -3,7 +3,7 @@ import express from 'express';
 import { AppException } from '@/exceptions/app.exception';
 import logger from '@/utils/logger';
 
-export default function errorHandler(
+export default function httpErrorHandler(
   error: Error,
   req: express.Request,
   res: express.Response,

@@ -34,7 +34,6 @@ src/
 │   ├── resolvers/    # Resolver maps (merged in mutation.resolver.ts)
 │   ├── context.ts    # GraphQL context type + createContext factory
 │   ├── typeDefs.ts   # Full GraphQL schema string
-│   └── with-error-handling.ts  # HOF wrapping resolvers
 ├── models/           # Mongoose schemas and models
 ├── repositories/     # (future) Repository pattern implementations
 ├── services/
@@ -50,20 +49,23 @@ src/
 ## Key Conventions
 
 ### Path Alias
+
 All internal imports use the `@/` alias (maps to `src/`). Never use relative paths like `../../`.
 
 ### Package Manager
+
 Use **yarn** for all installs and scripts. Never use npm.
 
 ### Naming Conventions
-| Layer | File pattern | Example |
-|---|---|---|
-| Model | `src/models/<entity>.model.ts` | `user.model.ts` |
-| Repository | `src/repositories/<entity>.repository.ts` | `user.repository.ts` |
-| Service impl | `src/services/<name>.service.ts` | `auth.service.ts` |
+
+| Layer             | File pattern                                          | Example                     |
+| ----------------- | ----------------------------------------------------- | --------------------------- |
+| Model             | `src/models/<entity>.model.ts`                        | `user.model.ts`             |
+| Repository        | `src/repositories/<entity>.repository.ts`             | `user.repository.ts`        |
+| Service impl      | `src/services/<name>.service.ts`                      | `auth.service.ts`           |
 | Service interface | `src/services/interfaces/<name>.service.interface.ts` | `auth.service.interface.ts` |
-| DTO | `src/dtos/<action>-<type>.dto.ts` | `login-request.dto.ts` |
-| Exception | `src/exceptions/<name>.exception.ts` | `not-found.exception.ts` |
+| DTO               | `src/dtos/<action>-<type>.dto.ts`                     | `login-request.dto.ts`      |
+| Exception         | `src/exceptions/<name>.exception.ts`                  | `not-found.exception.ts`    |
 
 ---
 
@@ -81,32 +83,11 @@ Use **yarn** for all installs and scripts. Never use npm.
 ## GraphQL Context
 
 Defined in `src/graphql/context.ts`. The `GraphQLContext` type exposes:
+
 - `res` — Express response (used for setting cookies)
 - `dataSources` — all service instances: `authService`, `userService`, …
 
 To add a new service, instantiate it inside `createContext` and add it to `dataSources`. Update the `GraphQLContext` type accordingly.
-
----
-
-## Error Handling
-
-Always wrap resolver bodies with `withErrorHandling` from `@/graphql/with-error-handling.ts`.
-
-Throw typed exceptions from `@/exceptions`:
-
-```typescript
-import { NotFoundException, ConflictException } from '@/exceptions';
-
-someResolver: withErrorHandling(async (_, args, context) => {
-  const item = await context.dataSources.someService.findById(args.id);
-  if (!item) throw new NotFoundException('Item not found');
-  return item;
-});
-```
-
-Available exceptions: `BadRequestException (400)`, `UnauthorizedException (401)`, `ForbiddenException (403)`, `NotFoundException (404)`, `ConflictException (409)`.
-
-Never catch and manually map errors in resolvers — that is `withErrorHandling`'s job.
 
 ---
 
@@ -115,18 +96,23 @@ Never catch and manually map errors in resolvers — that is `withErrorHandling`
 TSDoc is required for all public API surface in:
 
 ### `src/utils/`
+
 All exported functions must include:
+
 - A brief one-line description.
 - `@param` for every parameter.
 - `@returns` describing the resolved/returned value.
 - `@internal` for non-exported helpers that warrant documentation.
 
 ### `src/services/interfaces/`
+
 All interface files must include:
+
 - A brief description comment on the interface itself.
 - `@param` and `@returns` on every method.
 
 ### General rules
+
 - Interface/type declarations forming a public contract (e.g., `GraphQLContext`) need a minimum one-line description.
 - HOFs (e.g., `withErrorHandling`) must document generics with `@typeParam`.
 - Do not add TSDoc to private implementation details unless the logic is non-obvious.
@@ -139,6 +125,7 @@ All interface files must include:
 All env vars are validated at startup via Zod in `src/config/environment.ts`. Access them through the exported `env` object — **never use `process.env` directly** in business logic.
 
 Rules (see `docs/environment.md` for full list):
+
 - Never hardcode env values.
 - Add every new variable to `.env.example`.
 - Validate required variables in the Zod schema with `.min(1)` or the appropriate type.
@@ -154,6 +141,7 @@ Current variables: `MONGODB_URI`, `NODE_ENV`, `APP_PORT`, `LOG_LEVEL`, `LOG_SILE
 - `createHashForRefreshToken(token)` — SHA-512 HMAC; always store this hash, never the raw token
 
 Password hashing (`src/utils/crypto.ts`):
+
 - `hashPassword(plain)` — SHA-256 pre-hash → bcrypt 12 rounds (prevents 72-byte truncation)
 - `comparePassword(plain, stored)` — use this; never roll your own comparison
 

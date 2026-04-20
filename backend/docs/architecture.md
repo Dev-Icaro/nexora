@@ -58,30 +58,13 @@ All exceptions are located at `@/exceptions`. Every domain error should extend `
 
 Common exceptions available out of the box:
 
-| Class | Status Code |
-|---|---|
-| `BadRequestException` | 400 |
-| `UnauthorizedException` | 401 |
-| `ForbiddenException` | 403 |
-| `NotFoundException` | 404 |
-| `ConflictException` | 409 |
-
-### 3.2 - withErrorHandling
-
-Resolvers should never handle error-to-response mapping manually. Instead, wrap the resolver with the `withErrorHandling` higher-order function located at `@/graphql/with-error-handling.ts`.
-
-It works as follows:
-- If the thrown error is an instance of `AppException`, it catches it and returns an `ApiResponse` (`{ code, success: false, message }`) automatically.
-- Any other error is re-thrown and bubbles up to Apollo.
-
-Usage:
-
-```typescript
-register: withErrorHandling(async (_, { registerRequest }) => {
-  if (condition) throw new BadRequestException('Passwords do not match');
-  // ...
-})
-```
+| Class                   | Status Code |
+| ----------------------- | ----------- |
+| `BadRequestException`   | 400         |
+| `UnauthorizedException` | 401         |
+| `ForbiddenException`    | 403         |
+| `NotFoundException`     | 404         |
+| `ConflictException`     | 409         |
 
 ## 4.0 - Services
 
@@ -90,5 +73,6 @@ The application uses a service layer to hold all business logic, keeping resolve
 Each service must implement its corresponding interface (e.g. `AuthService implements IAuthService`). Services are instantiated directly in the GraphQL context (`createContext`) and made available to resolvers via `context.dataSources`.
 
 File naming convention:
+
 - Implementation: `@/services/<name>.service.ts`
 - Interface: `@/services/interfaces/<name>.service.interface.ts`

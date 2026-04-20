@@ -8,13 +8,14 @@ import http from 'http';
 
 import connectDatabase from '@/config/database';
 import env from '@/config/environment';
+import { apolloErrorHandler } from '@/graphql/apollo-error-handler';
 import { createContext, type GraphQLContext } from '@/graphql/context';
 import { commentResolver } from '@/graphql/resolvers/comment.resolver';
 import { mutationResolver } from '@/graphql/resolvers/mutation.resolver';
 import { postResolver } from '@/graphql/resolvers/post.resolver';
 import { userResolver } from '@/graphql/resolvers/user.resolver';
 import { typeDefs } from '@/graphql/typeDefs';
-import errorHandler from '@/rest/middlewares/error-handler';
+import httpErrorHandler from '@/rest/middlewares/error-handler';
 import { authRouter } from '@/rest/routes/auth.router';
 import logger from '@/utils/logger';
 
@@ -33,6 +34,7 @@ const bootstrap = async (): Promise<void> => {
   const server = new ApolloServer<GraphQLContext>({
     typeDefs,
     resolvers,
+    formatError: apolloErrorHandler,
     plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
   });
 
@@ -41,7 +43,7 @@ const bootstrap = async (): Promise<void> => {
   app.use('/auth', authRouter);
   app.use('/graphql', expressMiddleware(server, { context: createContext }));
 
-  app.use(errorHandler);
+  app.use(httpErrorHandler);
 
   await new Promise<void>(resolve => httpServer.listen({ port: env.APP_PORT }, resolve));
   logger.info(`GraphQL server ready at http://localhost:${env.APP_PORT}/graphql`);
