@@ -1,15 +1,15 @@
-import { AppException } from '@/exceptions';
+import type { GraphQLContext } from '../context';
 
 export const postMutations = {
-  createPost: async () => {
-    throw new AppException('Not implemented');
-  },
+  createPost: async (
+    _: unknown,
+    { body, mediaUrl }: { body: string; mediaUrl?: string },
+    { dataSources, currentUser }: GraphQLContext,
+  ) => dataSources.postService.createPost(currentUser!.userId, body, mediaUrl),
 
-  deletePost: async () => {
-    throw new Error('Not implemented');
-  },
+  deletePost: async (_: unknown, { postId }: { postId: string }, { dataSources, currentUser }: GraphQLContext) =>
+    dataSources.postService.deletePost(currentUser!.userId, postId),
 
-  likePost: async () => {
-    throw new Error('Not implemented');
-  },
+  likePost: async (_: unknown, { postId }: { postId: string }, { dataSources, currentUser }: GraphQLContext) =>
+    dataSources.postService.likePost(currentUser!.userId, postId),
 };

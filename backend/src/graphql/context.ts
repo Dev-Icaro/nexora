@@ -3,7 +3,9 @@ import { GraphQLError } from 'graphql/error';
 
 import { AuthService } from '@/services/auth.service';
 import type { IAuthService } from '@/services/interfaces/auth.service.interface';
+import type { IPostService } from '@/services/interfaces/post.service.interface';
 import type { IUserService } from '@/services/interfaces/user.service.interface';
+import { PostService } from '@/services/post.service';
 import { UserService } from '@/services/user.service';
 import { type IUserTokenInfo, verifyAccessToken } from '@/utils/auth';
 
@@ -22,6 +24,7 @@ export interface GraphQLContext {
   dataSources: {
     authService: IAuthService;
     userService: IUserService;
+    postService: IPostService;
   };
 }
 
@@ -71,6 +74,7 @@ export const createContext = async ({
     dataSources: {
       authService: new AuthService(userService),
       userService,
+      postService: new PostService(userService),
     },
   };
 };

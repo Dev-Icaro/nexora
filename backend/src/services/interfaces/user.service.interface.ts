@@ -4,6 +4,14 @@ import type UserDto from '@/dtos/user.dto';
 /** Defines the contract for user data access and refresh-token hash lifecycle management. */
 export interface IUserService {
   /**
+   * Finds a user by their unique identifier.
+   *
+   * @param userId - The MongoDB ObjectId string of the user.
+   * @returns A promise resolving to the matching {@link UserDto}, or `null` if not found.
+   */
+  findById(userId: string): Promise<UserDto | null>;
+
+  /**
    * Finds a user by their email address.
    *
    * @param email - The email address to search for.

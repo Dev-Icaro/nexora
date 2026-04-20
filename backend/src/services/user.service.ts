@@ -5,6 +5,18 @@ import { User } from '@/models/user.model';
 import type { IUserService } from './interfaces/user.service.interface';
 
 export class UserService implements IUserService {
+  async findById(userId: string): Promise<UserDto | null> {
+    const user = await User.findById(userId);
+    if (!user) return null;
+    return {
+      id: user.id as string,
+      email: user.email,
+      username: user.username,
+      password: user.password ?? undefined,
+      createdAt: user.createdAt,
+    };
+  }
+
   async findByEmail(email: string): Promise<UserDto | null> {
     const user = await User.findOne({ email });
     if (!user) return null;
