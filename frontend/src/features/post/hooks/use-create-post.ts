@@ -2,6 +2,7 @@ import { useMutation } from '@apollo/client/react';
 import { useMemo } from 'react';
 
 import { getApiErrorMessage } from '@/shared/lib/utils';
+import { toast } from '@/shared/utils/toast';
 
 import { CREATE_POST } from '../api/post.mutations';
 import type { CreatePostRequest, CreatePostResponse } from '../api/post.types';
@@ -20,7 +21,11 @@ export function useCreatePost(): UseCreatePostResult {
   const errorMessage = useMemo(() => getApiErrorMessage(error, data), [data, error]);
 
   const createPost = async (body: string, mediaUrl?: string) => {
-    await createPostMutation({ variables: { body, mediaUrl } });
+    try {
+      await createPostMutation({ variables: { body, mediaUrl } });
+    } catch (error) {
+      toast.error((error as Error).message);
+    }
   };
 
   return { createPost, loading, error: errorMessage };
