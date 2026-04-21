@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+
 import { PostCard } from '@/features/post/components/post-card';
 
 import type { PostNode } from '../api/post.types';
@@ -9,15 +11,45 @@ import { PostFeedSkeleton } from './post-feed-skeleton';
 type PostFeedProps = {
   posts: PostNode[];
   loading: boolean;
+  isFetchingNextPage: boolean;
   error?: string;
   paginationError?: string;
   hasNextPage: boolean;
   onRetry: () => void;
-  onLoadMore: () => void;
+  onLoadMore: () => Promise<void>;
 };
 
-export function PostFeed({ posts, loading, error, paginationError, hasNextPage, onRetry, onLoadMore }: PostFeedProps) {
+export function PostFeed({
+  posts,
+  loading,
+  isFetchingNextPage,
+  error,
+  paginationError,
+  hasNextPage,
+  onRetry,
+  onLoadMore,
+}: PostFeedProps) {
+  const [observedElement, setObservedElement] = useState<HTMLDivElement | null>(null);
   const hasPosts = posts.length > 0;
+
+  useEffect(() => {
+    if (!observedElement || !hasNextPage || isFetchingNextPage || paginationError) return;
+
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0]?.isIntersecting) {
+          onLoadMore();
+        }
+      },
+      {
+        rootMargin: '0px 0px 240px 0px',
+      },
+    );
+
+    observer.observe(observedElement);
+
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, observedElement, onLoadMore, paginationError]);
 
   if (loading && !hasPosts) {
     return <PostFeedSkeleton />;
@@ -33,17 +65,22 @@ export function PostFeed({ posts, loading, error, paginationError, hasNextPage, 
 
   return (
     <div className="space-y-4">
-      {posts.map(post => (
-        <PostCard key={post.id} post={post} />
-      ))}
-      {paginationError ? <PostFeedInlineError message={paginationError} onRetry={onLoadMore} /> : null}
-      {hasNextPage && !paginationError ? (
-        <div className="flex justify-center">
-          <button className="text-sm text-muted-foreground hover:text-foreground" onClick={onLoadMore}>
-            Load more
-          </button>
+      {posts.map((post, index) => {
+        const observedIndex = posts.length > 1 ? posts.length - 2 : posts.length - 1;
+        const isObservedPost = index === observedIndex;
+
+        return (
+          <div key={post.id} ref={isObservedPost ? setObservedElement : null}>
+            <PostCard post={post} />
+          </div>
+        );
+      })}
+      {isFetchingNextPage ? (
+        <div className="flex justify-center py-2">
+          <span className="text-sm text-muted-foreground">Loading more posts...</span>
         </div>
       ) : null}
+      {paginationError ? <PostFeedInlineError message={paginationError} onRetry={onLoadMore} /> : null}
     </div>
   );
 }

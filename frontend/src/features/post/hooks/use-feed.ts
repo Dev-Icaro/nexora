@@ -1,5 +1,5 @@
 import { useQuery } from '@apollo/client/react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { GET_FEED } from '../api/post.queries';
 import type { FeedRequest, FeedResponse, PostNode } from '../api/post.types';
@@ -9,15 +9,18 @@ const PAGE_SIZE = 10;
 export type UseFeedResult = {
   posts: PostNode[];
   loading: boolean;
+  isFetchingNextPage: boolean;
   error: string | undefined;
   paginationError: string | undefined;
   refetch: () => void;
-  fetchNextPage: () => void;
+  fetchNextPage: () => Promise<void>;
   hasNextPage: boolean;
 };
 
 export function useFeed(): UseFeedResult {
   const [paginationError, setPaginationError] = useState<string>();
+  const [isFetchingNextPage, setIsFetchingNextPage] = useState(false);
+  const isFetchingNextPageRef = useRef(false);
 
   const {
     data,
@@ -32,25 +35,32 @@ export function useFeed(): UseFeedResult {
   const posts = data?.feed.edges.map(e => e.node) ?? [];
   const pageInfo = data?.feed.pageInfo;
 
-  const fetchNextPage = () => {
-    if (!pageInfo?.hasNextPage) return;
+  const fetchNextPage = async () => {
+    if (!pageInfo?.hasNextPage || isFetchingNextPageRef.current) return;
 
-    fetchMore({
-      variables: { first: PAGE_SIZE, after: pageInfo.endCursor ?? undefined },
-      updateQuery: (prev, { fetchMoreResult }) => {
-        if (!fetchMoreResult) return prev;
-        return {
-          feed: {
-            ...fetchMoreResult.feed,
-            edges: [...prev.feed.edges, ...fetchMoreResult.feed.edges],
-          },
-        };
-      },
-    })
-      .then(() => setPaginationError(undefined))
-      .catch(fetchMoreError => {
-        setPaginationError(fetchMoreError instanceof Error ? fetchMoreError.message : 'Unable to load more posts.');
+    setPaginationError(undefined);
+    isFetchingNextPageRef.current = true;
+    setIsFetchingNextPage(true);
+    try {
+      await fetchMore({
+        variables: { first: PAGE_SIZE, after: pageInfo.endCursor ?? undefined },
+        updateQuery: (prev, { fetchMoreResult }) => {
+          if (!fetchMoreResult) return prev;
+          return {
+            feed: {
+              ...fetchMoreResult.feed,
+              edges: [...prev.feed.edges, ...fetchMoreResult.feed.edges],
+            },
+          };
+        },
       });
+      setPaginationError(undefined);
+    } catch (fetchMoreError) {
+      setPaginationError(fetchMoreError instanceof Error ? fetchMoreError.message : 'Unable to load more posts.');
+    } finally {
+      isFetchingNextPageRef.current = false;
+      setIsFetchingNextPage(false);
+    }
   };
 
   const refetch = () => {
@@ -61,6 +71,7 @@ export function useFeed(): UseFeedResult {
   return {
     posts,
     loading,
+    isFetchingNextPage,
     error: error?.message,
     paginationError,
     refetch,

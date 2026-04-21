@@ -4,7 +4,7 @@ import { Button } from '@/shared/components/ui/button';
 
 type PostFeedInlineErrorProps = {
   message: string;
-  onRetry: () => void;
+  onRetry: () => Promise<void>;
 };
 
 export function PostFeedInlineError({ message, onRetry }: PostFeedInlineErrorProps) {

@@ -3,7 +3,7 @@ import { PostFeed } from '@/features/post/components/post-feed';
 import { useFeed } from '@/features/post/hooks/use-feed';
 
 export function HomePage() {
-  const { posts, loading, error, paginationError, refetch, fetchNextPage, hasNextPage } = useFeed();
+  const { posts, loading, isFetchingNextPage, error, paginationError, refetch, fetchNextPage, hasNextPage } = useFeed();
 
   return (
     <main className="flex flex-1 flex-col">
@@ -12,6 +12,7 @@ export function HomePage() {
         <PostFeed
           posts={posts}
           loading={loading}
+          isFetchingNextPage={isFetchingNextPage}
           error={error}
           paginationError={paginationError}
           hasNextPage={hasNextPage}
