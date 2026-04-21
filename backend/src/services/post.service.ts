@@ -1,7 +1,9 @@
 import type CreatePostResponse from '@/dtos/create-post-response.dto';
 import type PostDto from '@/dtos/post.dto';
+import type PostConnectionDto from '@/dtos/post-connection.dto';
 import { BadRequestException, ForbiddenException, NotFoundException } from '@/exceptions';
 import { Post } from '@/models/post.model';
+import { decodeCursor, encodeCursor } from '@/utils/pagination';
 
 import type { IPostService } from './interfaces/post.service.interface';
 import type { IUserService } from './interfaces/user.service.interface';
@@ -56,6 +58,54 @@ export class PostService implements IPostService {
 
     await Post.deleteOne({ _id: postId });
     return 'Post deleted successfully';
+  }
+
+  async getFeed(first = 10, after?: string): Promise<PostConnectionDto> {
+    const limit = first;
+    const query: Record<string, unknown> = {};
+
+    if (after) {
+      const cursorId = decodeCursor(after);
+      if (cursorId) query._id = { $lt: cursorId };
+    }
+
+    const docs = await Post.find(query)
+      .sort({ _id: -1 })
+      .limit(limit + 1);
+    const hasNextPage = docs.length > limit;
+    const nodes = hasNextPage ? docs.slice(0, limit) : docs;
+
+    const edges = nodes.map(post => ({
+      node: {
+        id: post.id as string,
+        body: post.body ?? '',
+        mediaUrl: post.mediaUrl ?? undefined,
+        username: post.username ?? '',
+        createdAt: post.createdAt ?? '',
+        comments: post.comments.map(c => ({
+          id: c._id.toString(),
+          body: c.body ?? '',
+          username: c.username ?? '',
+          createdAt: c.createdAt ?? '',
+        })),
+        likes: post.likes.map(l => ({
+          id: l._id.toString(),
+          username: l.username ?? '',
+          createdAt: l.createdAt ?? '',
+        })),
+      },
+      cursor: encodeCursor(post._id.toString()),
+    }));
+
+    return {
+      edges,
+      pageInfo: {
+        startCursor: edges[0]?.cursor ?? null,
+        endCursor: edges[edges.length - 1]?.cursor ?? null,
+        hasNextPage,
+        hasPreviousPage: !!after,
+      },
+    };
   }
 
   async likePost(userId: string, postId: string): Promise<PostDto> {

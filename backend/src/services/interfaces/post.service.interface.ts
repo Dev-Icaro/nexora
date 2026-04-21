@@ -1,5 +1,6 @@
 import type CreatePostResponse from '@/dtos/create-post-response.dto';
 import type PostDto from '@/dtos/post.dto';
+import type PostConnectionDto from '@/dtos/post-connection.dto';
 
 /** Defines the contract for post creation, deletion, and social interactions. */
 export interface IPostService {
@@ -31,4 +32,14 @@ export interface IPostService {
    * @returns A promise resolving to the updated {@link PostDto}.
    */
   likePost(userId: string, postId: string): Promise<PostDto>;
+
+  /**
+   * Returns a paginated connection of posts ordered most recent first,
+   * following the Relay Cursor Connections specification.
+   *
+   * @param first - Maximum number of posts to return (default 10).
+   * @param after - Opaque cursor from a previous page's `pageInfo.endCursor`.
+   * @returns A promise resolving to a {@link PostConnectionDto} with edges and page info.
+   */
+  getFeed(first: number, after?: string): Promise<PostConnectionDto>;
 }

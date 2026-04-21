@@ -65,9 +65,27 @@ export const typeDefs = `#graphql
     success: Boolean!
   }
 
+  type PostEdge {
+    node: Post!
+    cursor: String!
+  }
+
+  type PageInfo {
+    startCursor: String
+    endCursor: String
+    hasNextPage: Boolean!
+    hasPreviousPage: Boolean!
+  }
+
+  type PostConnection {
+    edges: [PostEdge!]!
+    pageInfo: PageInfo!
+  }
+
   type Query {
     getPosts: [Post]
     getPost(postId: ID!): Post
+    feed(first: Int, after: String): PostConnection!
   }
 
   type RegisterResponse {

@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CalendarDays, Hash, Image, Mic, Video, X } from 'lucide-react';
+import { Image, Mic, Video, X } from 'lucide-react';
 import { type ChangeEvent, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -9,6 +9,7 @@ import { Button } from '@/shared/components/ui/button';
 import { Card, CardContent } from '@/shared/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/shared/components/ui/form';
 import { Input } from '@/shared/components/ui/input';
+import { Textarea } from '@/shared/components/ui/textarea';
 
 import { useCreatePost } from '../hooks/use-create-post';
 
@@ -103,7 +104,7 @@ export function PostComposer() {
                 render={({ field }) => (
                   <FormItem className="relative flex-1">
                     <FormControl>
-                      <Input placeholder="What is happening!?" className="bg-muted border-0 pr-10" {...field} />
+                      <Textarea placeholder="What is happening!?" className="bg-muted border-0 pr-10" {...field} />
                     </FormControl>
                     <Mic className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
                   </FormItem>
@@ -159,14 +160,14 @@ export function PostComposer() {
                   <Image className="size-4" />
                   Media Content
                 </button>
-                <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                {/* <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <Hash className="size-4" />
                   Hashtags
                 </span>
                 <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <CalendarDays className="size-4" />
                   Schedule
-                </span>
+                </span> */}
               </div>
               <Button type="submit" variant="secondary" size="sm" className="rounded-full" disabled={!isValid}>
                 Post

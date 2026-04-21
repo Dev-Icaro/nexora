@@ -1,9 +1,3 @@
-export type ApiResponse = {
-  code: number;
-  message: string;
-  success: boolean;
-};
-
 /** Relay Cursor Connections page metadata. */
 export type PageInfo = {
   startCursor: string | null;
