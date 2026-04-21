@@ -8,7 +8,6 @@ import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar';
 import { Button } from '@/shared/components/ui/button';
 import { Card, CardContent } from '@/shared/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/shared/components/ui/form';
-import { Input } from '@/shared/components/ui/input';
 import { Textarea } from '@/shared/components/ui/textarea';
 
 import { useCreatePost } from '../hooks/use-create-post';
