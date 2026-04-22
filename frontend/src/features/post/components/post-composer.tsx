@@ -10,8 +10,6 @@ import { Card, CardContent } from '@/shared/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/shared/components/ui/form';
 import { Textarea } from '@/shared/components/ui/textarea';
 
-import { useCreatePost } from '../hooks/use-create-post';
-
 const SUPPORTED_MEDIA_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/webm'];
 
 const postSchema = z.object({
@@ -27,23 +25,19 @@ const postSchema = z.object({
 
 type PostFormValues = z.infer<typeof postSchema>;
 
-function fileToDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
+type PostComposerProps = {
+  username: string;
+  loading: boolean;
+  onSubmit: (body: string, mediaFile?: File) => Promise<boolean>;
+};
 
-export function PostComposer() {
+export function PostComposer({ username, loading, onSubmit }: PostComposerProps) {
   const form = useForm<PostFormValues>({
     resolver: zodResolver(postSchema),
     mode: 'onChange',
     defaultValues: { body: '' },
   });
   const { isValid } = form.formState;
-  const { createPost } = useCreatePost();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -80,22 +74,24 @@ export function PostComposer() {
     form.setValue('mediaFile', undefined, { shouldValidate: true });
   };
 
-  const onSubmit = async (values: PostFormValues) => {
-    let mediaUrl: string | undefined;
-    if (values.mediaFile) {
-      mediaUrl = await fileToDataUrl(values.mediaFile);
+  const handleSubmit = async (values: PostFormValues) => {
+    const success = await onSubmit(values.body, values.mediaFile);
+    if (success) {
+      form.reset();
+      handleRemoveMedia();
     }
-    await createPost(values.body, mediaUrl);
   };
+
+  const initials = username.slice(0, 2).toUpperCase();
 
   return (
     <Card className="bg-card border border-border">
       <CardContent className="p-4 space-y-3">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
+          <form onSubmit={form.handleSubmit(handleSubmit)}>
             <div className="flex items-center gap-3">
               <Avatar className="size-10 shrink-0">
-                <AvatarFallback className="bg-primary/20 text-primary font-semibold">JD</AvatarFallback>
+                <AvatarFallback className="bg-primary/20 text-primary font-semibold">{initials}</AvatarFallback>
               </Avatar>
               <FormField
                 control={form.control}
@@ -168,7 +164,13 @@ export function PostComposer() {
                   Schedule
                 </span> */}
               </div>
-              <Button type="submit" variant="secondary" size="sm" className="rounded-full" disabled={!isValid}>
+              <Button
+                type="submit"
+                variant="secondary"
+                size="sm"
+                className="rounded-full"
+                disabled={!isValid || loading}
+              >
                 Post
               </Button>
             </div>

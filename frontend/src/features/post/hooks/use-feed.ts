@@ -15,9 +15,11 @@ export type UseFeedResult = {
   refetch: () => void;
   fetchNextPage: () => Promise<void>;
   hasNextPage: boolean;
+  prependPost: (post: PostNode) => void;
 };
 
 export function useFeed(): UseFeedResult {
+  const [localPosts, setLocalPosts] = useState<PostNode[]>([]);
   const [paginationError, setPaginationError] = useState<string>();
   const [isFetchingNextPage, setIsFetchingNextPage] = useState(false);
   const isFetchingNextPageRef = useRef(false);
@@ -32,8 +34,11 @@ export function useFeed(): UseFeedResult {
     variables: { first: PAGE_SIZE },
   });
 
-  const posts = data?.feed.edges.map(e => e.node) ?? [];
+  const serverPosts = data?.feed.edges.map(e => e.node) ?? [];
+  const posts = [...localPosts, ...serverPosts];
   const pageInfo = data?.feed.pageInfo;
+
+  const prependPost = (post: PostNode) => setLocalPosts(prev => [post, ...prev]);
 
   const fetchNextPage = async () => {
     if (!pageInfo?.hasNextPage || isFetchingNextPageRef.current) return;
@@ -65,6 +70,7 @@ export function useFeed(): UseFeedResult {
 
   const refetch = () => {
     setPaginationError(undefined);
+    setLocalPosts([]);
     void apolloRefetch();
   };
 
@@ -77,5 +83,6 @@ export function useFeed(): UseFeedResult {
     refetch,
     fetchNextPage,
     hasNextPage: pageInfo?.hasNextPage ?? false,
+    prependPost,
   };
 }

@@ -12,6 +12,8 @@ export const CREATE_POST = gql`
         mediaUrl
         createdAt
         username
+        likeCount
+        commentCount
       }
     }
   }
