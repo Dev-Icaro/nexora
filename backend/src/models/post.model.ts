@@ -7,19 +7,8 @@ const postSchema = new Schema({
   mediaUrl: String,
   username: String,
   createdAt: String,
-  comments: [
-    {
-      body: String,
-      userId: String,
-      createdAt: String,
-    },
-  ],
-  likes: [
-    {
-      userId: String,
-      createdAt: String,
-    },
-  ],
+  likeCount: { type: Number, default: 0 },
+  commentCount: { type: Number, default: 0 },
   user: {
     type: Schema.Types.ObjectId,
     ref: 'users',

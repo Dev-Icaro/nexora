@@ -4,8 +4,8 @@ type PostDto = {
   mediaUrl?: string;
   username: string;
   createdAt: string;
-  comments: { id: string; body: string; username: string; createdAt: string }[];
-  likes: { id: string; username: string; createdAt: string }[];
+  likeCount: number;
+  commentCount: number;
 };
 
 export default PostDto;

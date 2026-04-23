@@ -2,7 +2,9 @@ import type { Request as ExpressRequest, Response as ExpressResponse } from 'exp
 import { GraphQLError } from 'graphql/error';
 
 import { AuthService } from '@/services/auth.service';
+import { CommentService } from '@/services/comment.service';
 import type { IAuthService } from '@/services/interfaces/auth.service.interface';
+import type { ICommentService } from '@/services/interfaces/comment.service.interface';
 import type { IPostService } from '@/services/interfaces/post.service.interface';
 import type { IUserService } from '@/services/interfaces/user.service.interface';
 import { PostService } from '@/services/post.service';
@@ -25,6 +27,7 @@ export interface GraphQLContext {
     authService: IAuthService;
     userService: IUserService;
     postService: IPostService;
+    commentService: ICommentService;
   };
 }
 
@@ -75,6 +78,7 @@ export const createContext = async ({
       authService: new AuthService(userService),
       userService,
       postService: new PostService(userService),
+      commentService: new CommentService(userService),
     },
   };
 };

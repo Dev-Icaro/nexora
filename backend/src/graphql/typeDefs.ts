@@ -102,6 +102,33 @@ export const typeDefs = `#graphql
     post: Post
   }
 
+  type DeletePostResponse {
+    code: Int!
+    message: String!
+    success: Boolean!
+  }
+
+  type CreateCommentResponse {
+    code: Int!
+    message: String!
+    success: Boolean!
+    comment: Comment
+  }
+
+  type DeleteCommentResponse {
+    code: Int!
+    message: String!
+    success: Boolean!
+    comment: Comment
+  }
+
+  type LikePostResponse {
+    code: Int!
+    message: String!
+    success: Boolean!
+    post: Post
+  }
+
   type Mutation {
     register(registerRequest: RegisterRequest): RegisterResponse!
     login(loginRequest: LoginRequest!): LoginResponse!
@@ -109,12 +136,12 @@ export const typeDefs = `#graphql
     logout: LogoutResponse!
 
     createPost(body: String!, mediaUrl: String): CreatePostResponse!
-    deletePost(postId: ID!): String!
+    deletePost(postId: ID!): DeletePostResponse!
 
-    createComment(postId: String!, body: String!): Post!
-    deleteComment(postId: ID!, commentId: ID!): Post!
+    createComment(postId: String!, body: String!): CreateCommentResponse!
+    deleteComment(postId: ID!, commentId: ID!): DeleteCommentResponse!
 
-    likePost(postId: ID!): Post!
+    likePost(postId: ID!): LikePostResponse!
   }
 
   type Subscription {

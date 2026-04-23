@@ -1,7 +1,10 @@
 import type CreatePostResponse from '@/dtos/create-post-response.dto';
-import type PostDto from '@/dtos/post.dto';
+import type DeletePostResponse from '@/dtos/delete-post-response.dto';
+import type LikePostResponse from '@/dtos/like-post-response.dto';
 import type PostConnectionDto from '@/dtos/post-connection.dto';
 import { BadRequestException, ForbiddenException, NotFoundException } from '@/exceptions';
+import { Comment } from '@/models/comment.model';
+import { Like } from '@/models/like.model';
 import { Post } from '@/models/post.model';
 import { decodeCursor, encodeCursor } from '@/utils/pagination';
 
@@ -30,8 +33,6 @@ export class PostService implements IPostService {
       username: user.username,
       user: userId,
       createdAt,
-      comments: [],
-      likes: [],
     });
 
     return {
@@ -44,20 +45,22 @@ export class PostService implements IPostService {
         mediaUrl: post.mediaUrl ?? undefined,
         username: post.username ?? '',
         createdAt: post.createdAt ?? createdAt,
-        comments: [],
-        likes: [],
+        likeCount: 0,
+        commentCount: 0,
       },
     };
   }
 
-  async deletePost(userId: string, postId: string): Promise<string> {
+  async deletePost(userId: string, postId: string): Promise<DeletePostResponse> {
     const post = await Post.findById(postId);
     if (!post) throw new NotFoundException('Post not found');
 
     if (post.user?.toString() !== userId) throw new ForbiddenException('Action not allowed');
 
     await Post.deleteOne({ _id: postId });
-    return 'Post deleted successfully';
+    await Promise.all([Comment.deleteMany({ postId }), Like.deleteMany({ postId })]);
+
+    return { code: 200, success: true, message: 'Post deleted successfully' };
   }
 
   async getFeed(first = 10, after?: string): Promise<PostConnectionDto> {
@@ -82,17 +85,8 @@ export class PostService implements IPostService {
         mediaUrl: post.mediaUrl ?? undefined,
         username: post.username ?? '',
         createdAt: post.createdAt ?? '',
-        comments: post.comments.map(c => ({
-          id: c._id.toString(),
-          body: c.body ?? '',
-          username: c.username ?? '',
-          createdAt: c.createdAt ?? '',
-        })),
-        likes: post.likes.map(l => ({
-          id: l._id.toString(),
-          username: l.username ?? '',
-          createdAt: l.createdAt ?? '',
-        })),
+        likeCount: post.likeCount ?? 0,
+        commentCount: post.commentCount ?? 0,
       },
       cursor: encodeCursor(post._id.toString()),
     }));
@@ -108,42 +102,39 @@ export class PostService implements IPostService {
     };
   }
 
-  async likePost(userId: string, postId: string): Promise<PostDto> {
+  async likePost(userId: string, postId: string): Promise<LikePostResponse> {
     const user = await this.userService.findById(userId);
     if (!user) throw new NotFoundException('User not found');
 
     const existing = await Post.findById(postId);
     if (!existing) throw new NotFoundException('Post not found');
 
-    const alreadyLiked = existing.likes.some(like => like.username === user.username);
+    const alreadyLiked = await Like.findOne({ postId, userId });
 
-    const post = await Post.findByIdAndUpdate(
-      postId,
-      alreadyLiked
-        ? { $pull: { likes: { username: user.username } } }
-        : { $push: { likes: { username: user.username, createdAt: new Date().toISOString() } } },
-      { new: true },
-    );
+    let post;
+    if (alreadyLiked) {
+      await Like.deleteOne({ _id: alreadyLiked._id });
+      post = await Post.findByIdAndUpdate(postId, { $inc: { likeCount: -1 } }, { new: true });
+    } else {
+      await Like.create({ postId, userId, username: user.username, createdAt: new Date().toISOString() });
+      post = await Post.findByIdAndUpdate(postId, { $inc: { likeCount: 1 } }, { new: true });
+    }
 
     if (!post) throw new NotFoundException('Post not found');
 
     return {
-      id: post.id as string,
-      body: post.body ?? '',
-      mediaUrl: post.mediaUrl ?? undefined,
-      username: post.username ?? '',
-      createdAt: post.createdAt ?? '',
-      comments: post.comments.map(c => ({
-        id: c._id.toString(),
-        body: c.body ?? '',
-        username: c.username ?? '',
-        createdAt: c.createdAt ?? '',
-      })),
-      likes: post.likes.map(l => ({
-        id: l._id.toString(),
-        username: l.username ?? '',
-        createdAt: l.createdAt ?? '',
-      })),
+      code: 200,
+      success: true,
+      message: alreadyLiked ? 'Post unliked successfully' : 'Post liked successfully',
+      post: {
+        id: post.id as string,
+        body: post.body ?? '',
+        mediaUrl: post.mediaUrl ?? undefined,
+        username: post.username ?? '',
+        createdAt: post.createdAt ?? '',
+        likeCount: post.likeCount ?? 0,
+        commentCount: post.commentCount ?? 0,
+      },
     };
   }
 }
