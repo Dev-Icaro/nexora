@@ -11,12 +11,17 @@ export type CreatePostResponse = {
   };
 };
 
+export type PostAuthor = {
+  id: string;
+  username: string;
+};
+
 export type PostNode = {
   id: string;
   body: string;
   mediaUrl: string | null;
   createdAt: string;
-  username: string;
+  author: PostAuthor;
   likeCount: number;
   commentCount: number;
 };

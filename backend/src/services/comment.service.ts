@@ -31,7 +31,7 @@ export class CommentService implements ICommentService {
         id: comment.id as string,
         postId: comment.postId.toString(),
         body: comment.body,
-        username: comment.username,
+        authorId: comment.userId.toString(),
         createdAt: comment.createdAt,
       },
     };
@@ -54,7 +54,7 @@ export class CommentService implements ICommentService {
         id: comment.id as string,
         postId: comment.postId.toString(),
         body: comment.body,
-        username: comment.username,
+        authorId: comment.userId.toString(),
         createdAt: comment.createdAt,
       },
     };
@@ -66,7 +66,7 @@ export class CommentService implements ICommentService {
       id: c.id as string,
       postId: c.postId.toString(),
       body: c.body,
-      username: c.username,
+      authorId: c.userId.toString(),
       createdAt: c.createdAt,
     }));
   }

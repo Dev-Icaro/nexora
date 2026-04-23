@@ -26,7 +26,7 @@ interface PostCardProps {
 export function PostCard({ post }: PostCardProps) {
   const [expanded, setExpanded] = useState(false);
 
-  const initials = post.username.slice(0, 2).toUpperCase();
+  const initials = post.author.username.slice(0, 2).toUpperCase();
   const timestamp = dayjs(post.createdAt).fromNow();
   const hashtags = post.body.match(/#\w+/g) ?? [];
   const bodyText = post.body.replace(/#\w+/g, '').trim();
@@ -42,7 +42,7 @@ export function PostCard({ post }: PostCardProps) {
               <AvatarFallback className="bg-primary/20 text-primary font-semibold">{initials}</AvatarFallback>
             </Avatar>
             <div>
-              <p className="text-sm font-semibold">{post.username}</p>
+              <p className="text-sm font-semibold">{post.author.username}</p>
               <p className="text-xs text-muted-foreground">{timestamp}</p>
             </div>
           </div>

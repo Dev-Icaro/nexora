@@ -2,7 +2,7 @@ type CommentDto = {
   id: string;
   postId: string;
   body: string;
-  username: string;
+  authorId: string;
   createdAt: string;
 };
 

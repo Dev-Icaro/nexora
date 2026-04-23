@@ -1,7 +1,7 @@
 type LikeDto = {
   id: string;
   postId: string;
-  username: string;
+  authorId: string;
   createdAt: string;
 };
 

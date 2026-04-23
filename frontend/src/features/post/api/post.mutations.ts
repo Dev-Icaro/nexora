@@ -11,7 +11,10 @@ export const CREATE_POST = gql`
         body
         mediaUrl
         createdAt
-        username
+        author {
+          id
+          username
+        }
         likeCount
         commentCount
       }

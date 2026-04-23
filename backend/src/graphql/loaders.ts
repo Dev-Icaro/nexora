@@ -2,6 +2,7 @@ import DataLoader from 'dataloader';
 
 import { Comment } from '@/models/comment.model';
 import { Like } from '@/models/like.model';
+import { User } from '@/models/user.model';
 
 export function createLoaders() {
   return {
@@ -17,6 +18,12 @@ export function createLoaders() {
       const map = new Map<string, typeof likes>(postIds.map(id => [id, []]));
       for (const like of likes) map.get(String(like.postId))?.push(like);
       return postIds.map(id => map.get(id) ?? []);
+    }),
+
+    usersLoader: new DataLoader(async (userIds: readonly string[]) => {
+      const users = await User.find({ _id: { $in: userIds } });
+      const map = new Map(users.map(user => [String(user._id), user]));
+      return userIds.map(id => map.get(id) ?? null);
     }),
   };
 }

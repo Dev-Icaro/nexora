@@ -10,7 +10,10 @@ export const GET_FEED = gql`
           body
           mediaUrl
           createdAt
-          username
+          author {
+            id
+            username
+          }
           likeCount
           commentCount
         }

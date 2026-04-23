@@ -10,7 +10,6 @@ import connectDatabase from '@/config/database';
 import env from '@/config/environment';
 import { apolloErrorHandler } from '@/graphql/apollo-error-handler';
 import { createContext, type GraphQLContext } from '@/graphql/context';
-import { commentResolver } from '@/graphql/resolvers/comment.resolver';
 import { mutationResolver } from '@/graphql/resolvers/mutation.resolver';
 import { postResolver } from '@/graphql/resolvers/post.resolver';
 import { userResolver } from '@/graphql/resolvers/user.resolver';
@@ -19,7 +18,7 @@ import httpErrorHandler from '@/rest/middlewares/error-handler';
 import { authRouter } from '@/rest/routes/auth.router';
 import logger from '@/utils/logger';
 
-const resolvers = [postResolver, mutationResolver, userResolver, commentResolver];
+const resolvers = [postResolver, mutationResolver, userResolver];
 
 const bootstrap = async (): Promise<void> => {
   await connectDatabase();
