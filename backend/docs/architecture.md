@@ -66,7 +66,40 @@ Common exceptions available out of the box:
 | `NotFoundException`     | 404         |
 | `ConflictException`     | 409         |
 
-## 4.0 - Services
+## 4.0 - DataLoaders
+
+The application uses DataLoaders to batch and deduplicate database queries within a single GraphQL request, preventing N+1 query problems in field resolvers.
+
+All loaders are defined in `@/graphql/loaders.ts` via the `createLoaders()` factory, which returns a fresh set of DataLoader instances per request. They are wired into `GraphQLContext` under the `loaders` key inside `createContext`.
+
+### 4.1 - How DataLoaders work
+
+A DataLoader accumulates all `.load(key)` calls made during a single GraphQL tick and fires a single batch function with all collected keys. The batch function must:
+
+1. Accept a `readonly` array of keys.
+2. Fetch all matching records in one query (e.g. `Model.find({ field: { $in: keys } })`).
+3. Return an array of values in the **exact same order** and **same length** as the input keys.
+
+```typescript
+// Example: batching comments by postId
+new DataLoader(async (postIds: readonly string[]) => {
+  const comments = await Comment.find({ postId: { $in: postIds } }).sort({ _id: 1 });
+  const map = new Map(postIds.map((id) => [id, [] as typeof comments]));
+  for (const comment of comments) map.get(String(comment.postId))?.push(comment);
+  return postIds.map((id) => map.get(id) ?? []);
+});
+```
+
+### 4.2 - When to use a DataLoader
+
+When implementing a field resolver, evaluate whether it causes N+1 queries:
+
+- **Use a DataLoader** when the field resolver fetches related data by a foreign key that will be repeated across multiple parent objects (e.g. `Post.comments`, `Post.likes`, `Comment.author`).
+- **No DataLoader needed** when the resolver fetches a single document by its own ID (root queries like `getPost(postId)`).
+
+If a new field resolver introduces a per-parent database query, add a corresponding loader to `createLoaders()` and call `loaders.<name>.load(parent.id)` from the resolver instead of querying the model directly.
+
+## 5.0 - Services
 
 The application uses a service layer to hold all business logic, keeping resolvers thin. All services are located at `@/services`, and their interfaces are located at `@/services/interfaces`.
 

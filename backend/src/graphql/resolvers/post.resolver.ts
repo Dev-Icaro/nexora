@@ -1,14 +1,14 @@
+import type { GraphQLContext } from '@/graphql/context';
 import { postQueries } from '@/graphql/queries/post.query';
-import { Comment } from '@/models/comment.model';
-import { Like } from '@/models/like.model';
 
 export const postResolver = {
   Query: {
     ...postQueries,
   },
   Post: {
-    comments: (parent: { id: string }) => Comment.find({ postId: parent.id }).sort({ _id: 1 }),
-    likes: (parent: { id: string }) => Like.find({ postId: parent.id }).sort({ _id: 1 }),
+    comments: (parent: { id: string }, _: unknown, { loaders }: GraphQLContext) =>
+      loaders.commentsLoader.load(parent.id),
+    likes: (parent: { id: string }, _: unknown, { loaders }: GraphQLContext) => loaders.likesLoader.load(parent.id),
     likeCount: (parent: { likeCount: number }) => parent.likeCount,
     commentCount: (parent: { commentCount: number }) => parent.commentCount,
   },

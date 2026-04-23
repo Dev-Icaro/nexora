@@ -11,6 +11,7 @@ import { PostService } from '@/services/post.service';
 import { UserService } from '@/services/user.service';
 import { type IUserTokenInfo, verifyAccessToken } from '@/utils/auth';
 
+import { createLoaders, type Loaders } from './loaders';
 import { GRAPHQL_AUTH_WHITELIST } from './whitelist';
 
 /**
@@ -23,6 +24,7 @@ export interface GraphQLContext {
   req: ExpressRequest;
   res: ExpressResponse;
   currentUser: IUserTokenInfo | null;
+  loaders: Loaders;
   dataSources: {
     authService: IAuthService;
     userService: IUserService;
@@ -74,6 +76,7 @@ export const createContext = async ({
     req,
     res,
     currentUser,
+    loaders: createLoaders(),
     dataSources: {
       authService: new AuthService(userService),
       userService,
