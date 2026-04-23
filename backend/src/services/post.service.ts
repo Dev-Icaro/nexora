@@ -1,6 +1,7 @@
 import type CreatePostResponse from '@/dtos/create-post-response.dto';
 import type DeletePostResponse from '@/dtos/delete-post-response.dto';
 import type LikePostResponse from '@/dtos/like-post-response.dto';
+import type PostDto from '@/dtos/post.dto';
 import type PostConnectionDto from '@/dtos/post-connection.dto';
 import { BadRequestException, ForbiddenException, NotFoundException } from '@/exceptions';
 import { Comment } from '@/models/comment.model';
@@ -61,6 +62,20 @@ export class PostService implements IPostService {
     await Promise.all([Comment.deleteMany({ postId }), Like.deleteMany({ postId })]);
 
     return { code: 200, success: true, message: 'Post deleted successfully' };
+  }
+
+  async getPostById(postId: string): Promise<PostDto | null> {
+    const post = await Post.findById(postId);
+    if (!post) return null;
+    return {
+      id: post.id as string,
+      body: post.body ?? '',
+      mediaUrl: post.mediaUrl ?? undefined,
+      authorId: String(post.user),
+      createdAt: post.createdAt ?? '',
+      likeCount: post.likeCount ?? 0,
+      commentCount: post.commentCount ?? 0,
+    };
   }
 
   async getFeed(first = 10, after?: string): Promise<PostConnectionDto> {

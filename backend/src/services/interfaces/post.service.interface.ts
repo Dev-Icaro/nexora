@@ -1,6 +1,7 @@
 import type CreatePostResponse from '@/dtos/create-post-response.dto';
 import type DeletePostResponse from '@/dtos/delete-post-response.dto';
 import type LikePostResponse from '@/dtos/like-post-response.dto';
+import type PostDto from '@/dtos/post.dto';
 import type PostConnectionDto from '@/dtos/post-connection.dto';
 
 /** Defines the contract for post creation, deletion, and social interactions. */
@@ -33,6 +34,14 @@ export interface IPostService {
    * @returns A promise resolving to a {@link LikePostResponse} with the updated post.
    */
   likePost(userId: string, postId: string): Promise<LikePostResponse>;
+
+  /**
+   * Retrieves a single post by its ID.
+   *
+   * @param postId - The ID of the post to fetch.
+   * @returns A promise resolving to a {@link PostDto} if found, or `null` if no post matches the ID.
+   */
+  getPostById(postId: string): Promise<PostDto | null>;
 
   /**
    * Returns a paginated connection of posts ordered most recent first,

@@ -6,8 +6,8 @@ export const postQueries = {
     return await Post.find();
   },
 
-  getPost: async (_: unknown, { postId }: { postId: string }) => {
-    return await Post.findById(postId);
+  getPost: async (_: unknown, { postId }: { postId: string }, { dataSources }: GraphQLContext) => {
+    return await dataSources.postService.getPostById(postId);
   },
 
   feed: async (
