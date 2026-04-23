@@ -1,5 +1,8 @@
+import { useState } from 'react';
+
 import { useAuth } from '@/features/auth/hooks/use-auth';
 import { PostComposer } from '@/features/post/components/post-composer';
+import { PostDetailModal } from '@/features/post/components/post-detail-modal';
 import { PostFeed } from '@/features/post/components/post-feed';
 import { useCreatePost } from '@/features/post/hooks/use-create-post';
 import { useFeed } from '@/features/post/hooks/use-feed';
@@ -8,6 +11,7 @@ import { fileToDataUrl } from '@/features/post/utils/file-to-data-url';
 export function HomePage() {
   const { state } = useAuth();
   const username = state.user?.username ?? '';
+  const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
 
   const { createPost, loading: createPostLoading } = useCreatePost();
   const {
@@ -46,8 +50,10 @@ export function HomePage() {
           hasNextPage={hasNextPage}
           onRetry={refetch}
           onLoadMore={fetchNextPage}
+          onOpenPost={setSelectedPostId}
         />
       </div>
+      <PostDetailModal postId={selectedPostId} open={!!selectedPostId} onClose={() => setSelectedPostId(null)} />
     </main>
   );
 }

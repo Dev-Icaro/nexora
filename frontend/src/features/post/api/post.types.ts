@@ -24,6 +24,7 @@ export type PostNode = {
   author: PostAuthor;
   likeCount: number;
   commentCount: number;
+  likes: Array<{ id: string; author: { id: string; username: string } }>;
 };
 
 export type FeedResponse = {

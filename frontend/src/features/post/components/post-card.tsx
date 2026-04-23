@@ -1,8 +1,10 @@
+import { useMutation } from '@apollo/client/react';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { Bookmark, Heart, MessageCircle, MoreHorizontal, Send } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
+import { useAuth } from '@/features/auth/hooks/use-auth';
 import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar';
 import { Badge } from '@/shared/components/ui/badge';
 import { Button } from '@/shared/components/ui/button';
@@ -14,17 +16,46 @@ import {
   DropdownMenuTrigger,
 } from '@/shared/components/ui/dropdown-menu';
 import { cn } from '@/shared/lib/utils';
+import { toast } from '@/shared/utils/toast';
 
+import type { LikePostMutationResponse, LikePostVariables } from '../api/post.mutations';
+import { LIKE_POST } from '../api/post.mutations';
 import type { PostNode } from '../api/post.types';
 
 dayjs.extend(relativeTime);
 
 interface PostCardProps {
   post: PostNode;
+  onOpenModal?: (postId: string) => void;
 }
 
-export function PostCard({ post }: PostCardProps) {
+export function PostCard({ post, onOpenModal }: PostCardProps) {
   const [expanded, setExpanded] = useState(false);
+  const { state } = useAuth();
+  const userId = state.user?.id;
+
+  const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(post.likeCount);
+
+  useEffect(() => {
+    setLiked(!!userId && post.likes.some(l => l.author.id === userId));
+    setLikeCount(post.likeCount);
+  }, [post, userId]);
+
+  const [likePost] = useMutation<LikePostMutationResponse, LikePostVariables>(LIKE_POST);
+
+  const handleLike = async () => {
+    const next = !liked;
+    setLiked(next);
+    setLikeCount(c => c + (next ? 1 : -1));
+    try {
+      await likePost({ variables: { postId: post.id } });
+    } catch {
+      setLiked(!next);
+      setLikeCount(c => c + (next ? -1 : 1));
+      toast.error('Failed to update like');
+    }
+  };
 
   const initials = post.author.username.slice(0, 2).toUpperCase();
   const timestamp = dayjs(post.createdAt).fromNow();
@@ -88,11 +119,20 @@ export function PostCard({ post }: PostCardProps) {
         {/* Engagement counters */}
         <div className="flex items-center justify-between pt-1">
           <div className="flex items-center gap-4">
-            <button className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors">
-              <Heart className="size-4" />
-              {post.likeCount}
+            <button
+              onClick={handleLike}
+              className={cn(
+                'flex items-center gap-1.5 text-xs transition-colors bg-transparent border-none cursor-pointer',
+                liked ? 'text-primary' : 'text-muted-foreground hover:text-foreground',
+              )}
+            >
+              <Heart className={cn('size-4', liked && 'fill-current')} />
+              <span className={cn('font-semibold', liked ? 'text-primary' : 'text-foreground')}>{likeCount}</span>
             </button>
-            <button className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors">
+            <button
+              onClick={() => onOpenModal?.(post.id)}
+              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors"
+            >
               <MessageCircle className="size-4" />
               {post.commentCount}
             </button>

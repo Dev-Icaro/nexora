@@ -73,6 +73,13 @@ export const GET_FEED = gql`
           }
           likeCount
           commentCount
+          likes {
+            id
+            author {
+              id
+              username
+            }
+          }
         }
       }
       pageInfo {
