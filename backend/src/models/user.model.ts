@@ -15,6 +15,8 @@ const userSchema = new Schema({
   password: { type: String, required: false },
   email: { type: String, required: true },
   createdAt: { type: String, required: true },
+  bio: { type: String, required: false },
+  position: { type: String, required: false },
   tokens: [{ refreshTokenHash: { type: String, required: true }, expiresAt: { type: Date, required: true } }],
   oauthAccounts: { type: [oauthAccountSchema], default: [] },
 });

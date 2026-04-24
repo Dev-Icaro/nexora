@@ -1,5 +1,8 @@
 import type CreateUserDto from '@/dtos/create-user.dto';
+import type UpdateProfileRequestDto from '@/dtos/update-profile-request.dto';
+import type UpdateProfileResponseDto from '@/dtos/update-profile-response.dto';
 import type UserDto from '@/dtos/user.dto';
+import { BadRequestException, NotFoundException } from '@/exceptions';
 import { User } from '@/models/user.model';
 
 import type { IUserService } from './interfaces/user.service.interface';
@@ -14,6 +17,8 @@ export class UserService implements IUserService {
       username: user.username,
       password: user.password ?? undefined,
       createdAt: user.createdAt,
+      bio: user.bio ?? undefined,
+      position: user.position ?? undefined,
     };
   }
 
@@ -26,6 +31,8 @@ export class UserService implements IUserService {
       username: user.username,
       password: user.password ?? undefined,
       createdAt: user.createdAt,
+      bio: user.bio ?? undefined,
+      position: user.position ?? undefined,
     };
   }
 
@@ -46,6 +53,8 @@ export class UserService implements IUserService {
       username: user.username,
       password: user.password ?? undefined,
       createdAt: user.createdAt,
+      bio: user.bio ?? undefined,
+      position: user.position ?? undefined,
     };
   }
 
@@ -66,6 +75,8 @@ export class UserService implements IUserService {
       username: user.username,
       password: user.password ?? undefined,
       createdAt: user.createdAt,
+      bio: user.bio ?? undefined,
+      position: user.position ?? undefined,
     };
   }
 
@@ -92,5 +103,32 @@ export class UserService implements IUserService {
     await User.findByIdAndUpdate(userId, {
       $addToSet: { oauthAccounts: { provider, providerId } },
     });
+  }
+
+  async updateProfile(userId: string, { bio, position }: UpdateProfileRequestDto): Promise<UpdateProfileResponseDto> {
+    if (bio !== undefined && bio.length > 160) {
+      throw new BadRequestException('Bio must not exceed 160 characters');
+    }
+
+    const updates: Record<string, string> = {};
+    if (bio !== undefined) updates.bio = bio;
+    if (position !== undefined) updates.position = position;
+
+    const user = await User.findByIdAndUpdate(userId, { $set: updates }, { new: true });
+    if (!user) throw new NotFoundException('User not found');
+
+    return {
+      code: 200,
+      message: 'Profile updated successfully',
+      success: true,
+      user: {
+        id: user.id as string,
+        email: user.email,
+        username: user.username,
+        createdAt: user.createdAt,
+        bio: user.bio ?? undefined,
+        position: user.position ?? undefined,
+      },
+    };
   }
 }

@@ -29,6 +29,8 @@ export const typeDefs = `#graphql
     email: String!
     username: String!
     createdAt: String!
+    bio: String
+    position: String
   }
 
   input RegisterRequest {
@@ -129,6 +131,18 @@ export const typeDefs = `#graphql
     post: Post
   }
 
+  input UpdateProfileRequest {
+    bio: String
+    position: String
+  }
+
+  type UpdateProfileResponse {
+    code: Int!
+    message: String!
+    success: Boolean!
+    user: User
+  }
+
   type Mutation {
     register(registerRequest: RegisterRequest): RegisterResponse!
     login(loginRequest: LoginRequest!): LoginResponse!
@@ -142,6 +156,8 @@ export const typeDefs = `#graphql
     deleteComment(postId: ID!, commentId: ID!): DeleteCommentResponse!
 
     likePost(postId: ID!): LikePostResponse!
+
+    updateProfile(updateProfileRequest: UpdateProfileRequest!): UpdateProfileResponse!
   }
 
   type Subscription {

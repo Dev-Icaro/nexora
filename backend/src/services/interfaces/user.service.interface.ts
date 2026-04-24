@@ -1,4 +1,6 @@
 import type CreateUserDto from '@/dtos/create-user.dto';
+import type UpdateProfileRequestDto from '@/dtos/update-profile-request.dto';
+import type UpdateProfileResponseDto from '@/dtos/update-profile-response.dto';
 import type UserDto from '@/dtos/user.dto';
 
 /** Defines the contract for user data access and refresh-token hash lifecycle management. */
@@ -75,4 +77,13 @@ export interface IUserService {
    * @returns A promise that resolves when the link has been persisted.
    */
   linkOAuthAccount(userId: string, provider: string, providerId: string): Promise<void>;
+
+  /**
+   * Updates the profile fields (bio, position) of the authenticated user.
+   *
+   * @param userId - The unique identifier of the user.
+   * @param data - Partial profile fields to update. See {@link UpdateProfileRequestDto}.
+   * @returns A promise resolving to the updated {@link UserDto}.
+   */
+  updateProfile(userId: string, data: UpdateProfileRequestDto): Promise<UpdateProfileResponseDto>;
 }

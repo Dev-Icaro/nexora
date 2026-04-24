@@ -4,6 +4,8 @@ type UserDto = {
   username: string;
   password?: string;
   createdAt: string;
+  bio?: string;
+  position?: string;
 };
 
 export default UserDto;
