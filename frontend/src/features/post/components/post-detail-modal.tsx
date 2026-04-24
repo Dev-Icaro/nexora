@@ -558,9 +558,9 @@ export function PostDetailModal({ postId, open, onClose }: PostDetailModalProps)
           'p-0 gap-0 flex flex-col overflow-hidden',
           // Mobile: bottom sheet
           'top-auto bottom-0 left-0 right-0 max-w-none w-full rounded-t-2xl rounded-b-none h-[92dvh] translate-x-0 translate-y-0',
-          // SM+: centered two-panel dialog
+          // SM+: centered two-panel dialog — tablet 720px, desktop 880px
           'sm:top-1/2 sm:bottom-auto sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2',
-          'sm:max-w-220 sm:h-auto sm:max-h-[calc(100dvh-48px)] sm:rounded-xl',
+          'sm:max-w-[720px] lg:max-w-[880px] sm:h-auto sm:max-h-[calc(100dvh-32px)] lg:max-h-[calc(100dvh-48px)] sm:rounded-xl',
         )}
       >
         {mobileHeader}
