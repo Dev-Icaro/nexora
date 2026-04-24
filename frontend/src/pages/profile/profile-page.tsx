@@ -4,14 +4,7 @@ import { useAuth } from '@/features/auth/hooks/use-auth';
 import { PostFeed } from '@/features/post/components/post-feed';
 import { useUserPosts } from '@/features/post/hooks/use-user-posts';
 import { ProfileHeader } from '@/features/profile/components/profile-header';
-
-const MOCK_USER = {
-  name: 'Icaro Melo',
-  isVerified: true,
-  role: 'College Doctor',
-  bio: 'Building Nexora one commit at a time. ☕',
-  stats: { posts: 368, followers: 184_300, following: 512 },
-};
+import { useProfile } from '@/features/profile/hooks/use-profile';
 
 export function ProfilePage() {
   const { userId = '' } = useParams<{ userId: string }>();
@@ -19,14 +12,23 @@ export function ProfilePage() {
   const navigate = useNavigate();
   const isOwnProfile = userId === state.user?.id;
 
+  const { user: userData } = useProfile(userId);
   const { posts, loading, isFetchingNextPage, error, paginationError, refetch, fetchNextPage, hasNextPage } =
     useUserPosts(userId);
 
-  const user = { ...MOCK_USER, username: state.user?.username ?? '' };
+  const user = userData
+    ? {
+        name: userData.username,
+        username: userData.username,
+        role: userData.position,
+        bio: userData.bio,
+        stats: { posts: 0, followers: 0, following: 0 },
+      }
+    : null;
 
   return (
     <main className="max-w-2xl w-full mx-auto px-4 py-6 space-y-6">
-      <ProfileHeader isOwnProfile={isOwnProfile} user={user} />
+      {user && <ProfileHeader isOwnProfile={isOwnProfile} user={user} />}
       <PostFeed
         posts={posts}
         loading={loading}

@@ -1,3 +1,7 @@
+import { userQueries } from '@/graphql/queries/user.query';
+
 export const userResolver = {
-  // User type field resolvers — populated as auth feature is implemented
+  Query: {
+    ...userQueries,
+  },
 };

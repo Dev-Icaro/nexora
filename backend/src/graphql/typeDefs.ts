@@ -89,6 +89,7 @@ export const typeDefs = `#graphql
     getPost(postId: ID!): Post
     feed(first: Int, after: String): PostConnection!
     getUserPosts(userId: ID!, first: Int, after: String): PostConnection!
+    getUserById(userId: ID!): User
   }
 
   type RegisterResponse {
