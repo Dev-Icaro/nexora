@@ -24,7 +24,7 @@ export const router = createBrowserRouter([
             children: [
               { index: true, element: <HomePage /> },
               { path: 'posts/:id', element: <HomePage /> },
-              { path: 'profile/:username', element: <ProfilePage /> },
+              { path: 'profile/:userId', element: <ProfilePage /> },
             ],
           },
         ],

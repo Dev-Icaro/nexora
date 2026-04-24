@@ -35,3 +35,11 @@ export type FeedResponse = {
 };
 
 export type FeedRequest = { first?: number; after?: string };
+
+export type UserPostsRequest = { userId: string; first?: number; after?: string };
+export type UserPostsResponse = {
+  getUserPosts: {
+    edges: Edge<PostNode>[];
+    pageInfo: PageInfo;
+  };
+};

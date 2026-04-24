@@ -52,4 +52,14 @@ export interface IPostService {
    * @returns A promise resolving to a {@link PostConnectionDto} with edges and page info.
    */
   getFeed(first: number, after?: string): Promise<PostConnectionDto>;
+
+  /**
+   * Returns a paginated connection of posts by a specific user, ordered most recent first.
+   *
+   * @param userId - The ID of the user whose posts to fetch.
+   * @param first - Maximum number of posts to return (default 10).
+   * @param after - Opaque cursor from a previous page's `pageInfo.endCursor`.
+   * @returns A promise resolving to a {@link PostConnectionDto} with edges and page info.
+   */
+  getUserPosts(userId: string, first: number, after?: string): Promise<PostConnectionDto>;
 }

@@ -15,4 +15,10 @@ export const postQueries = {
     { first = 10, after }: { first?: number; after?: string },
     { dataSources }: GraphQLContext,
   ) => dataSources.postService.getFeed(first, after),
+
+  getUserPosts: async (
+    _: unknown,
+    { userId, first = 10, after }: { userId: string; first?: number; after?: string },
+    { dataSources }: GraphQLContext,
+  ) => dataSources.postService.getUserPosts(userId, first, after),
 };

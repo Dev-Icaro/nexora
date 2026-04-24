@@ -57,6 +57,39 @@ export const GET_POST_BY_ID = gql`
   }
 `;
 
+export const GET_USER_POSTS = gql`
+  query GetUserPosts($userId: ID!, $first: Int, $after: String) {
+    getUserPosts(userId: $userId, first: $first, after: $after) {
+      edges {
+        cursor
+        node {
+          id
+          body
+          mediaUrl
+          createdAt
+          author {
+            id
+            username
+          }
+          likeCount
+          commentCount
+          likes {
+            id
+            author {
+              id
+              username
+            }
+          }
+        }
+      }
+      pageInfo {
+        endCursor
+        hasNextPage
+      }
+    }
+  }
+`;
+
 export const GET_FEED = gql`
   query GetFeed($first: Int, $after: String) {
     feed(first: $first, after: $after) {

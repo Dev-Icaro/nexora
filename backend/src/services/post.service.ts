@@ -117,6 +117,45 @@ export class PostService implements IPostService {
     };
   }
 
+  async getUserPosts(userId: string, first = 10, after?: string): Promise<PostConnectionDto> {
+    const limit = first;
+    const query: Record<string, unknown> = { user: userId };
+
+    if (after) {
+      const cursorId = decodeCursor(after);
+      if (cursorId) query._id = { $lt: cursorId };
+    }
+
+    const docs = await Post.find(query)
+      .sort({ _id: -1 })
+      .limit(limit + 1);
+    const hasNextPage = docs.length > limit;
+    const nodes = hasNextPage ? docs.slice(0, limit) : docs;
+
+    const edges = nodes.map(post => ({
+      node: {
+        id: post.id as string,
+        body: post.body ?? '',
+        mediaUrl: post.mediaUrl ?? undefined,
+        authorId: String(post.user),
+        createdAt: post.createdAt ?? '',
+        likeCount: post.likeCount ?? 0,
+        commentCount: post.commentCount ?? 0,
+      },
+      cursor: encodeCursor(post._id.toString()),
+    }));
+
+    return {
+      edges,
+      pageInfo: {
+        startCursor: edges[0]?.cursor ?? null,
+        endCursor: edges[edges.length - 1]?.cursor ?? null,
+        hasNextPage,
+        hasPreviousPage: !!after,
+      },
+    };
+  }
+
   async likePost(userId: string, postId: string): Promise<LikePostResponse> {
     const user = await this.userService.findById(userId);
     if (!user) throw new NotFoundException('User not found');
