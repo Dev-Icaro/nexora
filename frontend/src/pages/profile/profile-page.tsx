@@ -1,6 +1,8 @@
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import { useAuth } from '@/features/auth/hooks/use-auth';
+import { PostFeed } from '@/features/post/components/post-feed';
+import { useUserPosts } from '@/features/post/hooks/use-user-posts';
 import { ProfileHeader } from '@/features/profile/components/profile-header';
 
 const MOCK_USER = {
@@ -12,15 +14,30 @@ const MOCK_USER = {
 };
 
 export function ProfilePage() {
-  const { username = '' } = useParams<{ username: string }>();
+  const { userId = '' } = useParams<{ userId: string }>();
   const { state } = useAuth();
-  const isOwnProfile = username === state.user?.username;
+  const navigate = useNavigate();
+  const isOwnProfile = userId === state.user?.id;
 
-  const user = { ...MOCK_USER, username };
+  const { posts, loading, isFetchingNextPage, error, paginationError, refetch, fetchNextPage, hasNextPage } =
+    useUserPosts(userId);
+
+  const user = { ...MOCK_USER, username: state.user?.username ?? '' };
 
   return (
-    <main className="max-w-2xl w-full mx-auto px-4 py-6">
+    <main className="max-w-2xl w-full mx-auto px-4 py-6 space-y-6">
       <ProfileHeader isOwnProfile={isOwnProfile} user={user} />
+      <PostFeed
+        posts={posts}
+        loading={loading}
+        isFetchingNextPage={isFetchingNextPage}
+        error={error}
+        paginationError={paginationError}
+        hasNextPage={hasNextPage}
+        onRetry={refetch}
+        onLoadMore={fetchNextPage}
+        onOpenPost={postId => navigate(`/posts/${postId}`)}
+      />
     </main>
   );
 }

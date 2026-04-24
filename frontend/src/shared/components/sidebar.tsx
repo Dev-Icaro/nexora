@@ -3,6 +3,7 @@ import { Home, Settings2 } from 'lucide-react';
 import { Link, NavLink } from 'react-router-dom';
 
 import { useAuth } from '@/features/auth/hooks/use-auth';
+import { useProfileNavigation } from '@/shared/hooks/use-profile-navigation';
 import { cn } from '@/shared/lib/utils';
 
 import { Avatar, AvatarFallback } from './ui/avatar';
@@ -46,6 +47,7 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
     state: { user },
   } = useAuth();
   const initials = user?.username.slice(0, 2).toUpperCase() ?? 'ME';
+  const { navigateToProfile } = useProfileNavigation();
 
   return (
     <aside
@@ -63,9 +65,16 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
       {/* Profile */}
       {collapsed ? (
         <div className="flex justify-center mt-3 mb-2">
-          <Avatar className="size-10">
-            <AvatarFallback className="bg-primary/20 text-primary font-semibold text-sm">{initials}</AvatarFallback>
-          </Avatar>
+          <button
+            type="button"
+            onClick={() => user?.id && navigateToProfile(user.id)}
+            className="rounded-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            aria-label="View your profile"
+          >
+            <Avatar className="size-10">
+              <AvatarFallback className="bg-primary/20 text-primary font-semibold text-sm">{initials}</AvatarFallback>
+            </Avatar>
+          </button>
         </div>
       ) : (
         <>
@@ -75,6 +84,7 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
             role="College Doctor"
             bio="Guiding the next generation through the journey of health and knowledge!"
             stats={{ posts: 368, followers: 184300, following: 1040000 }}
+            onProfileClick={user?.id ? () => navigateToProfile(user.id) : undefined}
           />
           <Separator />
         </>

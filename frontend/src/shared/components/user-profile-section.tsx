@@ -1,7 +1,7 @@
 import { BadgeCheck } from 'lucide-react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar';
-import { formatCompactNumber } from '@/shared/lib/utils';
+import { cn, formatCompactNumber } from '@/shared/lib/utils';
 
 type UserProfileSectionProps = {
   avatarUrl?: string;
@@ -14,6 +14,7 @@ type UserProfileSectionProps = {
     followers: number;
     following: number;
   };
+  onProfileClick?: () => void;
 };
 
 function getInitials(name: string): string {
@@ -25,19 +26,32 @@ function getInitials(name: string): string {
     .toUpperCase();
 }
 
-export function UserProfileSection({ avatarUrl, name, isVerified, role, bio, stats }: UserProfileSectionProps) {
+export function UserProfileSection({ avatarUrl, name, isVerified, role, bio, stats, onProfileClick }: UserProfileSectionProps) {
   return (
     <div className="flex flex-col items-center gap-3 py-4">
-      <Avatar className="size-16">
-        {avatarUrl && <AvatarImage src={avatarUrl} alt={name} />}
-        <AvatarFallback className="bg-primary/20 text-primary font-semibold text-lg">
-          {getInitials(name)}
-        </AvatarFallback>
-      </Avatar>
+      <button
+        type="button"
+        onClick={onProfileClick}
+        disabled={!onProfileClick}
+        className="rounded-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none"
+        aria-label={onProfileClick ? `View ${name}'s profile` : undefined}
+      >
+        <Avatar className="size-16">
+          {avatarUrl && <AvatarImage src={avatarUrl} alt={name} />}
+          <AvatarFallback className="bg-primary/20 text-primary font-semibold text-lg">
+            {getInitials(name)}
+          </AvatarFallback>
+        </Avatar>
+      </button>
 
       <div className="flex w-full flex-col items-center gap-1 px-2">
         <div className="flex max-w-full items-center gap-1">
-          <span className="truncate text-base font-semibold">{name}</span>
+          <span
+            onClick={onProfileClick}
+            className={cn('truncate text-base font-semibold', onProfileClick && 'cursor-pointer hover:underline')}
+          >
+            {name}
+          </span>
           {isVerified && <BadgeCheck className="size-4 shrink-0 fill-blue-500 text-white" />}
         </div>
 

@@ -13,6 +13,7 @@ import { Dialog, DialogContent } from '@/shared/components/ui/dialog';
 import { ScrollArea } from '@/shared/components/ui/scroll-area';
 import { Separator } from '@/shared/components/ui/separator';
 import { Skeleton } from '@/shared/components/ui/skeleton';
+import { useProfileNavigation } from '@/shared/hooks/use-profile-navigation';
 import { cn } from '@/shared/lib/utils';
 import { toast } from '@/shared/utils/toast';
 
@@ -95,20 +96,33 @@ function NotFoundState({ onClose }: { onClose: () => void }) {
 interface CommentItemProps {
   comment: CommentDetail & { localLiked?: boolean };
   onLike: (id: string) => void;
+  onAuthorClick: (userId: string) => void;
 }
 
-function CommentItem({ comment, onLike }: CommentItemProps) {
+function CommentItem({ comment, onLike, onAuthorClick }: CommentItemProps) {
   const initials = comment.author.username.slice(0, 2).toUpperCase();
   const timestamp = dayjs(comment.createdAt).fromNow();
 
   return (
     <div className="flex gap-2.5 py-3 border-b border-border last:border-b-0">
-      <Avatar className="size-8 shrink-0">
-        <AvatarFallback className="bg-primary/20 text-primary font-semibold text-xs">{initials}</AvatarFallback>
-      </Avatar>
+      <button
+        type="button"
+        onClick={() => onAuthorClick(comment.author.id)}
+        className="rounded-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0 self-start"
+        aria-label={`View ${comment.author.username}'s profile`}
+      >
+        <Avatar className="size-8">
+          <AvatarFallback className="bg-primary/20 text-primary font-semibold text-xs">{initials}</AvatarFallback>
+        </Avatar>
+      </button>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5 flex-wrap mb-1">
-          <span className="text-[13px] font-semibold">{comment.author.username}</span>
+          <span
+            onClick={() => onAuthorClick(comment.author.id)}
+            className="text-[13px] font-semibold cursor-pointer hover:underline"
+          >
+            {comment.author.username}
+          </span>
           <span className="text-[11px] text-muted-foreground ml-auto">{timestamp}</span>
         </div>
         <p className="text-[13px] leading-[1.55] text-foreground mb-2">{comment.body}</p>
@@ -133,9 +147,10 @@ interface PostContentPanelProps {
   saved: boolean;
   onLike: () => void;
   onSave: () => void;
+  onAuthorClick: (userId: string) => void;
 }
 
-function PostContentPanel({ post, liked, likeCount, saved, onLike, onSave }: PostContentPanelProps) {
+function PostContentPanel({ post, liked, likeCount, saved, onLike, onSave, onAuthorClick }: PostContentPanelProps) {
   const hashtags = post.body.match(/#\w+/g) ?? [];
   const bodyText = post.body.replace(/#\w+/g, '').trim();
   const initials = post.author.username.slice(0, 2).toUpperCase();
@@ -145,11 +160,23 @@ function PostContentPanel({ post, liked, likeCount, saved, onLike, onSave }: Pos
     <div className="flex flex-col gap-4">
       {/* Author */}
       <div className="flex items-center gap-3">
-        <Avatar className="size-12 shrink-0">
-          <AvatarFallback className="bg-primary/20 text-primary font-semibold">{initials}</AvatarFallback>
-        </Avatar>
+        <button
+          type="button"
+          onClick={() => onAuthorClick(post.author.id)}
+          className="rounded-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0"
+          aria-label={`View ${post.author.username}'s profile`}
+        >
+          <Avatar className="size-12">
+            <AvatarFallback className="bg-primary/20 text-primary font-semibold">{initials}</AvatarFallback>
+          </Avatar>
+        </button>
         <div>
-          <p className="text-sm font-semibold">{post.author.username}</p>
+          <p
+            onClick={() => onAuthorClick(post.author.id)}
+            className="text-sm font-semibold cursor-pointer hover:underline"
+          >
+            {post.author.username}
+          </p>
           <p className="text-xs text-muted-foreground">{timestamp}</p>
         </div>
       </div>
@@ -219,6 +246,7 @@ interface CommentsPanelProps {
   onSend: () => void;
   sending: boolean;
   scrollToBottomTrigger: number;
+  onAuthorClick: (userId: string) => void;
 }
 
 function CommentsPanel({
@@ -230,6 +258,7 @@ function CommentsPanel({
   onSend,
   sending,
   scrollToBottomTrigger,
+  onAuthorClick,
 }: CommentsPanelProps) {
   const commentsEndRef = useRef<HTMLDivElement>(null);
   const { state } = useAuth();
@@ -260,7 +289,10 @@ function CommentsPanel({
             </>
           )}
           {!loading && comments.length === 0 && <EmptyComments />}
-          {!loading && comments.map(comment => <CommentItem key={comment.id} comment={comment} onLike={onLike} />)}
+          {!loading &&
+            comments.map(comment => (
+              <CommentItem key={comment.id} comment={comment} onLike={onLike} onAuthorClick={onAuthorClick} />
+            ))}
           <div ref={commentsEndRef} />
         </div>
       </ScrollArea>
@@ -315,6 +347,11 @@ export function PostDetailModal({ postId, open, onClose }: PostDetailModalProps)
   const { post, loading, error } = usePostDetail(postId);
   const { state } = useAuth();
   const userId = state.user?.id;
+  const { navigateToProfile } = useProfileNavigation();
+
+  const handleAuthorClick = (authorId: string) => {
+    navigateToProfile(authorId);
+  };
 
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
@@ -481,6 +518,7 @@ export function PostDetailModal({ postId, open, onClose }: PostDetailModalProps)
               saved={saved}
               onLike={handleLike}
               onSave={() => setSaved(v => !v)}
+              onAuthorClick={handleAuthorClick}
             />
           )}
         </div>
@@ -497,6 +535,7 @@ export function PostDetailModal({ postId, open, onClose }: PostDetailModalProps)
           onSend={handleSend}
           sending={sending}
           scrollToBottomTrigger={scrollToBottomTrigger}
+          onAuthorClick={handleAuthorClick}
         />
       </div>
     </div>
@@ -518,6 +557,7 @@ export function PostDetailModal({ postId, open, onClose }: PostDetailModalProps)
                   saved={saved}
                   onLike={handleLike}
                   onSave={() => setSaved(v => !v)}
+                  onAuthorClick={handleAuthorClick}
                 />
                 <button
                   onClick={() => setMobileTab('comments')}
@@ -539,6 +579,7 @@ export function PostDetailModal({ postId, open, onClose }: PostDetailModalProps)
           onSend={handleSend}
           sending={sending}
           scrollToBottomTrigger={scrollToBottomTrigger}
+          onAuthorClick={handleAuthorClick}
         />
       )}
     </div>

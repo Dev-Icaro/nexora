@@ -15,6 +15,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/shared/components/ui/dropdown-menu';
+import { useProfileNavigation } from '@/shared/hooks/use-profile-navigation';
 import { cn } from '@/shared/lib/utils';
 import { toast } from '@/shared/utils/toast';
 
@@ -33,6 +34,7 @@ export function PostCard({ post, onOpenModal }: PostCardProps) {
   const [expanded, setExpanded] = useState(false);
   const { state } = useAuth();
   const userId = state.user?.id;
+  const { navigateToProfile } = useProfileNavigation();
 
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(post.likeCount);
@@ -69,11 +71,29 @@ export function PostCard({ post, onOpenModal }: PostCardProps) {
         {/* Header */}
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
-            <Avatar className="size-12 shrink-0">
-              <AvatarFallback className="bg-primary/20 text-primary font-semibold">{initials}</AvatarFallback>
-            </Avatar>
+            <button
+              type="button"
+              onClick={e => {
+                e.stopPropagation();
+                navigateToProfile(post.author.id);
+              }}
+              className="rounded-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0"
+              aria-label={`View ${post.author.username}'s profile`}
+            >
+              <Avatar className="size-12">
+                <AvatarFallback className="bg-primary/20 text-primary font-semibold">{initials}</AvatarFallback>
+              </Avatar>
+            </button>
             <div>
-              <p className="text-sm font-semibold">{post.author.username}</p>
+              <p
+                onClick={e => {
+                  e.stopPropagation();
+                  navigateToProfile(post.author.id);
+                }}
+                className="text-sm font-semibold cursor-pointer hover:underline"
+              >
+                {post.author.username}
+              </p>
               <p className="text-xs text-muted-foreground">{timestamp}</p>
             </div>
           </div>
