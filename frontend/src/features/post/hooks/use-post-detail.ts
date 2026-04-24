@@ -11,7 +11,7 @@ export function usePostDetail(postId: string | null) {
 
   return {
     post: data?.getPost ?? null,
-    loading,
+    loading: loading || (!!postId && !data && !error),
     error: error?.message,
   };
 }

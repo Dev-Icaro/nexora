@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import { useAuth } from '@/features/auth/hooks/use-auth';
 import { PostComposer } from '@/features/post/components/post-composer';
@@ -11,7 +11,8 @@ import { fileToDataUrl } from '@/features/post/utils/file-to-data-url';
 export function HomePage() {
   const { state } = useAuth();
   const username = state.user?.username ?? '';
-  const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
+  const { id: selectedPostId } = useParams<{ id?: string }>();
+  const navigate = useNavigate();
 
   const { createPost, loading: createPostLoading } = useCreatePost();
   const {
@@ -50,10 +51,10 @@ export function HomePage() {
           hasNextPage={hasNextPage}
           onRetry={refetch}
           onLoadMore={fetchNextPage}
-          onOpenPost={setSelectedPostId}
+          onOpenPost={postId => navigate(`/posts/${postId}`)}
         />
       </div>
-      <PostDetailModal postId={selectedPostId} open={!!selectedPostId} onClose={() => setSelectedPostId(null)} />
+      <PostDetailModal postId={selectedPostId ?? null} open={!!selectedPostId} onClose={() => navigate(-1)} />
     </main>
   );
 }
