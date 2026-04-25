@@ -1,8 +1,12 @@
 import { useAuth } from '@/features/auth/hooks/use-auth';
 import { useProfile } from '@/features/profile/hooks/use-profile';
+import { AppearanceSection } from '@/features/settings/components/appearance-section';
 import { PersonalInformationForm } from '@/features/settings/components/personal-information-form';
+import { useTheme } from '@/shared/hooks/use-theme';
 
 export function SettingsPage() {
+  const { preference, setTheme } = useTheme();
+
   const {
     state: { user: authUser },
   } = useAuth();
@@ -28,6 +32,7 @@ export function SettingsPage() {
       </div>
 
       <PersonalInformationForm profile={profile} loading={updateLoading} onSubmit={updateProfile} />
+      <AppearanceSection value={preference} onValueChange={setTheme} />
     </main>
   );
 }

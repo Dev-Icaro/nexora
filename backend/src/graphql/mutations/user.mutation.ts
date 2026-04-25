@@ -6,4 +6,10 @@ export const userMutations = {
     { updateProfileRequest }: { updateProfileRequest: { bio?: string; position?: string } },
     { dataSources, currentUser }: GraphQLContext,
   ) => dataSources.userService.updateProfile(currentUser!.userId, updateProfileRequest),
+
+  updateThemePreference: async (
+    _: unknown,
+    { theme }: { theme: string },
+    { dataSources, currentUser }: GraphQLContext,
+  ) => dataSources.userService.updateThemePreference(currentUser!.userId, { theme }),
 };

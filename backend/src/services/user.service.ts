@@ -1,6 +1,8 @@
 import type CreateUserDto from '@/dtos/create-user.dto';
 import type UpdateProfileRequestDto from '@/dtos/update-profile-request.dto';
 import type UpdateProfileResponseDto from '@/dtos/update-profile-response.dto';
+import type UpdateThemePreferenceRequestDto from '@/dtos/update-theme-preference-request.dto';
+import type UpdateThemePreferenceResponseDto from '@/dtos/update-theme-preference-response.dto';
 import type UserDto from '@/dtos/user.dto';
 import { BadRequestException, NotFoundException } from '@/exceptions';
 import { User } from '@/models/user.model';
@@ -103,6 +105,29 @@ export class UserService implements IUserService {
     await User.findByIdAndUpdate(userId, {
       $addToSet: { oauthAccounts: { provider, providerId } },
     });
+  }
+
+  async updateThemePreference(
+    userId: string,
+    { theme }: UpdateThemePreferenceRequestDto,
+  ): Promise<UpdateThemePreferenceResponseDto> {
+    const user = await User.findByIdAndUpdate(userId, { $set: { themePreference: theme } }, { new: true });
+    if (!user) throw new NotFoundException('User not found');
+
+    return {
+      code: 200,
+      message: 'Theme preference updated',
+      success: true,
+      user: {
+        id: user.id as string,
+        email: user.email,
+        username: user.username,
+        createdAt: user.createdAt,
+        bio: user.bio ?? undefined,
+        position: user.position ?? undefined,
+        themePreference: (user.themePreference as 'light' | 'dark' | 'system') ?? 'system',
+      },
+    };
   }
 
   async updateProfile(userId: string, { bio, position }: UpdateProfileRequestDto): Promise<UpdateProfileResponseDto> {

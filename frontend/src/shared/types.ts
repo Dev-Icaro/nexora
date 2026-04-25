@@ -23,3 +23,6 @@ export type Connection<T> = {
   edges: Edge<T>[];
   pageInfo: PageInfo;
 };
+
+export type ThemePreference = 'light' | 'dark' | 'system';
+export type ResolvedTheme = 'light' | 'dark';
