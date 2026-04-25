@@ -1,7 +1,7 @@
 import { BadgeCheck } from 'lucide-react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar';
-import { cn, formatCompactNumber } from '@/shared/lib/utils';
+import { cn, formatCompactNumber, getInitials } from '@/shared/lib/utils';
 
 type UserProfileSectionProps = {
   avatarUrl?: string;
@@ -17,16 +17,15 @@ type UserProfileSectionProps = {
   onProfileClick?: () => void;
 };
 
-function getInitials(name: string): string {
-  return name
-    .split(' ')
-    .map(w => w[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase();
-}
-
-export function UserProfileSection({ avatarUrl, name, isVerified, role, bio, stats, onProfileClick }: UserProfileSectionProps) {
+export function UserProfileSection({
+  avatarUrl,
+  name,
+  isVerified,
+  role,
+  bio,
+  stats,
+  onProfileClick,
+}: UserProfileSectionProps) {
   return (
     <div className="flex flex-col items-center gap-3 py-4">
       <button

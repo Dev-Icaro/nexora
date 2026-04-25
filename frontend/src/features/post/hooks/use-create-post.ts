@@ -1,6 +1,6 @@
 import { useMutation } from '@apollo/client/react';
 
-import { toast } from '@/shared/utils/toast';
+import { toast } from '@/shared/lib/toast';
 
 import { CREATE_POST } from '../api/post.mutations';
 import type { CreatePostRequest, CreatePostResponse, PostNode } from '../api/post.types';

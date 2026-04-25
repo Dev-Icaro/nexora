@@ -1,9 +1,10 @@
 import { BadgeCheck, Camera, MessageCircle, UserPlus } from 'lucide-react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar';
 import { Button } from '@/shared/components/ui/button';
-import { formatCompactNumber } from '@/shared/lib/utils';
+import { formatCompactNumber, getInitials } from '@/shared/lib/utils';
 
 import { AvatarUploadModal } from './avatar-upload-modal';
 
@@ -22,18 +23,10 @@ type ProfileHeaderProps = {
   user: ProfileUser;
 };
 
-function getInitials(name: string): string {
-  return name
-    .split(' ')
-    .map(w => w[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase();
-}
-
 export function ProfileHeader({ isOwnProfile, user }: ProfileHeaderProps) {
   const [isFollowing, setIsFollowing] = useState(false);
   const [uploadOpen, setUploadOpen] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <div className="rounded-xl border border-border bg-card overflow-hidden">
@@ -65,7 +58,7 @@ export function ProfileHeader({ isOwnProfile, user }: ProfileHeaderProps) {
           {/* Action row */}
           <div className="flex gap-2">
             {isOwnProfile ? (
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={() => navigate('/settings')}>
                 Edit profile
               </Button>
             ) : (

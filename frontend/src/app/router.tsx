@@ -3,6 +3,7 @@ import { createBrowserRouter } from 'react-router-dom';
 import { HomePage } from '@/pages/home/home-page';
 import { LoginPage } from '@/pages/login/login-page';
 import { ProfilePage } from '@/pages/profile/profile-page';
+import { SettingsPage } from '@/pages/settings/settings-page';
 import { SignupPage } from '@/pages/signup/signup-page';
 
 import { AppLayout } from './layouts/app-layout';
@@ -25,6 +26,7 @@ export const router = createBrowserRouter([
               { index: true, element: <HomePage /> },
               { path: 'posts/:id', element: <HomePage /> },
               { path: 'profile/:userId', element: <ProfilePage /> },
+              { path: 'settings', element: <SettingsPage /> },
             ],
           },
         ],

@@ -14,8 +14,8 @@ import { ScrollArea } from '@/shared/components/ui/scroll-area';
 import { Separator } from '@/shared/components/ui/separator';
 import { Skeleton } from '@/shared/components/ui/skeleton';
 import { useProfileNavigation } from '@/shared/hooks/use-profile-navigation';
+import { toast } from '@/shared/lib/toast';
 import { cn } from '@/shared/lib/utils';
-import { toast } from '@/shared/utils/toast';
 
 import type {
   CreateCommentMutationResponse,
