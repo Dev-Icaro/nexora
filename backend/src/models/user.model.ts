@@ -17,6 +17,7 @@ const userSchema = new Schema({
   createdAt: { type: String, required: true },
   bio: { type: String, required: false },
   position: { type: String, required: false },
+  themePreference: { type: String, default: 'system', required: false },
   tokens: [{ refreshTokenHash: { type: String, required: true }, expiresAt: { type: Date, required: true } }],
   oauthAccounts: { type: [oauthAccountSchema], default: [] },
 });

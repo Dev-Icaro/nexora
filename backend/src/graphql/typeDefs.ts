@@ -31,6 +31,7 @@ export const typeDefs = `#graphql
     createdAt: String!
     bio: String
     position: String
+    themePreference: String
   }
 
   input RegisterRequest {
@@ -145,6 +146,13 @@ export const typeDefs = `#graphql
     user: User
   }
 
+  type UpdateThemePreferenceResponse {
+    code: Int!
+    message: String!
+    success: Boolean!
+    user: User
+  }
+
   type Mutation {
     register(registerRequest: RegisterRequest): RegisterResponse!
     login(loginRequest: LoginRequest!): LoginResponse!
@@ -160,6 +168,7 @@ export const typeDefs = `#graphql
     likePost(postId: ID!): LikePostResponse!
 
     updateProfile(updateProfileRequest: UpdateProfileRequest!): UpdateProfileResponse!
+    updateThemePreference(theme: String!): UpdateThemePreferenceResponse!
   }
 
   type Subscription {

@@ -6,6 +6,7 @@ type UserDto = {
   createdAt: string;
   bio?: string;
   position?: string;
+  themePreference?: string;
 };
 
 export default UserDto;
