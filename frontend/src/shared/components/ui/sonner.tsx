@@ -1,6 +1,7 @@
+import type { ComponentProps, CSSProperties } from 'react';
 import { Toaster as Sonner } from 'sonner';
 
-type ToasterProps = React.ComponentProps<typeof Sonner>;
+type ToasterProps = ComponentProps<typeof Sonner>;
 
 function Toaster({ ...props }: ToasterProps) {
   return (
@@ -18,7 +19,7 @@ function Toaster({ ...props }: ToasterProps) {
           '--error-bg': 'var(--popover)',
           '--error-border': 'var(--border)',
           '--error-text': 'var(--popover-foreground)',
-        } as React.CSSProperties
+        } as CSSProperties
       }
       {...props}
     />

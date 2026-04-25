@@ -2,7 +2,7 @@ import { useMutation } from '@apollo/client/react';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { Bookmark, Heart, MessageCircle, MoreHorizontal, Send } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { useAuth } from '@/features/auth/hooks/use-auth';
 import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar';
@@ -36,25 +36,20 @@ export function PostCard({ post, onOpenModal }: PostCardProps) {
   const userId = state.user?.id;
   const { navigateToProfile } = useProfileNavigation();
 
-  const [liked, setLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(post.likeCount);
-
-  useEffect(() => {
-    setLiked(!!userId && post.likes.some(l => l.author.id === userId));
-    setLikeCount(post.likeCount);
-  }, [post, userId]);
+  const baseLiked = !!userId && post.likes.some(l => l.author.id === userId);
+  const [optimisticLike, setOptimisticLike] = useState<{ postId: string; liked: boolean; count: number } | null>(null);
+  const liked = optimisticLike?.postId === post.id ? optimisticLike.liked : baseLiked;
+  const likeCount = optimisticLike?.postId === post.id ? optimisticLike.count : post.likeCount;
 
   const [likePost] = useMutation<LikePostMutationResponse, LikePostVariables>(LIKE_POST);
 
   const handleLike = async () => {
     const next = !liked;
-    setLiked(next);
-    setLikeCount(c => c + (next ? 1 : -1));
+    setOptimisticLike({ postId: post.id, liked: next, count: likeCount + (next ? 1 : -1) });
     try {
       await likePost({ variables: { postId: post.id } });
     } catch {
-      setLiked(!next);
-      setLikeCount(c => c + (next ? -1 : 1));
+      setOptimisticLike(null);
       toast.error('Failed to update like');
     }
   };

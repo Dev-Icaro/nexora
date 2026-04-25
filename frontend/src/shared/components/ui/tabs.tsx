@@ -73,4 +73,5 @@ function TabsContent({ className, ...props }: React.ComponentProps<typeof TabsPr
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export { Tabs, TabsContent, TabsList, tabsListVariants, TabsTrigger };

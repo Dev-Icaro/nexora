@@ -7,6 +7,7 @@ export default function httpErrorHandler(
   error: Error,
   req: express.Request,
   res: express.Response,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _next: express.NextFunction,
 ) {
   logger.error(error);

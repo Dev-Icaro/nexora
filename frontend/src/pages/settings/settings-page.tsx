@@ -12,10 +12,12 @@ export function SettingsPage() {
   if (profileLoading || !user) return null;
 
   const profile = {
+    id: user.id,
     username: user.username,
     email: authUser?.email ?? '',
     bio: user.bio,
     position: user.position,
+    avatarUrl: user.avatarUrl,
   };
 
   return (
