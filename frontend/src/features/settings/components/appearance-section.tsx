@@ -1,3 +1,6 @@
+import { Monitor, Moon, Sun } from 'lucide-react';
+import type { CSSProperties } from 'react';
+
 import { cn } from '@/shared/lib/utils';
 import type { ThemePreference } from '@/shared/types';
 
@@ -15,60 +18,65 @@ type ThemeCardProps = {
   onSelect: () => void;
 };
 
-function LightPreview() {
+type PreviewChromeProps = {
+  mode: 'light' | 'dark';
+  icon?: 'light' | 'dark' | 'system';
+  className?: string;
+  style?: CSSProperties;
+};
+
+const previewIcons = {
+  light: Sun,
+  dark: Moon,
+  system: Monitor,
+};
+
+function PreviewChrome({ mode, icon, className, style }: PreviewChromeProps) {
+  const isLight = mode === 'light';
+  const Icon = icon ? previewIcons[icon] : null;
+  const surface = isLight ? '#f7f5f2' : '#1b1b1b';
+  const sidebar = isLight ? '#f0ede8' : '#212121';
+  const line = isLight ? '#d4cfc9' : '#383838';
+  const iconColor = isLight ? '#8a8178' : '#8c8c8c';
+
   return (
-    <div className="flex h-full w-full" style={{ background: '#f7f5f2' }}>
-      <div className="flex h-full w-1/3 flex-col gap-1.5 p-2" style={{ background: '#f0ede8' }}>
-        <div className="h-1.5 w-3/4 rounded-full" style={{ background: '#d4cfc9' }} />
-        <div className="h-1 w-1/2 rounded-full" style={{ background: '#d4cfc9' }} />
-        <div className="h-1 w-2/3 rounded-full" style={{ background: '#d4cfc9' }} />
+    <div className={cn('relative flex h-full w-full', className)} style={{ background: surface, ...style }}>
+      <div className="flex h-full w-1/3 flex-col gap-1.5 p-2" style={{ background: sidebar }}>
+        {Icon ? (
+          <Icon aria-hidden="true" className="mb-0.5 size-3.5 shrink-0" strokeWidth={2} style={{ color: iconColor }} />
+        ) : (
+          <div className="h-3.5" />
+        )}
+        <div className="h-1.5 w-3/4 rounded-full" style={{ background: line }} />
+        <div className="h-1 w-1/2 rounded-full" style={{ background: line }} />
+        <div className="h-1 w-2/3 rounded-full" style={{ background: line }} />
       </div>
       <div className="flex flex-1 flex-col gap-2 p-2">
-        <div className="h-1.5 w-full rounded-full" style={{ background: '#d4cfc9' }} />
-        <div className="h-1.5 w-4/5 rounded-full" style={{ background: '#d4cfc9' }} />
-        <div className="h-1.5 w-3/5 rounded-full" style={{ background: '#d4cfc9' }} />
+        <div className="h-1.5 w-full rounded-full" style={{ background: line }} />
+        <div className="h-1.5 w-4/5 rounded-full" style={{ background: line }} />
+        <div className="h-1.5 w-3/5 rounded-full" style={{ background: line }} />
       </div>
     </div>
   );
 }
 
+function LightPreview() {
+  return <PreviewChrome mode="light" icon="light" />;
+}
+
 function DarkPreview() {
-  return (
-    <div className="flex h-full w-full" style={{ background: '#1b1b1b' }}>
-      <div className="flex h-full w-1/3 flex-col gap-1.5 p-2" style={{ background: '#212121' }}>
-        <div className="h-1.5 w-3/4 rounded-full" style={{ background: '#383838' }} />
-        <div className="h-1 w-1/2 rounded-full" style={{ background: '#383838' }} />
-        <div className="h-1 w-2/3 rounded-full" style={{ background: '#383838' }} />
-      </div>
-      <div className="flex flex-1 flex-col gap-2 p-2">
-        <div className="h-1.5 w-full rounded-full" style={{ background: '#383838' }} />
-        <div className="h-1.5 w-4/5 rounded-full" style={{ background: '#383838' }} />
-        <div className="h-1.5 w-3/5 rounded-full" style={{ background: '#383838' }} />
-      </div>
-    </div>
-  );
+  return <PreviewChrome mode="dark" icon="dark" />;
 }
 
 function SystemPreview() {
   return (
-    <div className="relative flex h-full w-full overflow-hidden">
-      <div className="absolute inset-0 flex">
-        <div className="flex h-full w-1/2 flex-col gap-1.5 p-2" style={{ background: '#f0ede8' }}>
-          <div className="h-1.5 w-3/4 rounded-full" style={{ background: '#d4cfc9' }} />
-          <div className="h-1 w-1/2 rounded-full" style={{ background: '#d4cfc9' }} />
-        </div>
-        <div className="flex h-full w-1/2 flex-col gap-1.5 p-2" style={{ background: '#1b1b1b' }}>
-          <div className="h-1.5 w-3/4 rounded-full" style={{ background: '#383838' }} />
-          <div className="h-1 w-1/2 rounded-full" style={{ background: '#383838' }} />
-        </div>
-      </div>
-      {/* Diagonal divider */}
-      <div
+    <div className="relative h-full w-full overflow-hidden">
+      <PreviewChrome mode="dark" icon="system" className="absolute inset-0" />
+      <PreviewChrome
+        mode="light"
+        icon="system"
         className="absolute inset-0"
-        style={{
-          background:
-            'linear-gradient(135deg, transparent 49.5%, oklch(0.5 0 0 / 30%) 49.5%, oklch(0.5 0 0 / 30%) 50.5%, transparent 50.5%)',
-        }}
+        style={{ clipPath: 'polygon(0 0, 58% 0, 32% 100%, 0 100%)' }}
       />
     </div>
   );
