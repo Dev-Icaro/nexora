@@ -41,7 +41,7 @@ authRouter.get('/:provider/callback', async (req: ExpressRequest<{ provider: str
   res.cookie(settings.REFRESH_TOKEN_COOKIE_NAME, refreshToken, {
     httpOnly: true,
     secure: env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    sameSite: settings.REFRESH_TOKEN_COOKIE_SAME_SITE,
     maxAge: settings.REFRESH_TOKEN_DURATION_MINUTES * 60 * 1000,
   });
 
