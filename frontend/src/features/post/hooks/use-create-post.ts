@@ -16,12 +16,14 @@ export function useCreatePost(): UseCreatePostResult {
   const createPost = async (body: string, mediaUrl?: string): Promise<PostNode | undefined> => {
     try {
       const result = await createPostMutation({ variables: { body, mediaUrl } });
+
       const responseData = result.data;
-      if (!responseData?.createPost.success) {
+      if (!responseData?.createPost.success || !responseData.createPost.post) {
         toast.error(responseData?.createPost.message ?? 'Failed to create post');
         return undefined;
       }
-      return responseData.createPost.post;
+
+      return { ...responseData.createPost.post, likes: [] };
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to create post');
       return undefined;
