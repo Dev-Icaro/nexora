@@ -4,6 +4,7 @@ import { useAuth } from '@/features/auth/hooks/use-auth';
 import { PostFeed } from '@/features/post/components/post-feed';
 import { useUserPosts } from '@/features/post/hooks/use-user-posts';
 import { ProfileHeader } from '@/features/profile/components/profile-header';
+import { ProfileTabs } from '@/features/profile/components/profile-tabs';
 import { useProfile } from '@/features/profile/hooks/use-profile';
 
 export function ProfilePage() {
@@ -29,17 +30,19 @@ export function ProfilePage() {
   return (
     <main className="max-w-2xl w-full mx-auto px-4 py-6 space-y-6">
       {user && <ProfileHeader isOwnProfile={isOwnProfile} user={user} />}
-      <PostFeed
-        posts={posts}
-        loading={loading}
-        isFetchingNextPage={isFetchingNextPage}
-        error={error}
-        paginationError={paginationError}
-        hasNextPage={hasNextPage}
-        onRetry={refetch}
-        onLoadMore={fetchNextPage}
-        onOpenPost={postId => navigate(`/posts/${postId}`)}
-      />
+      <ProfileTabs>
+        <PostFeed
+          posts={posts}
+          loading={loading}
+          isFetchingNextPage={isFetchingNextPage}
+          error={error}
+          paginationError={paginationError}
+          hasNextPage={hasNextPage}
+          onRetry={refetch}
+          onLoadMore={fetchNextPage}
+          onOpenPost={postId => navigate(`/posts/${postId}`)}
+        />
+      </ProfileTabs>
     </main>
   );
 }

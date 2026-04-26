@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import { PostCard } from '@/features/post/components/post-card';
+import { Spinner } from '@/shared/components/ui/spinner';
 
 import type { PostNode } from '../api/post.types';
 import { PostFeedEmpty } from './post-feed-empty';
@@ -79,7 +80,7 @@ export function PostFeed({
       })}
       {isFetchingNextPage ? (
         <div className="flex justify-center py-2">
-          <span className="text-sm text-muted-foreground">Loading more posts...</span>
+          <Spinner />
         </div>
       ) : null}
       {paginationError ? <PostFeedInlineError message={paginationError} onRetry={onLoadMore} /> : null}
