@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
-import { Home, Settings2 } from 'lucide-react';
+import { Home, LogOut, Settings2 } from 'lucide-react';
 import { Link, NavLink } from 'react-router-dom';
 
 import { useAuth } from '@/features/auth/hooks/use-auth';
@@ -7,6 +7,7 @@ import { useProfileNavigation } from '@/shared/hooks/use-profile-navigation';
 import { cn } from '@/shared/lib/utils';
 
 import { Avatar, AvatarFallback } from './ui/avatar';
+import { Button } from './ui/button';
 import { Separator } from './ui/separator';
 import { UserProfileSection } from './user-profile-section';
 
@@ -45,6 +46,7 @@ interface SidebarProps {
 export function Sidebar({ collapsed = false }: SidebarProps) {
   const {
     state: { user },
+    logout,
   } = useAuth();
   const initials = user?.username.slice(0, 2).toUpperCase() ?? 'ME';
   const { navigateToProfile } = useProfileNavigation();
@@ -97,6 +99,19 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
       </nav>
 
       <Separator className="mt-4" />
+
+      <div className={cn('mt-auto pt-4', collapsed && 'flex justify-center')}>
+        <Button
+          variant="ghost"
+          onClick={logout}
+          title={collapsed ? 'Sign out' : undefined}
+          aria-label="Sign out"
+          className={cn('cursor-pointer', collapsed ? 'size-10 p-0' : 'w-full justify-start gap-3 px-3')}
+        >
+          <LogOut className="size-5 shrink-0" />
+          {!collapsed && <span>Sign out</span>}
+        </Button>
+      </div>
     </aside>
   );
 }
