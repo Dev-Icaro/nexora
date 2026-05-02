@@ -1,0 +1,42 @@
+{
+  "hooks": {
+    "TaskCompleted": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd frontend && yarn format 2>&1",
+            "statusMessage": "Formatting frontend..."
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd frontend && yarn lint 2>&1",
+            "statusMessage": "Linting frontend..."
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd frontend && yarn typecheck 2>&1",
+            "statusMessage": "Typechecking frontend..."
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd frontend && yarn build 2>&1",
+            "statusMessage": "Building frontend..."
+          }
+        ]
+      }
+    ]
+  }
+}
