@@ -3,6 +3,7 @@ import { GraphQLError } from 'graphql/error';
 
 import { AuthService } from '@/services/auth.service';
 import { CommentService } from '@/services/comment.service';
+import { ResendEmailService } from '@/services/email/resend-email.service';
 import type { IAuthService } from '@/services/interfaces/auth.service.interface';
 import type { ICommentService } from '@/services/interfaces/comment.service.interface';
 import type { IPostService } from '@/services/interfaces/post.service.interface';
@@ -72,13 +73,14 @@ export const createContext = async ({
   }
 
   const userService = new UserService();
+  const emailService = new ResendEmailService();
   return {
     req,
     res,
     currentUser,
     loaders: createLoaders(),
     dataSources: {
-      authService: new AuthService(userService),
+      authService: new AuthService(userService, emailService),
       userService,
       postService: new PostService(userService),
       commentService: new CommentService(userService),

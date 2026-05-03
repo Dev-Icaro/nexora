@@ -1,3 +1,4 @@
+import env from '@/config/environment';
 import settings from '@/config/settings';
 import type LoginRequest from '@/dtos/login-request.dto';
 import type LoginResponse from '@/dtos/login-response.dto';
@@ -5,17 +6,24 @@ import type LogoutResponse from '@/dtos/logout-response.dto';
 import type RefreshResponse from '@/dtos/refresh-response.dto';
 import type RegisterRequest from '@/dtos/register-request.dto';
 import type RegisterResponse from '@/dtos/register-response.dto';
+import type RequestPasswordResetResponse from '@/dtos/request-password-reset-response.dto';
 import { BadRequestException, ConflictException, UnauthorizedException } from '@/exceptions';
+import { PasswordResetToken } from '@/models/password-reset-token.model';
 import { User } from '@/models/user.model';
 import type { OAuthUserInfo } from '@/services/oauth/oauth-provider.interface';
 import { createAccessToken, createHashForRefreshToken, createRefreshToken } from '@/utils/auth';
-import { comparePassword, hashPassword } from '@/utils/crypto';
+import { comparePassword, generatePasswordResetToken, hashPassword, hashPasswordResetToken } from '@/utils/crypto';
 
+import type { IEmailService } from './email/email.service.interface';
+import { buildPasswordResetEmailHtml } from './email/templates/password-reset.template';
 import type { IAuthService } from './interfaces/auth.service.interface';
 import type { IUserService } from './interfaces/user.service.interface';
 
 export class AuthService implements IAuthService {
-  constructor(private readonly userService: IUserService) {}
+  constructor(
+    private readonly userService: IUserService,
+    private readonly emailService: IEmailService,
+  ) {}
 
   async register({ username, email, password, confirmPassword }: RegisterRequest): Promise<RegisterResponse> {
     if (password !== confirmPassword) throw new BadRequestException('Passwords do not match');
@@ -39,6 +47,40 @@ export class AuthService implements IAuthService {
         createdAt,
       },
     };
+  }
+
+  async requestPasswordReset(email: string): Promise<RequestPasswordResetResponse> {
+    const successResponse = (): RequestPasswordResetResponse => ({
+      code: 200,
+      success: true,
+      message: 'If this email is registered, you will receive a reset link.',
+    });
+
+    const user = await this.userService.findByEmail(email);
+    if (!user) return successResponse();
+
+    const rawToken = generatePasswordResetToken();
+    const tokenHash = hashPasswordResetToken(rawToken);
+    const expiresAt = new Date(Date.now() + settings.PASSWORD_RESET_TOKEN_DURATION_MINUTES * 60 * 1000);
+
+    await PasswordResetToken.deleteMany({ userId: user.id });
+    await PasswordResetToken.create({ userId: user.id, tokenHash, expiresAt });
+
+    const resetLink = `${env.FRONTEND_URL}/reset-password?token=${rawToken}`;
+    const html = buildPasswordResetEmailHtml({
+      userName: user.username,
+      resetLink,
+      expiresIn: `${settings.PASSWORD_RESET_TOKEN_DURATION_MINUTES} minutes`,
+      year: new Date().getFullYear().toString(),
+    });
+
+    await this.emailService.sendEmail({
+      to: user.email,
+      subject: 'Reset your Nexora password',
+      html,
+    });
+
+    return successResponse();
   }
 
   async refresh(incomingRefreshToken: string): Promise<RefreshResponse & { refreshToken: string }> {

@@ -6,5 +6,6 @@ export const GRAPHQL_AUTH_WHITELIST: ReadonlySet<string> = new Set([
   'Register',
   'Refresh',
   'Logout',
+  'RequestPasswordReset',
   'IntrospectionQuery',
 ]);

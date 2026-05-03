@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto';
+import { createHash, randomBytes } from 'node:crypto';
 
 import bcrypt from 'bcrypt';
 
@@ -38,4 +38,23 @@ export async function hashPassword(password: string): Promise<string> {
  */
 export async function comparePassword(plain: string, hashed: string): Promise<boolean> {
   return bcrypt.compare(preHash(plain), hashed);
+}
+
+/**
+ * Generates a cryptographically secure random password reset token.
+ *
+ * @returns A 64-character lowercase hex string (32 random bytes).
+ */
+export function generatePasswordResetToken(): string {
+  return randomBytes(32).toString('hex');
+}
+
+/**
+ * Hashes a password reset token using SHA-256 for safe storage.
+ *
+ * @param token - The raw token produced by {@link generatePasswordResetToken}.
+ * @returns A 64-character lowercase hex string (SHA-256 digest).
+ */
+export function hashPasswordResetToken(token: string): string {
+  return createHash('sha256').update(token).digest('hex');
 }

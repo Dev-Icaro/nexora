@@ -22,6 +22,7 @@ const environmentSchema = z.object({
   GOOGLE_CLIENT_SECRET: z.string().min(1),
   BACKEND_URL: z.string().url().default('http://localhost:4000'),
   FRONTEND_URL: z.string().url().default('http://localhost:5173'),
+  RESEND_API_KEY: z.string().min(1),
 });
 
 export default environmentSchema.parse(process.env);

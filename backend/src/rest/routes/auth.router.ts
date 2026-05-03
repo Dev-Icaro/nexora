@@ -5,11 +5,12 @@ import env from '@/config/environment';
 import settings from '@/config/settings';
 import { AppException } from '@/exceptions';
 import { AuthService } from '@/services/auth.service';
+import { ResendEmailService } from '@/services/email/resend-email.service';
 import { OAuthProviderFactory } from '@/services/oauth/oauth-provider.factory';
 import { UserService } from '@/services/user.service';
 
 export const authRouter = Router();
-const authService = new AuthService(new UserService());
+const authService = new AuthService(new UserService(), new ResendEmailService());
 
 function getCallbackUrl(provider: string): string {
   return `${env.BACKEND_URL}/auth/${provider}/callback`;

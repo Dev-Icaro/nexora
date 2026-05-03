@@ -4,6 +4,7 @@ import type LogoutResponse from '@/dtos/logout-response.dto';
 import type RefreshResponse from '@/dtos/refresh-response.dto';
 import type RegisterRequest from '@/dtos/register-request.dto';
 import type RegisterResponse from '@/dtos/register-response.dto';
+import type RequestPasswordResetResponse from '@/dtos/request-password-reset-response.dto';
 import type { OAuthUserInfo } from '@/services/oauth/oauth-provider.interface';
 
 /** Defines the contract for authentication operations: registration, login, and token refresh. */
@@ -39,6 +40,18 @@ export interface IAuthService {
    * @returns A promise resolving to a {@link LogoutResponse}.
    */
   logout(refreshToken: string): Promise<LogoutResponse>;
+
+  /**
+   * Initiates a password reset flow for the given email address.
+   *
+   * Generates a time-limited token, stores its hash, and sends a reset email when
+   * the email is registered. Always returns a generic success response to avoid
+   * leaking whether the email exists.
+   *
+   * @param email - The email address of the account to reset.
+   * @returns A promise resolving to a {@link RequestPasswordResetResponse}.
+   */
+  requestPasswordReset(email: string): Promise<RequestPasswordResetResponse>;
 
   /**
    * Authenticates or provisions a user via an OAuth provider.
