@@ -10,6 +10,7 @@ import connectDatabase from '@/config/database';
 import env from '@/config/environment';
 import { apolloErrorHandler } from '@/graphql/apollo-error-handler';
 import { createContext, type GraphQLContext } from '@/graphql/context';
+import { rateLimiterPlugin } from '@/graphql/plugins/rate-limiter.plugin';
 import { mutationResolver } from '@/graphql/resolvers/mutation.resolver';
 import { postResolver } from '@/graphql/resolvers/post.resolver';
 import { userResolver } from '@/graphql/resolvers/user.resolver';
@@ -34,7 +35,7 @@ const bootstrap = async (): Promise<void> => {
     typeDefs,
     resolvers,
     formatError: apolloErrorHandler,
-    plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
+    plugins: [ApolloServerPluginDrainHttpServer({ httpServer }), rateLimiterPlugin],
   });
 
   await server.start();
