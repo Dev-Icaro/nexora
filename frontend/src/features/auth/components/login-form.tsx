@@ -29,11 +29,19 @@ type LoginFormProps = {
   onSubmit: (values: LoginRequest) => void | Promise<void>;
   onGithubLogin: () => void;
   onGoogleLogin: () => void;
+  onForgotPassword?: () => void;
   error?: string | null;
   isLoading?: boolean;
 };
 
-export function LoginForm({ onSubmit, onGithubLogin, onGoogleLogin, error, isLoading }: LoginFormProps) {
+export function LoginForm({
+  onSubmit,
+  onGithubLogin,
+  onGoogleLogin,
+  onForgotPassword,
+  error,
+  isLoading,
+}: LoginFormProps) {
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     mode: 'onChange',
@@ -88,9 +96,9 @@ export function LoginForm({ onSubmit, onGithubLogin, onGoogleLogin, error, isLoa
             Sign up
           </Link>
           <br />
-          <a href="#" className="text-left font-medium text-primary hover:underline">
+          <Button variant="link" type="button" onClick={onForgotPassword} className="text-xs">
             Forgot password?
-          </a>
+          </Button>
         </p>
 
         <div className="flex items-center gap-3">

@@ -1,8 +1,12 @@
+import { useState } from 'react';
+
+import { ForgotPasswordModal } from '@/features/auth/components/forgot-password-modal';
 import { LoginForm } from '@/features/auth/components/login-form';
 import { useLogin } from '@/features/auth/hooks/use-login';
 
 export function LoginPage() {
   const { login, loading, error } = useLogin();
+  const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
 
   return (
     <>
@@ -18,9 +22,11 @@ export function LoginPage() {
         onGoogleLogin={() => {
           window.location.href = `${import.meta.env.VITE_BACKEND_URL}/auth/google`;
         }}
+        onForgotPassword={() => setForgotPasswordOpen(true)}
         error={error}
         isLoading={loading}
       />
+      <ForgotPasswordModal open={forgotPasswordOpen} onOpenChange={setForgotPasswordOpen} />
     </>
   );
 }
