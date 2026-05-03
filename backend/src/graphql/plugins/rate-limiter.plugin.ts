@@ -3,6 +3,7 @@ import { RateLimiterMemory, RateLimiterRes } from 'rate-limiter-flexible';
 
 import settings from '@/config/settings';
 import { TooManyRequestsException } from '@/exceptions';
+import logger from '@/utils/logger';
 
 import type { GraphQLContext } from '../context';
 
@@ -61,6 +62,7 @@ export const rateLimiterPlugin: ApolloServerPlugin<GraphQLContext> = {
           }
         } catch (error) {
           if (error instanceof RateLimiterRes) {
+            logger.error(`Rate limit exceeded for IP: ${ip} and operation name: ${operationName}`);
             throw new TooManyRequestsException();
           }
           throw error;
