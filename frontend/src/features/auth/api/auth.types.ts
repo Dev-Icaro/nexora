@@ -49,3 +49,7 @@ export type RequestPasswordResetResponse = {
 export type ValidatePasswordResetTokenResponse = {
   validatePasswordResetToken: ApiResponse;
 };
+
+export type ApplyPasswordResetResponse = {
+  applyPasswordReset: ApiResponse;
+};
