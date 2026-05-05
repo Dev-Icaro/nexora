@@ -41,7 +41,7 @@
     // "moduleSuffixes": [],                   /* (TS 4.7) List of file name suffixes to search when resolving a module. */
     // "allowImportingTsExtensions": true,     /* (TS 5.0) Allow imports to include TypeScript file extensions. */
     // "rewriteRelativeImportExtensions": true, /* (TS 5.7) Rewrite .ts/.tsx/.mts/.cts file extensions in relative import paths to their JavaScript equivalents in output files. */
-    // "resolvePackageJsonExports": true,      /* (TS 4.7) Use the package.json 'exports' field when resolving package imports. */
+    "resolvePackageJsonExports": true,      /* (TS 4.7) Use the package.json 'exports' field when resolving package imports. */
     // "resolvePackageJsonImports": true,      /* (TS 4.7) Use the package.json 'imports' field when resolving imports. */
     // "customConditions": [],                 /* (TS 5.0) Conditions to set in addition to the resolver-specific defaults when resolving imports. */
     // "noUncheckedSideEffectImports": true,   /* (TS 5.6) Check side effect imports. */

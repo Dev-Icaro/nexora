@@ -24,6 +24,7 @@
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.5.2",
+    "@types/ws": "^8.18.1",
     "@typescript-eslint/eslint-plugin": "^8.58.0",
     "@typescript-eslint/parser": "^8.58.0",
     "eslint": "^10.2.0",
@@ -45,6 +46,7 @@
   "dependencies": {
     "@apollo/server": "^5.5.0",
     "@as-integrations/express5": "^1.1.2",
+    "@graphql-tools/schema": "^10.0.33",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
@@ -52,6 +54,8 @@
     "express": "^5",
     "express-http-context": "^2.0.1",
     "graphql": "^16.13.2",
+    "graphql-subscriptions": "^3.0.0",
+    "graphql-ws": "^6.0.8",
     "inversify": "6.2.2",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.4.1",
@@ -60,6 +64,7 @@
     "resend": "^6.12.2",
     "winston": "^3.19.0",
     "winston-daily-rotate-file": "^5.0.0",
+    "ws": "^8.20.0",
     "zod": "^4.3.6"
   }
 }

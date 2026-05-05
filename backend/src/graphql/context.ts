@@ -35,6 +35,63 @@ export interface GraphQLContext {
 }
 
 /**
+ * Context injected into subscription resolvers over WebSocket.
+ *
+ * @remarks
+ * WebSocket connections have no Express req/res. Post field resolvers only
+ * access loaders and dataSources, so subscriptions are fully functional
+ * without the HTTP layer.
+ */
+export interface SubscriptionContext {
+  currentUser: IUserTokenInfo | null;
+  loaders: Loaders;
+  dataSources: {
+    authService: IAuthService;
+    userService: IUserService;
+    postService: IPostService;
+    commentService: ICommentService;
+  };
+}
+
+/**
+ * Builds a {@link SubscriptionContext} for an incoming WebSocket connection.
+ *
+ * @param connectionParams - The connectionParams object sent by the client on connect.
+ * @returns A fully initialised {@link SubscriptionContext}.
+ * @throws {GraphQLError} with code UNAUTHORIZED if no valid Bearer token is present.
+ */
+export const createSubscriptionContext = async (
+  connectionParams: Record<string, unknown>,
+): Promise<SubscriptionContext> => {
+  const authorization =
+    typeof connectionParams['authorization'] === 'string' ? connectionParams['authorization'] : undefined;
+
+  if (!authorization?.startsWith('Bearer ')) {
+    throw new GraphQLError('Unauthorized', { extensions: { code: 'UNAUTHORIZED' } });
+  }
+
+  let currentUser: IUserTokenInfo | null;
+  try {
+    currentUser = verifyAccessToken(authorization.slice(7));
+  } catch {
+    throw new GraphQLError('Unauthorized', { extensions: { code: 'UNAUTHORIZED' } });
+  }
+
+  const userService = new UserService();
+  const emailService = new ResendEmailService();
+  return {
+    currentUser,
+    loaders: createLoaders(),
+    dataSources: {
+      authService: new AuthService(userService, emailService),
+      userService,
+      postService: new PostService(userService),
+      commentService: new CommentService(userService),
+    },
+  };
+};
+
+/**
  * Factory that builds the {@link GraphQLContext} for each incoming GraphQL request.
  *
  * @param args - Express `req` and `res` from the HTTP layer.

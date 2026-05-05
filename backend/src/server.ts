@@ -1,26 +1,33 @@
 import { ApolloServer } from '@apollo/server';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
 import { expressMiddleware } from '@as-integrations/express5';
+import { makeExecutableSchema } from '@graphql-tools/schema';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express from 'express';
+import { useServer } from 'graphql-ws/use/ws';
 import http from 'http';
+import { WebSocketServer } from 'ws';
 
 import connectDatabase from '@/config/database';
 import env from '@/config/environment';
 import { apolloErrorHandler } from '@/graphql/apollo-error-handler';
-import { createContext, type GraphQLContext } from '@/graphql/context';
+import { createContext, createSubscriptionContext, type GraphQLContext } from '@/graphql/context';
 import { rateLimiterPlugin } from '@/graphql/plugins/rate-limiter.plugin';
 import { authResolver } from '@/graphql/resolvers/auth.resolver';
 import { mutationResolver } from '@/graphql/resolvers/mutation.resolver';
 import { postResolver } from '@/graphql/resolvers/post.resolver';
+import { subscriptionResolver } from '@/graphql/resolvers/subscription.resolver';
 import { userResolver } from '@/graphql/resolvers/user.resolver';
 import { typeDefs } from '@/graphql/typeDefs';
 import httpErrorHandler from '@/rest/middlewares/error-handler';
 import { authRouter } from '@/rest/routes/auth.router';
 import logger from '@/utils/logger';
 
-const resolvers = [postResolver, mutationResolver, userResolver, authResolver];
+const schema = makeExecutableSchema({
+  typeDefs,
+  resolvers: [postResolver, mutationResolver, userResolver, authResolver, subscriptionResolver],
+});
 
 const bootstrap = async (): Promise<void> => {
   await connectDatabase();
@@ -32,22 +39,42 @@ const bootstrap = async (): Promise<void> => {
 
   const httpServer = http.createServer(app);
 
+  const wsServer = new WebSocketServer({ server: httpServer, path: '/graphql' });
+  const wsServerCleanup = useServer(
+    {
+      schema,
+      context: async ctx => createSubscriptionContext((ctx.connectionParams ?? {}) as Record<string, unknown>),
+    },
+    wsServer,
+  );
+
   const server = new ApolloServer<GraphQLContext>({
-    typeDefs,
-    resolvers,
+    schema,
     formatError: apolloErrorHandler,
-    plugins: [ApolloServerPluginDrainHttpServer({ httpServer }), rateLimiterPlugin],
+    plugins: [
+      ApolloServerPluginDrainHttpServer({ httpServer }),
+      {
+        async serverWillStart() {
+          return {
+            async drainServer() {
+              await wsServerCleanup.dispose();
+            },
+          };
+        },
+      },
+      rateLimiterPlugin,
+    ],
   });
 
   await server.start();
 
   app.use('/auth', authRouter);
   app.use('/graphql', expressMiddleware(server, { context: createContext }));
-
   app.use(httpErrorHandler);
 
   await new Promise<void>(resolve => httpServer.listen({ port: env.APP_PORT }, resolve));
   logger.info(`GraphQL server ready at http://localhost:${env.APP_PORT}/graphql`);
+  logger.info(`GraphQL subscriptions ready at ws://localhost:${env.APP_PORT}/graphql`);
 };
 
 bootstrap().catch(error => logger.error(error));
