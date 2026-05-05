@@ -79,10 +79,7 @@ export function buildPasswordResetEmailHtml({
                     <tbody><tr>
                       <td style="width:52px; height:52px; background-color:rgba(232,149,74,0.12);
                         border-radius:9999px; text-align:center; vertical-align:middle;">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e8954a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:block; margin: 14px auto 0;">
-                          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                        </svg>
+                        <img src="${escapeHtml(baseUrl)}/lock-icon.png" alt="" width="24" height="24" style="display:block; margin: 14px auto 0;">
                       </td>
                     </tr>
                   </tbody></table>

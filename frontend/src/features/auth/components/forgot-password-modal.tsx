@@ -34,33 +34,34 @@ export function ForgotPasswordModal({
   isSuccess,
   error,
 }: ForgotPasswordModalProps) {
-  const [localLoading, setLocalLoading] = useState(false);
-  const [localSuccess, setLocalSuccess] = useState(false);
   const [formValid, setFormValid] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [prevIsSuccess, setPrevIsSuccess] = useState(isSuccess ?? false);
 
-  const loading = isLoading ?? localLoading;
-  const success = isSuccess ?? localSuccess;
+  // This block avoid using set state inside useEffect
+  // and trigger react-hook linting error
+  if (isSuccess && !prevIsSuccess) {
+    setPrevIsSuccess(true);
+    setShowSuccess(true);
+  } else if (!isSuccess && prevIsSuccess) {
+    setPrevIsSuccess(false);
+  }
 
   async function handleSubmit(values: ForgotPasswordFormValues) {
     if (onSubmit) {
       await onSubmit(values);
-      return;
     }
-    setLocalLoading(true);
-    await new Promise<void>(resolve => setTimeout(resolve, 1200));
-    setLocalLoading(false);
-    setLocalSuccess(true);
   }
 
   function handleRetry() {
-    setLocalSuccess(false);
+    setShowSuccess(false);
     setFormValid(false);
   }
 
   function handleOpenChange(next: boolean) {
     onOpenChange(next);
     if (!next) {
-      setLocalSuccess(false);
+      setShowSuccess(false);
       setFormValid(false);
     }
   }
@@ -68,7 +69,7 @@ export function ForgotPasswordModal({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-md" showCloseButton={false}>
-        {success ? (
+        {showSuccess ? (
           <>
             <ForgotPasswordSuccess onRetry={handleRetry} />
             <DialogFooter>
@@ -90,18 +91,18 @@ export function ForgotPasswordModal({
               formId={FORM_ID}
               onSubmit={handleSubmit}
               onValidityChange={setFormValid}
-              isLoading={loading}
+              isLoading={isLoading}
               error={error}
             />
 
             <DialogFooter>
               <DialogClose asChild>
-                <Button variant="outline" disabled={loading} size="lg">
+                <Button variant="outline" disabled={isLoading} size="lg">
                   Cancel
                 </Button>
               </DialogClose>
-              <Button type="submit" form={FORM_ID} disabled={!formValid || loading} size="lg">
-                {loading ? (
+              <Button type="submit" form={FORM_ID} disabled={!formValid || isLoading} size="lg">
+                {isLoading ? (
                   <>
                     {' '}
                     <Spinner size="sm" className="border-primary-foreground border-t-transparent" /> Sending...
