@@ -3,6 +3,7 @@ interface PasswordResetEmailOptions {
   resetLink: string;
   expiresIn: string;
   year: string;
+  baseUrl: string;
 }
 
 export function buildPasswordResetEmailHtml({
@@ -10,6 +11,7 @@ export function buildPasswordResetEmailHtml({
   resetLink,
   expiresIn,
   year,
+  baseUrl,
 }: PasswordResetEmailOptions): string {
   return `<!DOCTYPE html>
 <html lang="en"><head>
@@ -39,27 +41,7 @@ export function buildPasswordResetEmailHtml({
                   <table cellpadding="0" cellspacing="0" border="0">
                     <tbody><tr>
                       <td valign="middle" style="padding-right: 10px;">
-                        <svg width="36" height="36" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <line x1="100" y1="20" x2="170" y2="70" stroke="#c97d3a" stroke-width="8" stroke-linecap="round"></line>
-                          <line x1="100" y1="20" x2="30" y2="70" stroke="#c97d3a" stroke-width="8" stroke-linecap="round"></line>
-                          <line x1="100" y1="20" x2="100" y2="100" stroke="#c97d3a" stroke-width="8" stroke-linecap="round"></line>
-                          <line x1="170" y1="70" x2="100" y2="100" stroke="#c97d3a" stroke-width="8" stroke-linecap="round"></line>
-                          <line x1="170" y1="70" x2="170" y2="145" stroke="#c97d3a" stroke-width="8" stroke-linecap="round"></line>
-                          <line x1="30" y1="70" x2="100" y2="100" stroke="#c97d3a" stroke-width="8" stroke-linecap="round"></line>
-                          <line x1="30" y1="70" x2="30" y2="145" stroke="#c97d3a" stroke-width="8" stroke-linecap="round"></line>
-                          <line x1="100" y1="100" x2="170" y2="145" stroke="#c97d3a" stroke-width="8" stroke-linecap="round"></line>
-                          <line x1="100" y1="100" x2="30" y2="145" stroke="#c97d3a" stroke-width="8" stroke-linecap="round"></line>
-                          <line x1="30" y1="145" x2="170" y2="145" stroke="#c97d3a" stroke-width="8" stroke-linecap="round"></line>
-                          <line x1="170" y1="70" x2="30" y2="145" stroke="#c97d3a" stroke-width="8" stroke-linecap="round"></line>
-                          <line x1="30" y1="70" x2="170" y2="145" stroke="#c97d3a" stroke-width="8" stroke-linecap="round"></line>
-                          <circle cx="100" cy="20" r="14" fill="#e8954a"></circle>
-                          <circle cx="170" cy="70" r="18" fill="#e8954a"></circle>
-                          <circle cx="30" cy="70" r="14" stroke="#c97d3a" stroke-width="6" fill="#1c1917"></circle>
-                          <circle cx="100" cy="100" r="18" fill="#d4782a"></circle>
-                          <circle cx="170" cy="145" r="14" stroke="#c97d3a" stroke-width="6" fill="#1c1917"></circle>
-                          <circle cx="30" cy="145" r="18" fill="#e06820"></circle>
-                          <circle cx="100" cy="175" r="14" stroke="#c97d3a" stroke-width="6" fill="#1c1917"></circle>
-                        </svg>
+                        <img src="${baseUrl}/logo.png" alt="Nexora" width="36" height="36" style="display:block;">
                       </td>
                       <td valign="middle">
                         <span style="font-size: 18px; font-weight: 700; color: #f5f5f5; letter-spacing: -0.3px;">Nexora</span>

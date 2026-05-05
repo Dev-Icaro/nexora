@@ -23,6 +23,7 @@ const environmentSchema = z.object({
   BACKEND_URL: z.string().url().default('http://localhost:4000'),
   FRONTEND_URL: z.string().url().default('http://localhost:5173'),
   RESEND_API_KEY: z.string().min(1),
+  APP_EMAIL: z.string().email(),
 });
 
 export default environmentSchema.parse(process.env);

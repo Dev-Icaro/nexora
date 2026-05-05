@@ -15,7 +15,7 @@ export class ResendEmailService implements IEmailService {
 
   async sendEmail({ to, subject, html }: SendEmailOptions): Promise<void> {
     const { error } = await this.resend.emails.send({
-      from: 'Nexora <noreply@nexora.app>',
+      from: env.APP_EMAIL,
       to,
       subject,
       html,

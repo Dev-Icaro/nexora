@@ -72,6 +72,7 @@ export class AuthService implements IAuthService {
       resetLink,
       expiresIn: `${settings.PASSWORD_RESET_TOKEN_DURATION_MINUTES} minutes`,
       year: new Date().getFullYear().toString(),
+      baseUrl: env.FRONTEND_URL,
     });
 
     await this.emailService.sendEmail({
