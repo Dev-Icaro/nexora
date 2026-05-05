@@ -7,6 +7,7 @@ import type RefreshResponse from '@/dtos/refresh-response.dto';
 import type RegisterRequest from '@/dtos/register-request.dto';
 import type RegisterResponse from '@/dtos/register-response.dto';
 import type RequestPasswordResetResponse from '@/dtos/request-password-reset-response.dto';
+import type ValidatePasswordResetTokenResponse from '@/dtos/validate-password-reset-token-response.dto';
 import { BadRequestException, ConflictException, UnauthorizedException } from '@/exceptions';
 import { PasswordResetToken } from '@/models/password-reset-token.model';
 import { User } from '@/models/user.model';
@@ -82,6 +83,17 @@ export class AuthService implements IAuthService {
     });
 
     return successResponse();
+  }
+
+  async validatePasswordResetToken(token: string): Promise<ValidatePasswordResetTokenResponse> {
+    const tokenHash = hashPasswordResetToken(token);
+    const record = await PasswordResetToken.findOne({ tokenHash });
+
+    if (!record) throw new BadRequestException('Invalid or expired reset link');
+    if (record.usedAt !== null) throw new BadRequestException('This reset link has already been used');
+    if (record.expiresAt <= new Date()) throw new BadRequestException('Invalid or expired reset link');
+
+    return { code: 200, success: true, message: 'Token is valid' };
   }
 
   async refresh(incomingRefreshToken: string): Promise<RefreshResponse & { refreshToken: string }> {

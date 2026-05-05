@@ -91,6 +91,7 @@ export const typeDefs = `#graphql
     feed(first: Int, after: String): PostConnection!
     getUserPosts(userId: ID!, first: Int, after: String): PostConnection!
     getUserById(userId: ID!): User
+    validatePasswordResetToken(token: String!): ValidatePasswordResetTokenResponse!
   }
 
   type RegisterResponse {
@@ -158,6 +159,12 @@ export const typeDefs = `#graphql
   }
 
   type RequestPasswordResetResponse {
+    code: Int!
+    message: String!
+    success: Boolean!
+  }
+
+  type ValidatePasswordResetTokenResponse {
     code: Int!
     message: String!
     success: Boolean!

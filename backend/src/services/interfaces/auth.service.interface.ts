@@ -5,6 +5,7 @@ import type RefreshResponse from '@/dtos/refresh-response.dto';
 import type RegisterRequest from '@/dtos/register-request.dto';
 import type RegisterResponse from '@/dtos/register-response.dto';
 import type RequestPasswordResetResponse from '@/dtos/request-password-reset-response.dto';
+import type ValidatePasswordResetTokenResponse from '@/dtos/validate-password-reset-token-response.dto';
 import type { OAuthUserInfo } from '@/services/oauth/oauth-provider.interface';
 
 /** Defines the contract for authentication operations: registration, login, and token refresh. */
@@ -52,6 +53,17 @@ export interface IAuthService {
    * @returns A promise resolving to a {@link RequestPasswordResetResponse}.
    */
   requestPasswordReset(email: string): Promise<RequestPasswordResetResponse>;
+
+  /**
+   * Validates a password reset token without consuming it.
+   *
+   * Checks token existence, expiration, and prior use. Throws an exception for any
+   * invalid state so the resolver returns a GraphQL error to the client.
+   *
+   * @param token - The raw reset token from the URL query parameter.
+   * @returns A promise resolving to a {@link ValidatePasswordResetTokenResponse} when the token is valid.
+   */
+  validatePasswordResetToken(token: string): Promise<ValidatePasswordResetTokenResponse>;
 
   /**
    * Authenticates or provisions a user via an OAuth provider.
