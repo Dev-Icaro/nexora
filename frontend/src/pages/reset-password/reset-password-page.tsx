@@ -1,31 +1,21 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 import { ResetPasswordForm } from '@/features/auth/components/reset-password-form';
 import { ResetPasswordInvalidToken } from '@/features/auth/components/reset-password-invalid-token';
 import { ResetPasswordSuccess } from '@/features/auth/components/reset-password-success';
+import { useValidatePasswordResetToken } from '@/features/auth/hooks/use-validate-password-reset-token';
 import { Spinner } from '@/shared/components/ui/spinner';
-
-type PageState = 'loading' | 'valid' | 'invalid' | 'success';
 
 export function ResetPasswordPage() {
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
-  const [pageState, setPageState] = useState<PageState>('loading');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (!token || token === 'invalid' || token === 'expired') {
-        setPageState('invalid');
-      } else {
-        setPageState('valid');
-      }
-    }, 800);
-    return () => clearTimeout(timer);
-  }, [token]);
+  const { isValid, loading } = useValidatePasswordResetToken(token);
 
-  if (pageState === 'loading') {
+  if (loading) {
     return (
       <div className="flex flex-col items-center justify-center gap-3 py-12">
         <Spinner size="md" />
@@ -34,11 +24,11 @@ export function ResetPasswordPage() {
     );
   }
 
-  if (pageState === 'invalid') {
+  if (!isValid) {
     return <ResetPasswordInvalidToken />;
   }
 
-  if (pageState === 'success') {
+  if (isSuccess) {
     return <ResetPasswordSuccess />;
   }
 
@@ -54,7 +44,7 @@ export function ResetPasswordPage() {
           setIsSubmitting(true);
           await new Promise(resolve => setTimeout(resolve, 1100));
           setIsSubmitting(false);
-          setPageState('success');
+          setIsSuccess(true);
         }}
       />
     </>

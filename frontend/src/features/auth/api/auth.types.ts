@@ -45,3 +45,7 @@ export type LogoutResponse = {
 export type RequestPasswordResetResponse = {
   requestPasswordReset: ApiResponse;
 };
+
+export type ValidatePasswordResetTokenResponse = {
+  validatePasswordResetToken: ApiResponse;
+};
