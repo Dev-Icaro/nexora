@@ -16,6 +16,7 @@ export type UseFeedResult = {
   fetchNextPage: () => Promise<void>;
   hasNextPage: boolean;
   prependPost: (post: PostNode) => void;
+  prependPosts: (posts: PostNode[]) => void;
 };
 
 export function useFeed(): UseFeedResult {
@@ -39,6 +40,7 @@ export function useFeed(): UseFeedResult {
   const pageInfo = data?.feed.pageInfo;
 
   const prependPost = (post: PostNode) => setLocalPosts(prev => [post, ...prev]);
+  const prependPosts = (newPosts: PostNode[]) => setLocalPosts(prev => [...newPosts, ...prev]);
 
   const fetchNextPage = async () => {
     if (!pageInfo?.hasNextPage || isFetchingNextPageRef.current) return;
@@ -84,5 +86,6 @@ export function useFeed(): UseFeedResult {
     fetchNextPage,
     hasNextPage: pageInfo?.hasNextPage ?? false,
     prependPost,
+    prependPosts,
   };
 }

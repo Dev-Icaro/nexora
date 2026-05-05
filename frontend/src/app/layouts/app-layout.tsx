@@ -19,7 +19,7 @@ export function AppLayout() {
         {isMobile && <MobileTopBar />}
 
         {/* Scrollable content area */}
-        <div className={cn('flex-1 overflow-y-auto', isMobile && 'pb-20')}>
+        <div id="main-scroll-area" className={cn('flex-1 overflow-y-auto', isMobile && 'pb-20')}>
           <Outlet />
         </div>
 

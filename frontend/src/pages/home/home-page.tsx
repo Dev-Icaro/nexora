@@ -1,11 +1,13 @@
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { useAuth } from '@/features/auth/hooks/use-auth';
+import { NewPostsAnchor } from '@/features/post/components/new-posts-anchor';
 import { PostComposer } from '@/features/post/components/post-composer';
 import { PostDetailModal } from '@/features/post/components/post-detail-modal';
 import { PostFeed } from '@/features/post/components/post-feed';
 import { useCreatePost } from '@/features/post/hooks/use-create-post';
 import { useFeed } from '@/features/post/hooks/use-feed';
+import { useNewPostsNotification } from '@/features/post/hooks/use-new-posts-notification';
 import { fileToDataUrl } from '@/features/post/utils/file-to-data-url';
 
 export function HomePage() {
@@ -25,7 +27,10 @@ export function HomePage() {
     fetchNextPage,
     hasNextPage,
     prependPost,
+    prependPosts,
   } = useFeed();
+
+  const { pendingCount, hasPending, flush } = useNewPostsNotification(prependPosts);
 
   const handleCreatePost = async (body: string, mediaFile?: File): Promise<boolean> => {
     let mediaUrl: string | undefined;
@@ -40,6 +45,7 @@ export function HomePage() {
 
   return (
     <main className="flex flex-1 flex-col">
+      {hasPending && <NewPostsAnchor count={pendingCount} onClick={flush} />}
       <div className="max-w-2xl w-full mx-auto px-4 py-6 space-y-4">
         <PostComposer username={username} loading={createPostLoading} onSubmit={handleCreatePost} />
         <PostFeed
