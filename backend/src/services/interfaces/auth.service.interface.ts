@@ -1,3 +1,5 @@
+import type ApplyPasswordResetRequest from '@/dtos/apply-password-reset-request.dto';
+import type ApplyPasswordResetResponse from '@/dtos/apply-password-reset-response.dto';
 import type LoginRequest from '@/dtos/login-request.dto';
 import type LoginResponse from '@/dtos/login-response.dto';
 import type LogoutResponse from '@/dtos/logout-response.dto';
@@ -53,6 +55,17 @@ export interface IAuthService {
    * @returns A promise resolving to a {@link RequestPasswordResetResponse}.
    */
   requestPasswordReset(email: string): Promise<RequestPasswordResetResponse>;
+
+  /**
+   * Applies a password reset by validating the token and updating the user's password.
+   *
+   * Re-validates the token before making any changes, hashes the new password, marks
+   * the token as consumed, and clears all active sessions (global logout).
+   *
+   * @param request - Payload containing token, newPassword, and confirmPassword.
+   * @returns A promise resolving to an {@link ApplyPasswordResetResponse}.
+   */
+  applyPasswordReset(request: ApplyPasswordResetRequest): Promise<ApplyPasswordResetResponse>;
 
   /**
    * Validates a password reset token without consuming it.

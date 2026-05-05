@@ -1,5 +1,6 @@
 import env from '@/config/environment';
 import settings from '@/config/settings';
+import type ApplyPasswordResetRequest from '@/dtos/apply-password-reset-request.dto';
 import type LoginRequest from '@/dtos/login-request.dto';
 import type RegisterRequest from '@/dtos/register-request.dto';
 import type RequestPasswordResetRequest from '@/dtos/request-password-reset-request.dto';
@@ -48,6 +49,16 @@ export const authMutations = {
     { requestPasswordResetRequest }: { requestPasswordResetRequest: RequestPasswordResetRequest },
     { dataSources }: GraphQLContext,
   ) => dataSources.authService.requestPasswordReset(requestPasswordResetRequest.email),
+
+  applyPasswordReset: async (
+    _: unknown,
+    { applyPasswordResetRequest }: { applyPasswordResetRequest: ApplyPasswordResetRequest },
+    { dataSources, res }: GraphQLContext,
+  ) => {
+    const response = await dataSources.authService.applyPasswordReset(applyPasswordResetRequest);
+    res.clearCookie(settings.REFRESH_TOKEN_COOKIE_NAME);
+    return response;
+  },
 
   logout: async (_: unknown, __: unknown, { dataSources, req, res }: GraphQLContext) => {
     const token = req.cookies[settings.REFRESH_TOKEN_COOKIE_NAME] as string | undefined;

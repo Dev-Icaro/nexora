@@ -170,12 +170,25 @@ export const typeDefs = `#graphql
     success: Boolean!
   }
 
+  input ApplyPasswordResetRequest {
+    token: String!
+    newPassword: String!
+    confirmPassword: String!
+  }
+
+  type ApplyPasswordResetResponse {
+    code: Int!
+    message: String!
+    success: Boolean!
+  }
+
   type Mutation {
     register(registerRequest: RegisterRequest): RegisterResponse!
     login(loginRequest: LoginRequest!): LoginResponse!
     refresh: RefreshResponse!
     logout: LogoutResponse!
     requestPasswordReset(requestPasswordResetRequest: RequestPasswordResetRequest!): RequestPasswordResetResponse!
+    applyPasswordReset(applyPasswordResetRequest: ApplyPasswordResetRequest!): ApplyPasswordResetResponse!
 
     createPost(body: String!, mediaUrl: String): CreatePostResponse!
     deletePost(postId: ID!): DeletePostResponse!

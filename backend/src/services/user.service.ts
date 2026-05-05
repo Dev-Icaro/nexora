@@ -66,6 +66,10 @@ export class UserService implements IUserService {
     });
   }
 
+  async clearAllRefreshTokens(userId: string): Promise<void> {
+    await User.findByIdAndUpdate(userId, { $set: { tokens: [] } });
+  }
+
   async findByOAuthAccount(provider: string, providerId: string): Promise<UserDto | null> {
     const user = await User.findOne({
       oauthAccounts: { $elemMatch: { provider, providerId } },

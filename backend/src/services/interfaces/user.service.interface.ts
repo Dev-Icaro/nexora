@@ -70,6 +70,14 @@ export interface IUserService {
   create(data: CreateUserDto): Promise<UserDto>;
 
   /**
+   * Removes all stored refresh token hashes for a user, forcing a global logout.
+   *
+   * @param userId - The unique identifier of the user.
+   * @returns A promise that resolves when all token hashes have been removed.
+   */
+  clearAllRefreshTokens(userId: string): Promise<void>;
+
+  /**
    * Links an OAuth account to an existing user, enabling future logins via that provider.
    * Uses an idempotent `$addToSet` operation — safe to call multiple times with the same arguments.
    *

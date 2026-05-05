@@ -1,5 +1,7 @@
 import env from '@/config/environment';
 import settings from '@/config/settings';
+import type ApplyPasswordResetRequest from '@/dtos/apply-password-reset-request.dto';
+import type ApplyPasswordResetResponse from '@/dtos/apply-password-reset-response.dto';
 import type LoginRequest from '@/dtos/login-request.dto';
 import type LoginResponse from '@/dtos/login-response.dto';
 import type LogoutResponse from '@/dtos/logout-response.dto';
@@ -83,6 +85,28 @@ export class AuthService implements IAuthService {
     });
 
     return successResponse();
+  }
+
+  async applyPasswordReset({
+    token,
+    newPassword,
+    confirmPassword,
+  }: ApplyPasswordResetRequest): Promise<ApplyPasswordResetResponse> {
+    if (newPassword !== confirmPassword) throw new BadRequestException('Passwords do not match');
+    if (newPassword.length < 8) throw new BadRequestException('Password must be at least 8 characters');
+
+    await this.validatePasswordResetToken(token);
+
+    const tokenHash = hashPasswordResetToken(token);
+    const record = await PasswordResetToken.findOne({ tokenHash });
+
+    const hashedPassword = await hashPassword(newPassword);
+
+    await User.findByIdAndUpdate(record!.userId, { $set: { password: hashedPassword } });
+    await PasswordResetToken.findOneAndUpdate({ tokenHash }, { $set: { usedAt: new Date() } });
+    await this.userService.clearAllRefreshTokens(record!.userId.toString());
+
+    return { code: 200, success: true, message: 'Password reset successfully' };
   }
 
   async validatePasswordResetToken(token: string): Promise<ValidatePasswordResetTokenResponse> {
