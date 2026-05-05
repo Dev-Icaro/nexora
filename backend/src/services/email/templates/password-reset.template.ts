@@ -77,7 +77,7 @@ export function buildPasswordResetEmailHtml({
                   <!-- Lock icon circle -->
                   <table cellpadding="0" cellspacing="0" border="0" style="margin-bottom:28px;">
                     <tbody><tr>
-                      <td style="width:52px; height:52px; background-color:rgba(232,149,74,0.12);
+                      <td style="width:52px; height:52px; background-color:rgba(232,149,74,0.12); display: flex;
                         border-radius:9999px; text-align:center; vertical-align:middle;">
                         <img src="${baseUrl}/lock-icon.png" alt="Lock Icon" width="24" height="24" style="display:block; margin: 14px auto 0;">
                       </td>
