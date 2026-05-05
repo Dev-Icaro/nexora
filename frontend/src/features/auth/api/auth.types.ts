@@ -41,3 +41,7 @@ export type RefreshResponse = {
 export type LogoutResponse = {
   logout: ApiResponse;
 };
+
+export type RequestPasswordResetResponse = {
+  requestPasswordReset: ApiResponse;
+};

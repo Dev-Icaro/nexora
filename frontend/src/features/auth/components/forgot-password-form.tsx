@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/components/ui/form';
+import { FormError } from '@/shared/components/ui/form-error';
 import { Input } from '@/shared/components/ui/input';
 
 const forgotPasswordSchema = z.object({
@@ -22,9 +23,10 @@ type ForgotPasswordFormProps = {
   onSubmit: (values: ForgotPasswordFormValues) => void | Promise<void>;
   onValidityChange?: (isValid: boolean) => void;
   isLoading?: boolean;
+  error?: string;
 };
 
-export function ForgotPasswordForm({ formId, onSubmit, onValidityChange, isLoading }: ForgotPasswordFormProps) {
+export function ForgotPasswordForm({ formId, onSubmit, onValidityChange, isLoading, error }: ForgotPasswordFormProps) {
   const form = useForm<ForgotPasswordFormValues>({
     resolver: zodResolver(forgotPasswordSchema),
     mode: 'onChange',
@@ -59,6 +61,7 @@ export function ForgotPasswordForm({ formId, onSubmit, onValidityChange, isLoadi
             </FormItem>
           )}
         />
+        {error && <FormError message={error} />}
       </form>
     </Form>
   );

@@ -23,9 +23,17 @@ type ForgotPasswordModalProps = {
   onSubmit?: (values: ForgotPasswordFormValues) => void | Promise<void>;
   isLoading?: boolean;
   isSuccess?: boolean;
+  error?: string;
 };
 
-export function ForgotPasswordModal({ open, onOpenChange, onSubmit, isLoading, isSuccess }: ForgotPasswordModalProps) {
+export function ForgotPasswordModal({
+  open,
+  onOpenChange,
+  onSubmit,
+  isLoading,
+  isSuccess,
+  error,
+}: ForgotPasswordModalProps) {
   const [localLoading, setLocalLoading] = useState(false);
   const [localSuccess, setLocalSuccess] = useState(false);
   const [formValid, setFormValid] = useState(false);
@@ -83,6 +91,7 @@ export function ForgotPasswordModal({ open, onOpenChange, onSubmit, isLoading, i
               onSubmit={handleSubmit}
               onValidityChange={setFormValid}
               isLoading={loading}
+              error={error}
             />
 
             <DialogFooter>

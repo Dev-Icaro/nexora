@@ -51,3 +51,13 @@ export const LOGOUT_MUTATION = gql`
     }
   }
 `;
+
+export const REQUEST_PASSWORD_RESET_MUTATION = gql`
+  mutation RequestPasswordReset($requestPasswordResetRequest: RequestPasswordResetRequest!) {
+    requestPasswordReset(requestPasswordResetRequest: $requestPasswordResetRequest) {
+      code
+      message
+      success
+    }
+  }
+`;
