@@ -2,6 +2,7 @@ import { createBrowserRouter } from 'react-router-dom';
 
 import { HomePage } from '@/pages/home/home-page';
 import { LoginPage } from '@/pages/login/login-page';
+import { NotFoundPage } from '@/pages/not-found/not-found-page';
 import { ProfilePage } from '@/pages/profile/profile-page';
 import { ResetPasswordPage } from '@/pages/reset-password/reset-password-page';
 import { SettingsPage } from '@/pages/settings/settings-page';
@@ -45,6 +46,7 @@ export const router = createBrowserRouter([
           },
         ],
       },
+      { path: '*', element: <NotFoundPage /> },
     ],
   },
 ]);
