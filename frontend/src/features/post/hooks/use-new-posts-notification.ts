@@ -1,29 +1,10 @@
+import { useSubscription } from '@apollo/client/react';
 import { useState } from 'react';
 
-import type { PostNode } from '../api/post.types';
+import { useAuth } from '@/features/auth/hooks/use-auth';
 
-const MOCK_PENDING_POSTS: PostNode[] = [
-  {
-    id: 'mock-pending-1',
-    body: 'Just launched something amazing! Cannot wait to share it with everyone. #excited #tech',
-    mediaUrl: null,
-    createdAt: new Date().toISOString(),
-    author: { id: 'mock-author-1', username: 'aliceDev' },
-    likeCount: 0,
-    commentCount: 0,
-    likes: [],
-  },
-  {
-    id: 'mock-pending-2',
-    body: 'What a beautiful day to build great things! #motivation #buildinpublic',
-    mediaUrl: null,
-    createdAt: new Date().toISOString(),
-    author: { id: 'mock-author-2', username: 'bobDesigns' },
-    likeCount: 0,
-    commentCount: 0,
-    likes: [],
-  },
-];
+import { NEW_POST_SUBSCRIPTION } from '../api/post.queries';
+import type { PostNode } from '../api/post.types';
 
 type UseNewPostsNotificationResult = {
   pendingCount: number;
@@ -31,8 +12,27 @@ type UseNewPostsNotificationResult = {
   flush: () => void;
 };
 
-export function useNewPostsNotification(onFlush: (posts: PostNode[]) => void): UseNewPostsNotificationResult {
-  const [pendingPosts, setPendingPosts] = useState<PostNode[]>(MOCK_PENDING_POSTS);
+export function useNewPostsNotification(
+  feedPosts: PostNode[],
+  onFlush: (posts: PostNode[]) => void,
+): UseNewPostsNotificationResult {
+  const [pendingPosts, setPendingPosts] = useState<PostNode[]>([]);
+  const { state } = useAuth();
+  const currentUserId = state.user?.id;
+
+  useSubscription<{ newPost: PostNode }>(NEW_POST_SUBSCRIPTION, {
+    onData: ({ data }) => {
+      const newPost = data.data?.newPost;
+      if (!newPost) return;
+      if (newPost.author.id === currentUserId) return;
+
+      setPendingPosts(prev => {
+        const existingIds = new Set([...feedPosts.map(p => p.id), ...prev.map(p => p.id)]);
+        if (existingIds.has(newPost.id)) return prev;
+        return [...prev, newPost];
+      });
+    },
+  });
 
   const pendingCount = pendingPosts.length;
   const hasPending = pendingCount > 0;

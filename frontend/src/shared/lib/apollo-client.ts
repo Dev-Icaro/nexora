@@ -7,8 +7,12 @@ import {
   InMemoryCache,
   Observable,
   ServerError,
+  split,
 } from '@apollo/client';
 import { ErrorLink } from '@apollo/client/link/error';
+import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
+import { getMainDefinition } from '@apollo/client/utilities';
+import { createClient } from 'graphql-ws';
 
 import { REFRESH_MUTATION } from '@/features/auth/api/auth.mutations';
 import type { RefreshResponse } from '@/features/auth/api/auth.types';
@@ -88,7 +92,26 @@ const errorLink = new ErrorLink(({ error, operation, forward }) => {
   });
 });
 
+const wsLink = new GraphQLWsLink(
+  createClient({
+    url: `${import.meta.env.VITE_BACKEND_URL.replace(/^http/, 'ws')}/graphql`,
+    connectionParams: () => {
+      const token = getAccessToken();
+      return token ? { authorization: `Bearer ${token}` } : {};
+    },
+  }),
+);
+
+const splitLink = split(
+  ({ query }) => {
+    const def = getMainDefinition(query);
+    return def.kind === 'OperationDefinition' && def.operation === 'subscription';
+  },
+  wsLink,
+  from([errorLink, authLink, httpLink]),
+);
+
 export const client = new ApolloClient({
-  link: from([errorLink, authLink, httpLink]),
+  link: splitLink,
   cache: new InMemoryCache(),
 });

@@ -90,6 +90,30 @@ export const GET_USER_POSTS = gql`
   }
 `;
 
+export const NEW_POST_SUBSCRIPTION = gql`
+  subscription OnNewPost {
+    newPost {
+      id
+      body
+      mediaUrl
+      createdAt
+      author {
+        id
+        username
+      }
+      likeCount
+      commentCount
+      likes {
+        id
+        author {
+          id
+          username
+        }
+      }
+    }
+  }
+`;
+
 export const GET_FEED = gql`
   query GetFeed($first: Int, $after: String) {
     feed(first: $first, after: $after) {

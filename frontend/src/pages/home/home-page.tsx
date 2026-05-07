@@ -30,7 +30,7 @@ export function HomePage() {
     prependPosts,
   } = useFeed();
 
-  const { pendingCount, hasPending, flush } = useNewPostsNotification(prependPosts);
+  const { pendingCount, hasPending, flush } = useNewPostsNotification(posts, prependPosts);
 
   const handleCreatePost = async (body: string, mediaFile?: File): Promise<boolean> => {
     let mediaUrl: string | undefined;
