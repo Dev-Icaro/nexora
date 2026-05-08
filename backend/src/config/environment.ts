@@ -24,6 +24,10 @@ const environmentSchema = z.object({
   FRONTEND_URL: z.string().url().default('http://localhost:5173'),
   RESEND_API_KEY: z.string().min(1),
   APP_EMAIL: z.string().email(),
+  AWS_S3_REGION: z.string().min(1),
+  AWS_S3_BUCKET_NAME: z.string().min(1),
+  AWS_ACCESS_KEY_ID: z.string().optional(),
+  AWS_SECRET_ACCESS_KEY: z.string().optional(),
 });
 
 export default environmentSchema.parse(process.env);
