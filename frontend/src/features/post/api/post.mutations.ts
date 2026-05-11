@@ -1,8 +1,21 @@
 import { gql } from '@apollo/client';
 
+export const GET_UPLOAD_URL = gql`
+  mutation GetUploadUrl($request: GetUploadUrlRequest!) {
+    getUploadUrl(request: $request) {
+      code
+      message
+      success
+      uploadUrl
+      fields
+      objectKey
+    }
+  }
+`;
+
 export const CREATE_POST = gql`
-  mutation CreatePost($body: String!, $mediaUrl: String) {
-    createPost(body: $body, mediaUrl: $mediaUrl) {
+  mutation CreatePost($body: String!, $objectKey: String) {
+    createPost(body: $body, objectKey: $objectKey) {
       code
       message
       success

@@ -1,5 +1,6 @@
 import type CreatePostResponse from '@/dtos/create-post-response.dto';
 import type DeletePostResponse from '@/dtos/delete-post-response.dto';
+import type GetUploadUrlResponse from '@/dtos/get-upload-url-response.dto';
 import type LikePostResponse from '@/dtos/like-post-response.dto';
 import type PostDto from '@/dtos/post.dto';
 import type PostConnectionDto from '@/dtos/post-connection.dto';
@@ -7,14 +8,26 @@ import type PostConnectionDto from '@/dtos/post-connection.dto';
 /** Defines the contract for post creation, deletion, and social interactions. */
 export interface IPostService {
   /**
+   * Generates a presigned POST URL for uploading post media directly to S3.
+   * Magic-byte validation happens server-side in {@link createPost} — not here.
+   *
+   * @param userId - The authenticated user's ID (embedded in the object key path).
+   * @param filename - Original filename; used for extension extraction and key generation.
+   * @param contentType - The MIME type claimed by the client; must be in the allow-list.
+   * @returns A promise resolving to a {@link GetUploadUrlResponse} with the URL, form fields, and object key.
+   */
+  getUploadUrl(userId: string, filename: string, contentType: string): Promise<GetUploadUrlResponse>;
+
+  /**
    * Creates a new post on behalf of the authenticated user.
+   * If `objectKey` is provided, validates ownership, verifies the file in S3, and moves it to confirmed storage.
    *
    * @param userId - The authenticated user's ID.
    * @param body - The text content of the post.
-   * @param mediaUrl - Optional URL of an attached image; must be a valid URL if provided.
+   * @param objectKey - Optional S3 pending object key from {@link getUploadUrl}.
    * @returns A promise resolving to a {@link CreatePostResponse} with the created post.
    */
-  createPost(userId: string, body: string, mediaUrl?: string): Promise<CreatePostResponse>;
+  createPost(userId: string, body: string, objectKey?: string): Promise<CreatePostResponse>;
 
   /**
    * Deletes a post. Only the post owner may delete their own post.

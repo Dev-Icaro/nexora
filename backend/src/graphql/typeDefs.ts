@@ -108,6 +108,20 @@ export const typeDefs = `#graphql
     post: Post
   }
 
+  input GetUploadUrlRequest {
+    filename: String!
+    contentType: String!
+  }
+
+  type GetUploadUrlResponse {
+    code: Int!
+    message: String!
+    success: Boolean!
+    uploadUrl: String
+    fields: String
+    objectKey: String
+  }
+
   type DeletePostResponse {
     code: Int!
     message: String!
@@ -190,7 +204,8 @@ export const typeDefs = `#graphql
     requestPasswordReset(requestPasswordResetRequest: RequestPasswordResetRequest!): RequestPasswordResetResponse!
     applyPasswordReset(applyPasswordResetRequest: ApplyPasswordResetRequest!): ApplyPasswordResetResponse!
 
-    createPost(body: String!, mediaUrl: String): CreatePostResponse!
+    getUploadUrl(request: GetUploadUrlRequest!): GetUploadUrlResponse!
+    createPost(body: String!, objectKey: String): CreatePostResponse!
     deletePost(postId: ID!): DeletePostResponse!
 
     createComment(postId: String!, body: String!): CreateCommentResponse!

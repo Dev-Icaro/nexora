@@ -2,7 +2,27 @@ import type { ApiResponse, Edge, PageInfo } from '@/shared/types';
 
 export type CreatePostRequest = {
   body: string;
-  mediaUrl?: string;
+  objectKey?: string;
+};
+
+export type GetUploadUrlInput = {
+  filename: string;
+  contentType: string;
+};
+
+export type GetUploadUrlRequest = {
+  request: GetUploadUrlInput;
+};
+
+export type GetUploadUrlResponse = {
+  getUploadUrl: {
+    code: number;
+    message: string;
+    success: boolean;
+    uploadUrl?: string;
+    fields?: string;
+    objectKey?: string;
+  };
 };
 
 export type CreatePostResponse = {

@@ -2,11 +2,13 @@ import type { Request as ExpressRequest, Response as ExpressResponse } from 'exp
 import { GraphQLError } from 'graphql/error';
 
 import { AuthService } from '@/services/auth.service';
+import S3StorageProvider from '@/services/cloud/s3-storage.provider';
 import { CommentService } from '@/services/comment.service';
 import { ResendEmailService } from '@/services/email/resend-email.service';
 import type { IAuthService } from '@/services/interfaces/auth.service.interface';
 import type { ICommentService } from '@/services/interfaces/comment.service.interface';
 import type { IPostService } from '@/services/interfaces/post.service.interface';
+import type { IStorageProvider } from '@/services/interfaces/storage-provider.interface';
 import type { IUserService } from '@/services/interfaces/user.service.interface';
 import { PostService } from '@/services/post.service';
 import { UserService } from '@/services/user.service';
@@ -14,6 +16,14 @@ import { type IUserTokenInfo, verifyAccessToken } from '@/utils/auth';
 
 import { createLoaders, type Loaders } from './loaders';
 import { GRAPHQL_AUTH_WHITELIST } from './whitelist';
+
+type DataSources = {
+  authService: IAuthService;
+  userService: IUserService;
+  postService: IPostService;
+  commentService: ICommentService;
+  storageProvider: IStorageProvider;
+};
 
 /**
  * Shared context object injected into every GraphQL resolver.
@@ -26,12 +36,7 @@ export interface GraphQLContext {
   res: ExpressResponse;
   currentUser: IUserTokenInfo | null;
   loaders: Loaders;
-  dataSources: {
-    authService: IAuthService;
-    userService: IUserService;
-    postService: IPostService;
-    commentService: ICommentService;
-  };
+  dataSources: DataSources;
 }
 
 /**
@@ -45,11 +50,24 @@ export interface GraphQLContext {
 export interface SubscriptionContext {
   currentUser: IUserTokenInfo | null;
   loaders: Loaders;
-  dataSources: {
-    authService: IAuthService;
-    userService: IUserService;
-    postService: IPostService;
-    commentService: ICommentService;
+  dataSources: DataSources;
+}
+
+/**
+ * Instantiates all data sources for a single request. Shared between HTTP and WS contexts.
+ *
+ * @returns A fully initialised {@link DataSources} object.
+ */
+function createDataSources(): DataSources {
+  const userService = new UserService();
+  const emailService = new ResendEmailService();
+  const storageProvider = new S3StorageProvider();
+  return {
+    authService: new AuthService(userService, emailService),
+    userService,
+    postService: new PostService(userService, storageProvider),
+    commentService: new CommentService(userService),
+    storageProvider,
   };
 }
 
@@ -77,18 +95,7 @@ export const createSubscriptionContext = async (
     throw new GraphQLError('Unauthorized', { extensions: { code: 'UNAUTHORIZED' } });
   }
 
-  const userService = new UserService();
-  const emailService = new ResendEmailService();
-  return {
-    currentUser,
-    loaders: createLoaders(),
-    dataSources: {
-      authService: new AuthService(userService, emailService),
-      userService,
-      postService: new PostService(userService),
-      commentService: new CommentService(userService),
-    },
-  };
+  return { currentUser, loaders: createLoaders(), dataSources: createDataSources() };
 };
 
 /**
@@ -112,35 +119,14 @@ export const createContext = async ({
   if (!GRAPHQL_AUTH_WHITELIST.has(operationName ?? '')) {
     const authHeader = req.headers.authorization;
     if (!authHeader?.startsWith('Bearer ')) {
-      throw new GraphQLError('Unauthorized', {
-        extensions: {
-          code: 'UNAUTHORIZED',
-        },
-      });
+      throw new GraphQLError('Unauthorized', { extensions: { code: 'UNAUTHORIZED' } });
     }
     try {
       currentUser = verifyAccessToken(authHeader.slice(7));
     } catch {
-      throw new GraphQLError('Unauthorized', {
-        extensions: {
-          code: 'UNAUTHORIZED',
-        },
-      });
+      throw new GraphQLError('Unauthorized', { extensions: { code: 'UNAUTHORIZED' } });
     }
   }
 
-  const userService = new UserService();
-  const emailService = new ResendEmailService();
-  return {
-    req,
-    res,
-    currentUser,
-    loaders: createLoaders(),
-    dataSources: {
-      authService: new AuthService(userService, emailService),
-      userService,
-      postService: new PostService(userService),
-      commentService: new CommentService(userService),
-    },
-  };
+  return { req, res, currentUser, loaders: createLoaders(), dataSources: createDataSources() };
 };

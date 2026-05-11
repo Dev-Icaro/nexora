@@ -1,27 +1,99 @@
+import settings from '@/config/settings';
 import type CreatePostResponse from '@/dtos/create-post-response.dto';
 import type DeletePostResponse from '@/dtos/delete-post-response.dto';
+import type GetUploadUrlResponse from '@/dtos/get-upload-url-response.dto';
 import type LikePostResponse from '@/dtos/like-post-response.dto';
 import type PostDto from '@/dtos/post.dto';
 import type PostConnectionDto from '@/dtos/post-connection.dto';
 import { BadRequestException, ForbiddenException, NotFoundException } from '@/exceptions';
 import { Comment } from '@/models/comment.model';
 import { Like } from '@/models/like.model';
+import { MediaUpload } from '@/models/media-upload.model';
 import { Post } from '@/models/post.model';
+import {
+  ALLOWED_CONTENT_TYPES,
+  getFileSizeLimit,
+  MAGIC_BYTES_HEADER_LENGTH,
+  validateMagicBytes,
+} from '@/utils/magic-bytes';
 import { decodeCursor, encodeCursor } from '@/utils/pagination';
+import { withRetry } from '@/utils/retry';
+import StorageKeyGenerator from '@/utils/storage-key-generator';
 
 import type { IPostService } from './interfaces/post.service.interface';
+import type { IStorageProvider } from './interfaces/storage-provider.interface';
 import type { IUserService } from './interfaces/user.service.interface';
 
 export class PostService implements IPostService {
-  constructor(private readonly userService: IUserService) {}
+  constructor(
+    private readonly userService: IUserService,
+    private readonly storageProvider: IStorageProvider,
+  ) {}
 
-  async createPost(userId: string, body: string, mediaUrl?: string): Promise<CreatePostResponse> {
-    if (mediaUrl !== undefined) {
-      try {
-        new URL(mediaUrl);
-      } catch {
-        throw new BadRequestException('mediaUrl must be a valid URL');
+  async getUploadUrl(userId: string, filename: string, contentType: string): Promise<GetUploadUrlResponse> {
+    if (!ALLOWED_CONTENT_TYPES.has(contentType)) {
+      throw new BadRequestException(`Unsupported content type: ${contentType}`);
+    }
+
+    const maxFileSizeBytes = getFileSizeLimit(contentType);
+    const objectKey = StorageKeyGenerator.generatePendingPostKey(userId, filename);
+
+    const { url, fields } = await withRetry(() =>
+      this.storageProvider.getPresignedUploadUrl(objectKey, {
+        contentType,
+        maxFileSizeBytes,
+        expiresIn: settings.PRESIGNED_UPLOAD_URL_EXPIRY_SECONDS,
+      }),
+    );
+
+    await MediaUpload.create({
+      userId,
+      entityType: 'post',
+      entityId: null,
+      status: 'pending',
+      objectKey,
+      confirmedUrl: null,
+      mimeType: contentType,
+      sizeBytes: 0,
+      createdAt: new Date(),
+    });
+
+    return {
+      code: 200,
+      success: true,
+      message: 'Upload URL generated',
+      uploadUrl: url,
+      fields: JSON.stringify(fields),
+      objectKey,
+    };
+  }
+
+  async createPost(userId: string, body: string, objectKey?: string): Promise<CreatePostResponse> {
+    let confirmedKey: string | undefined;
+    let mediaContentLength = 0;
+
+    if (objectKey) {
+      if (!objectKey.includes(`/${userId}/`)) {
+        throw new ForbiddenException('Object key does not belong to the authenticated user');
       }
+
+      const {
+        body: headerBytes,
+        contentType,
+        contentLength,
+      } = await withRetry(() => this.storageProvider.getObjectRange(objectKey, 0, MAGIC_BYTES_HEADER_LENGTH - 1));
+
+      // Validate content type and magic bytes from actual S3 bytes — never from client-supplied data
+      validateMagicBytes(contentType, headerBytes);
+
+      const sizeLimit = getFileSizeLimit(contentType);
+      if (contentLength > sizeLimit) {
+        throw new BadRequestException('Uploaded file exceeds the maximum allowed size');
+      }
+
+      confirmedKey = objectKey.replace('pending/posts/', 'confirmed/posts/');
+      mediaContentLength = contentLength;
+      await withRetry(() => this.storageProvider.moveFile(objectKey, confirmedKey!));
     }
 
     const user = await this.userService.findById(userId);
@@ -30,11 +102,24 @@ export class PostService implements IPostService {
     const createdAt = new Date().toISOString();
     const post = await Post.create({
       body,
-      mediaUrl,
+      mediaKey: confirmedKey,
       username: user.username,
       user: userId,
       createdAt,
     });
+
+    if (confirmedKey && objectKey) {
+      await MediaUpload.findOneAndUpdate(
+        { objectKey, status: 'pending', userId },
+        {
+          status: 'confirmed',
+          entityId: post._id,
+          objectKey: confirmedKey,
+          confirmedUrl: confirmedKey,
+          sizeBytes: mediaContentLength,
+        },
+      );
+    }
 
     return {
       code: 201,
@@ -43,7 +128,7 @@ export class PostService implements IPostService {
       post: {
         id: post.id as string,
         body: post.body ?? '',
-        mediaUrl: post.mediaUrl ?? undefined,
+        mediaKey: post.mediaKey ?? undefined,
         authorId: String(post.user ?? userId),
         createdAt: post.createdAt ?? createdAt,
         likeCount: 0,
@@ -71,6 +156,7 @@ export class PostService implements IPostService {
       id: post.id as string,
       body: post.body ?? '',
       mediaUrl: post.mediaUrl ?? undefined,
+      mediaKey: post.mediaKey ?? undefined,
       authorId: String(post.user),
       createdAt: post.createdAt ?? '',
       likeCount: post.likeCount ?? 0,
@@ -98,6 +184,7 @@ export class PostService implements IPostService {
         id: post.id as string,
         body: post.body ?? '',
         mediaUrl: post.mediaUrl ?? undefined,
+        mediaKey: post.mediaKey ?? undefined,
         authorId: String(post.user),
         createdAt: post.createdAt ?? '',
         likeCount: post.likeCount ?? 0,
@@ -137,6 +224,7 @@ export class PostService implements IPostService {
         id: post.id as string,
         body: post.body ?? '',
         mediaUrl: post.mediaUrl ?? undefined,
+        mediaKey: post.mediaKey ?? undefined,
         authorId: String(post.user),
         createdAt: post.createdAt ?? '',
         likeCount: post.likeCount ?? 0,
@@ -184,6 +272,7 @@ export class PostService implements IPostService {
         id: post.id as string,
         body: post.body ?? '',
         mediaUrl: post.mediaUrl ?? undefined,
+        mediaKey: post.mediaKey ?? undefined,
         authorId: String(post.user),
         createdAt: post.createdAt ?? '',
         likeCount: post.likeCount ?? 0,

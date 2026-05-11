@@ -12,6 +12,8 @@ const mediaUploadSchema = new Schema({
   createdAt: { type: Date, required: true, default: () => new Date() },
 });
 
-mediaUploadSchema.index({ status: 1, createdAt: 1 });
+mediaUploadSchema.index({ userId: 1, status: 1, createdAt: 1 });
+mediaUploadSchema.index({ entityId: 1 });
+mediaUploadSchema.index({ objectKey: 1 }, { unique: true });
 
 export const MediaUpload = model('media_uploads', mediaUploadSchema);

@@ -42,4 +42,30 @@ export interface IStorageProvider {
    * @returns The bucket name string from environment configuration.
    */
   getBucketName(): string;
+
+  /**
+   * Fetches a byte range from an S3 object and returns the body together with object metadata.
+   * Use this instead of HeadObject when you need both the file content and its attributes.
+   *
+   * @param storageKey - The key (path) of the object in the bucket.
+   * @param start - First byte offset (inclusive).
+   * @param end - Last byte offset (inclusive).
+   * @returns A promise resolving to the raw bytes, the object's content type, and its total size in bytes.
+   * @throws {AppException} If the object does not exist or the S3 call fails.
+   */
+  getObjectRange(
+    storageKey: string,
+    start: number,
+    end: number,
+  ): Promise<{ body: Buffer; contentType: string; contentLength: number }>;
+
+  /**
+   * Copies an S3 object to a new key then deletes the source (atomic move).
+   *
+   * @param sourceKey - The key of the object to move.
+   * @param destKey - The destination key.
+   * @returns A promise that resolves when the move is complete.
+   * @throws {AppException} If the copy operation fails.
+   */
+  moveFile(sourceKey: string, destKey: string): Promise<void>;
 }

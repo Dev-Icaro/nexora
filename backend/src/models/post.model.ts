@@ -5,6 +5,7 @@ const { Schema } = mongoose;
 const postSchema = new Schema({
   body: String,
   mediaUrl: String,
+  mediaKey: String,
   username: String,
   createdAt: String,
   likeCount: { type: Number, default: 0 },

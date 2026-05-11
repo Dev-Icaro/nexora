@@ -1,4 +1,10 @@
-import { DeleteObjectCommand, GetObjectCommand, S3Client, type S3ClientConfig } from '@aws-sdk/client-s3';
+import {
+  CopyObjectCommand,
+  DeleteObjectCommand,
+  GetObjectCommand,
+  S3Client,
+  type S3ClientConfig,
+} from '@aws-sdk/client-s3';
 import { createPresignedPost } from '@aws-sdk/s3-presigned-post';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
@@ -97,5 +103,54 @@ export default class S3StorageProvider implements IStorageProvider {
 
   getBucketName(): string {
     return this.bucketName;
+  }
+
+  async getObjectRange(
+    storageKey: string,
+    start: number,
+    end: number,
+  ): Promise<{ body: Buffer; contentType: string; contentLength: number }> {
+    try {
+      const command = new GetObjectCommand({
+        Bucket: this.bucketName,
+        Key: storageKey,
+        Range: `bytes=${start}-${end}`,
+      });
+      const response = await this.s3Client.send(command);
+      const body = Buffer.from(await response.Body!.transformToByteArray());
+
+      // ContentRange header: "bytes 0-15/12345" — extract total object size from denominator
+      const totalSize = response.ContentRange ? parseInt(response.ContentRange.split('/')[1] ?? '0', 10) : 0;
+
+      return {
+        body,
+        contentType: response.ContentType ?? '',
+        contentLength: totalSize,
+      };
+    } catch (error) {
+      logger.error(error);
+      throw new AppException('Failed to read S3 object range', 500);
+    }
+  }
+
+  async moveFile(sourceKey: string, destKey: string): Promise<void> {
+    try {
+      await this.s3Client.send(
+        new CopyObjectCommand({
+          Bucket: this.bucketName,
+          CopySource: `${this.bucketName}/${sourceKey}`,
+          Key: destKey,
+        }),
+      );
+    } catch (error) {
+      logger.error(error);
+      throw new AppException('Failed to copy S3 object', 500);
+    }
+
+    try {
+      await this.s3Client.send(new DeleteObjectCommand({ Bucket: this.bucketName, Key: sourceKey }));
+    } catch (error) {
+      logger.error('Failed to delete pending S3 object after copy — will be cleaned by lifecycle policy', error);
+    }
   }
 }

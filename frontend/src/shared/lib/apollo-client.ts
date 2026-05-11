@@ -10,6 +10,7 @@ import {
   split,
 } from '@apollo/client';
 import { ErrorLink } from '@apollo/client/link/error';
+import { RetryLink } from '@apollo/client/link/retry';
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 import { getMainDefinition } from '@apollo/client/utilities';
 import { createClient } from 'graphql-ws';
@@ -102,13 +103,25 @@ const wsLink = new GraphQLWsLink(
   }),
 );
 
+const retryLink = new RetryLink({
+  delay: { initial: 300, max: 3000, jitter: true },
+  attempts: {
+    max: 3,
+    retryIf: error => {
+      if (!error) return false;
+      const status = (error as { statusCode?: number }).statusCode;
+      return status !== undefined ? status >= 500 : true;
+    },
+  },
+});
+
 const splitLink = split(
   ({ query }) => {
     const def = getMainDefinition(query);
     return def.kind === 'OperationDefinition' && def.operation === 'subscription';
   },
   wsLink,
-  from([errorLink, authLink, httpLink]),
+  from([retryLink, errorLink, authLink, httpLink]),
 );
 
 export const client = new ApolloClient({

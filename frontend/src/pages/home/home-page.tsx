@@ -8,7 +8,7 @@ import { PostFeed } from '@/features/post/components/post-feed';
 import { useCreatePost } from '@/features/post/hooks/use-create-post';
 import { useFeed } from '@/features/post/hooks/use-feed';
 import { useNewPostsNotification } from '@/features/post/hooks/use-new-posts-notification';
-import { fileToDataUrl } from '@/features/post/utils/file-to-data-url';
+import { useUploadMedia } from '@/features/post/hooks/use-upload-media';
 
 export function HomePage() {
   const { state } = useAuth();
@@ -17,6 +17,7 @@ export function HomePage() {
   const navigate = useNavigate();
 
   const { createPost, loading: createPostLoading } = useCreatePost();
+  const { uploadMedia, uploading } = useUploadMedia();
   const {
     posts,
     loading,
@@ -33,9 +34,12 @@ export function HomePage() {
   const { pendingCount, hasPending, flush } = useNewPostsNotification(posts, prependPosts);
 
   const handleCreatePost = async (body: string, mediaFile?: File): Promise<boolean> => {
-    let mediaUrl: string | undefined;
-    if (mediaFile) mediaUrl = await fileToDataUrl(mediaFile);
-    const post = await createPost(body, mediaUrl);
+    let objectKey: string | undefined;
+    if (mediaFile) {
+      objectKey = await uploadMedia(mediaFile);
+      if (!objectKey) return false;
+    }
+    const post = await createPost(body, objectKey);
     if (post) {
       prependPost(post);
       return true;
@@ -47,7 +51,7 @@ export function HomePage() {
     <main className="flex flex-1 flex-col">
       {hasPending && <NewPostsAnchor count={pendingCount} onClick={flush} />}
       <div className="max-w-2xl w-full mx-auto px-4 py-6 space-y-4">
-        <PostComposer username={username} loading={createPostLoading} onSubmit={handleCreatePost} />
+        <PostComposer username={username} loading={createPostLoading || uploading} onSubmit={handleCreatePost} />
         <PostFeed
           posts={posts}
           loading={loading}

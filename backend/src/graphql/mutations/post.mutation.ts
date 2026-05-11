@@ -4,12 +4,18 @@ import logger from '@/utils/logger';
 import type { GraphQLContext } from '../context';
 
 export const postMutations = {
+  getUploadUrl: async (
+    _: unknown,
+    { request }: { request: { filename: string; contentType: string } },
+    { dataSources, currentUser }: GraphQLContext,
+  ) => dataSources.postService.getUploadUrl(currentUser!.userId, request.filename, request.contentType),
+
   createPost: async (
     _: unknown,
-    { body, mediaUrl }: { body: string; mediaUrl?: string },
+    { body, objectKey }: { body: string; objectKey?: string },
     { dataSources, currentUser }: GraphQLContext,
   ) => {
-    const result = await dataSources.postService.createPost(currentUser!.userId, body, mediaUrl);
+    const result = await dataSources.postService.createPost(currentUser!.userId, body, objectKey);
     if (result.success && result.post) {
       pubsub
         .publish(TOPICS.NEW_POST, { newPost: result.post })

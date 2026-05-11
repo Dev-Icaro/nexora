@@ -34,6 +34,25 @@ export default class StorageKeyGenerator {
   }
 
   /**
+   * Generates a pending-post storage key scoped to a specific user.
+   *
+   * @param userId - The authenticated user's ID (embedded in the key path for ownership verification).
+   * @param originalFilename - Original filename, used for extension extraction only.
+   * @returns Storage key in format: `pending/posts/{userId}/{uuid}.{ext}`
+   */
+  static generatePendingPostKey(userId: string, originalFilename: string): string {
+    const uuid = randomUUID();
+    const extension = this.extractSafeExtension(originalFilename);
+    const key = `pending/posts/${userId}/${uuid}${extension}`;
+
+    if (key.length > this.MAX_KEY_LENGTH) {
+      throw new BadRequestException('Storage key exceeded max length');
+    }
+
+    return key;
+  }
+
+  /**
    * Extract and validate file extension from filename
    * Only uses the last extension to prevent tricks like "image.jpg.exe"
    * Limits extension length to prevent abuse
