@@ -15,7 +15,6 @@ import logger from '@/utils/logger';
 
 import { IStorageProvider } from '../interfaces/storage-provider.interface';
 
-/** AWS S3 implementation of the storage service. */
 export default class S3StorageProvider implements IStorageProvider {
   private s3Client: S3Client;
   private bucketName: string;
@@ -55,6 +54,7 @@ export default class S3StorageProvider implements IStorageProvider {
         Conditions: [
           ['content-length-range', 1, maxFileSizeBytes],
           ['eq', '$Content-Type', contentType],
+          ['starts-with', '$key', storageKey],
         ],
       });
 

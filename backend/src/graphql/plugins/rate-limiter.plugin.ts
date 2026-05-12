@@ -23,9 +23,14 @@ const guestRateLimiter = new RateLimiterMemory({
   points: settings.GUEST_RATE_LIMIT_MAX_REQUESTS,
   duration: settings.GUEST_RATE_LIMIT_WINDOW_MS / 1000,
 });
+const uploadRateLimiter = new RateLimiterMemory({
+  points: settings.UPLOAD_RATE_LIMIT_MAX_REQUESTS,
+  duration: settings.UPLOAD_RATE_LIMIT_WINDOW_MS / 1000,
+});
 
 const EMAIL_OPERATIONS = new Set(['RequestPasswordReset']);
 const AUTH_OPERATIONS = new Set(['Login', 'Register', 'Refresh', 'Logout']);
+const UPLOAD_OPERATIONS = new Set(['GetUploadUrl']);
 
 /**
  * Apollo Server plugin that enforces graduated rate limiting before resolver execution.
@@ -33,9 +38,10 @@ const AUTH_OPERATIONS = new Set(['Login', 'Register', 'Refresh', 'Logout']);
  * @remarks
  * Priority order (most specific first):
  * 1. emailRateLimiter  — email-sending operations (5 req / 15 min, keyed by ip:operation)
- * 2. authRateLimiter   — auth mutations (20 req / 60 s, keyed by IP)
- * 3. generalRateLimiter — authenticated operations (200 req / 60 s, keyed by userId)
- * 4. guestRateLimiter  — all other unauthenticated operations (60 req / 60 s, keyed by IP)
+ * 2. authRateLimiter   — auth mutations (10 req / 60 s, keyed by IP)
+ * 3. uploadRateLimiter — pre-signed URL generation (20 req / 10 min, keyed by userId)
+ * 4. generalRateLimiter — authenticated operations (200 req / 60 s, keyed by userId)
+ * 5. guestRateLimiter  — all other unauthenticated operations (60 req / 60 s, keyed by IP)
  */
 export const rateLimiterPlugin: ApolloServerPlugin<GraphQLContext> = {
   async requestDidStart() {
@@ -55,6 +61,8 @@ export const rateLimiterPlugin: ApolloServerPlugin<GraphQLContext> = {
             await emailRateLimiter.consume(`${ip}:${name}`);
           } else if (AUTH_OPERATIONS.has(name)) {
             await authRateLimiter.consume(ip);
+          } else if (UPLOAD_OPERATIONS.has(name)) {
+            await uploadRateLimiter.consume(currentUser!.userId);
           } else if (currentUser) {
             await generalRateLimiter.consume(currentUser.userId);
           } else {
