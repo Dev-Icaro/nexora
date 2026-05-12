@@ -8,6 +8,7 @@ export type CreatePostRequest = {
 export type GetUploadUrlInput = {
   filename: string;
   contentType: string;
+  fileSizeBytes: number;
 };
 
 export type GetUploadUrlRequest = {

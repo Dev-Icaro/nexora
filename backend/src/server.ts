@@ -21,6 +21,7 @@ import { subscriptionResolver } from '@/graphql/resolvers/subscription.resolver'
 import { userResolver } from '@/graphql/resolvers/user.resolver';
 import { typeDefs } from '@/graphql/typeDefs';
 import { startCleanupPendingUploadsJob } from '@/jobs/cleanup-pending-uploads.job';
+import { startReconcileStorageCountersJob } from '@/jobs/reconcile-storage-counters.job';
 import httpErrorHandler from '@/rest/middlewares/error-handler';
 import { authRouter } from '@/rest/routes/auth.router';
 import logger from '@/utils/logger';
@@ -33,6 +34,7 @@ const schema = makeExecutableSchema({
 const bootstrap = async (): Promise<void> => {
   await connectDatabase();
   startCleanupPendingUploadsJob();
+  startReconcileStorageCountersJob();
 
   const app = express();
   app.use(cors<cors.CorsRequest>({ origin: env.CORS_ORIGIN, credentials: true }));

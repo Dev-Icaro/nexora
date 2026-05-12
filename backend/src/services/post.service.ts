@@ -1,3 +1,5 @@
+import mongoose from 'mongoose';
+
 import settings from '@/config/settings';
 import type CreatePostResponse from '@/dtos/create-post-response.dto';
 import type DeletePostResponse from '@/dtos/delete-post-response.dto';
@@ -10,6 +12,7 @@ import { Comment } from '@/models/comment.model';
 import { Like } from '@/models/like.model';
 import { MediaUpload } from '@/models/media-upload.model';
 import { Post } from '@/models/post.model';
+import { User } from '@/models/user.model';
 import {
   ALLOWED_CONTENT_TYPES,
   getFileSizeLimit,
@@ -30,12 +33,31 @@ export class PostService implements IPostService {
     private readonly storageProvider: IStorageProvider,
   ) {}
 
-  async getUploadUrl(userId: string, filename: string, contentType: string): Promise<GetUploadUrlResponse> {
+  async getUploadUrl(
+    userId: string,
+    filename: string,
+    contentType: string,
+    fileSizeBytes: number,
+  ): Promise<GetUploadUrlResponse> {
     if (!ALLOWED_CONTENT_TYPES.has(contentType)) {
       throw new BadRequestException(`Unsupported content type: ${contentType}`);
     }
 
     const maxFileSizeBytes = getFileSizeLimit(contentType);
+    if (fileSizeBytes > maxFileSizeBytes) {
+      throw new BadRequestException('File size exceeds the maximum allowed size for this file type');
+    }
+
+    const user = await this.userService.findById(userId);
+    if (!user) throw new NotFoundException('User not found');
+
+    const storageUsed = user.storageUsedBytes ?? 0;
+    const storageQuota = user.storageQuotaBytes ?? settings.STORAGE_QUOTA_FREE_BYTES;
+
+    if (storageUsed + fileSizeBytes > storageQuota) {
+      throw new BadRequestException('Storage quota exceeded');
+    }
+
     const objectKey = StorageKeyGenerator.generatePendingPostKey(userId, filename);
 
     const { url, fields } = await withRetry(() =>
@@ -100,25 +122,39 @@ export class PostService implements IPostService {
     if (!user) throw new NotFoundException('User not found');
 
     const createdAt = new Date().toISOString();
-    const post = await Post.create({
-      body,
-      mediaKey: confirmedKey,
-      username: user.username,
-      user: userId,
-      createdAt,
-    });
+    const session = await mongoose.connection.startSession();
+    let post: InstanceType<typeof Post>;
+    try {
+      session.startTransaction();
 
-    if (confirmedKey && objectKey) {
-      await MediaUpload.findOneAndUpdate(
-        { objectKey, status: 'pending', userId },
-        {
-          status: 'confirmed',
-          entityId: post._id,
-          objectKey: confirmedKey,
-          confirmedUrl: confirmedKey,
-          sizeBytes: mediaContentLength,
-        },
-      );
+      post = new Post({ body, mediaKey: confirmedKey, username: user.username, user: userId, createdAt });
+      await post.save({ session });
+
+      if (confirmedKey && objectKey) {
+        await MediaUpload.findOneAndUpdate(
+          { objectKey, status: 'pending', userId },
+          {
+            status: 'confirmed',
+            entityId: post._id,
+            objectKey: confirmedKey,
+            confirmedUrl: confirmedKey,
+            sizeBytes: mediaContentLength,
+          },
+          { session },
+        );
+        await User.findByIdAndUpdate(
+          userId,
+          { $inc: { storageUsedBytes: mediaContentLength, uploadCount: 1 } },
+          { session },
+        );
+      }
+
+      await session.commitTransaction();
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      session.endSession();
     }
 
     return {
@@ -143,8 +179,19 @@ export class PostService implements IPostService {
 
     if (post.user?.toString() !== userId) throw new ForbiddenException('Action not allowed');
 
+    const mediaUpload = post.mediaKey ? await MediaUpload.findOne({ entityId: postId, status: 'confirmed' }) : null;
+
     await Post.deleteOne({ _id: postId });
     await Promise.all([Comment.deleteMany({ postId }), Like.deleteMany({ postId })]);
+
+    if (mediaUpload) {
+      const fileKey = mediaUpload.confirmedUrl ?? mediaUpload.objectKey;
+      await Promise.all([
+        MediaUpload.deleteOne({ _id: mediaUpload._id }),
+        this.storageProvider.deleteFile(fileKey),
+        User.findByIdAndUpdate(userId, { $inc: { storageUsedBytes: -(mediaUpload.sizeBytes ?? 0) } }),
+      ]);
+    }
 
     return { code: 200, success: true, message: 'Post deleted successfully' };
   }

@@ -17,7 +17,7 @@ export function useUploadMedia(): UseUploadMediaResult {
   const uploadMedia = async (file: File): Promise<string | undefined> => {
     try {
       const result = await getUploadUrlMutation({
-        variables: { request: { filename: file.name, contentType: file.type } },
+        variables: { request: { filename: file.name, contentType: file.type, fileSizeBytes: file.size } },
       });
 
       const data = result.data?.getUploadUrl;

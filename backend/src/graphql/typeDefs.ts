@@ -24,6 +24,13 @@ export const typeDefs = `#graphql
     author: User!
   }
 
+  type StorageInfo {
+    usedBytes: Int!
+    quotaBytes: Int!
+    remainingBytes: Int!
+    usedPercent: Float!
+  }
+
   type User {
     id: ID!
     email: String!
@@ -32,6 +39,7 @@ export const typeDefs = `#graphql
     bio: String
     position: String
     themePreference: String
+    storageInfo: StorageInfo!
   }
 
   input RegisterRequest {
@@ -111,6 +119,7 @@ export const typeDefs = `#graphql
   input GetUploadUrlRequest {
     filename: String!
     contentType: String!
+    fileSizeBytes: Int!
   }
 
   type GetUploadUrlResponse {

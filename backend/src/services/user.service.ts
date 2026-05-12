@@ -1,3 +1,4 @@
+import settings from '@/config/settings';
 import type CreateUserDto from '@/dtos/create-user.dto';
 import type UpdateProfileRequestDto from '@/dtos/update-profile-request.dto';
 import type UpdateProfileResponseDto from '@/dtos/update-profile-response.dto';
@@ -21,6 +22,8 @@ export class UserService implements IUserService {
       createdAt: user.createdAt,
       bio: user.bio ?? undefined,
       position: user.position ?? undefined,
+      storageUsedBytes: user.storageUsedBytes ?? 0,
+      storageQuotaBytes: user.storageQuotaBytes ?? settings.STORAGE_QUOTA_FREE_BYTES,
     };
   }
 
@@ -35,6 +38,8 @@ export class UserService implements IUserService {
       createdAt: user.createdAt,
       bio: user.bio ?? undefined,
       position: user.position ?? undefined,
+      storageUsedBytes: user.storageUsedBytes ?? 0,
+      storageQuotaBytes: user.storageQuotaBytes ?? settings.STORAGE_QUOTA_FREE_BYTES,
     };
   }
 
@@ -57,6 +62,8 @@ export class UserService implements IUserService {
       createdAt: user.createdAt,
       bio: user.bio ?? undefined,
       position: user.position ?? undefined,
+      storageUsedBytes: user.storageUsedBytes ?? 0,
+      storageQuotaBytes: user.storageQuotaBytes ?? settings.STORAGE_QUOTA_FREE_BYTES,
     };
   }
 
@@ -83,6 +90,8 @@ export class UserService implements IUserService {
       createdAt: user.createdAt,
       bio: user.bio ?? undefined,
       position: user.position ?? undefined,
+      storageUsedBytes: user.storageUsedBytes ?? 0,
+      storageQuotaBytes: user.storageQuotaBytes ?? settings.STORAGE_QUOTA_FREE_BYTES,
     };
   }
 
@@ -93,6 +102,7 @@ export class UserService implements IUserService {
       email: userData.email,
       password: userData.password,
       createdAt,
+      storageQuotaBytes: settings.STORAGE_QUOTA_FREE_BYTES,
       ...(userData.provider && userData.providerId
         ? { oauthAccounts: [{ provider: userData.provider, providerId: userData.providerId }] }
         : {}),

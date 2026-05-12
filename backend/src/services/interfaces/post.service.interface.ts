@@ -14,9 +14,15 @@ export interface IPostService {
    * @param userId - The authenticated user's ID (embedded in the object key path).
    * @param filename - Original filename; used for extension extraction and key generation.
    * @param contentType - The MIME type claimed by the client; must be in the allow-list.
+   * @param fileSizeBytes - Client-declared file size in bytes; validated against per-type limit and user quota.
    * @returns A promise resolving to a {@link GetUploadUrlResponse} with the URL, form fields, and object key.
    */
-  getUploadUrl(userId: string, filename: string, contentType: string): Promise<GetUploadUrlResponse>;
+  getUploadUrl(
+    userId: string,
+    filename: string,
+    contentType: string,
+    fileSizeBytes: number,
+  ): Promise<GetUploadUrlResponse>;
 
   /**
    * Creates a new post on behalf of the authenticated user.

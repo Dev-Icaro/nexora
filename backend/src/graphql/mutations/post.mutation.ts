@@ -6,9 +6,15 @@ import type { GraphQLContext } from '../context';
 export const postMutations = {
   getUploadUrl: async (
     _: unknown,
-    { request }: { request: { filename: string; contentType: string } },
+    { request }: { request: { filename: string; contentType: string; fileSizeBytes: number } },
     { dataSources, currentUser }: GraphQLContext,
-  ) => dataSources.postService.getUploadUrl(currentUser!.userId, request.filename, request.contentType),
+  ) =>
+    dataSources.postService.getUploadUrl(
+      currentUser!.userId,
+      request.filename,
+      request.contentType,
+      request.fileSizeBytes,
+    ),
 
   createPost: async (
     _: unknown,
