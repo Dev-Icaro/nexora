@@ -10,7 +10,10 @@ export function apolloErrorHandler(formattedError: GraphQLFormattedError, error:
 
   const originalError = unwrapResolverError(error);
 
-  if (originalError instanceof AppException || originalError instanceof GraphQLError) {
+  if (
+    (originalError instanceof AppException && originalError.statusCode !== 500) ||
+    originalError instanceof GraphQLError
+  ) {
     return {
       ...formattedError,
       message: originalError.message,

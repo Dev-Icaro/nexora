@@ -14,7 +14,7 @@ export default function httpErrorHandler(
   if (error instanceof AppException) {
     return res.status(error.statusCode).json({
       status: 'error',
-      message: error.message,
+      message: error.statusCode === 500 ? 'Internal Server Error' : error.message,
     });
   } else {
     return res.status(500).json({
