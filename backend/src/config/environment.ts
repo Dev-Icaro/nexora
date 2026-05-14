@@ -28,6 +28,10 @@ const environmentSchema = z.object({
   AWS_S3_BUCKET_NAME: z.string().min(1),
   AWS_ACCESS_KEY_ID: z.string().optional(),
   AWS_SECRET_ACCESS_KEY: z.string().optional(),
+  AWS_CLOUDFRONT_DOMAIN: z.string().url(),
+  AWS_CLOUDFRONT_KEY_PAIR_ID: z.string().min(1),
+  AWS_CLOUDFRONT_PRIVATE_KEY_SECRET_NAME: z.string().min(1),
+  AWS_CLOUDFRONT_REGION: z.string().min(1),
 });
 
 export default environmentSchema.parse(process.env);

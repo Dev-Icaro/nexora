@@ -1,6 +1,6 @@
 import type { GraphQLContext } from '@/graphql/context';
 import { postQueries } from '@/graphql/queries/post.query';
-import { DocumentDownloadMode } from '@/types/storage';
+import { signMediaUrl } from '@/services/cloud/cloud-front';
 
 export const postResolver = {
   Query: {
@@ -17,13 +17,9 @@ export const postResolver = {
     likes: (parent: { id: string }, _: unknown, { loaders }: GraphQLContext) => loaders.likesLoader.load(parent.id),
     likeCount: (parent: { likeCount: number }) => parent.likeCount,
     commentCount: (parent: { commentCount: number }) => parent.commentCount,
-    mediaUrl: async (
-      parent: { mediaKey?: string; mediaUrl?: string },
-      _: unknown,
-      { dataSources }: GraphQLContext,
-    ): Promise<string | null> => {
+    mediaUrl: async (parent: { mediaKey?: string; mediaUrl?: string }): Promise<string | null> => {
       if (parent.mediaKey) {
-        return dataSources.storageProvider.getPresignedDownloadUrl(parent.mediaKey, 3600, DocumentDownloadMode.VIEW);
+        return signMediaUrl(parent.mediaKey);
       }
       return parent.mediaUrl ?? null;
     },
