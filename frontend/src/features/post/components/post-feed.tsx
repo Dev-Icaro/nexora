@@ -8,11 +8,13 @@ import { PostFeedEmpty } from './post-feed-empty';
 import { PostFeedError } from './post-feed-error';
 import { PostFeedInlineError } from './post-feed-inline-error';
 import { PostFeedSkeleton } from './post-feed-skeleton';
+import { PostUploadingSkeleton } from './post-uploading-skeleton';
 
 type PostFeedProps = {
   posts: PostNode[];
   loading: boolean;
   isFetchingNextPage: boolean;
+  isUploadingPost?: boolean;
   error?: string;
   paginationError?: string;
   hasNextPage: boolean;
@@ -25,6 +27,7 @@ export function PostFeed({
   posts,
   loading,
   isFetchingNextPage,
+  isUploadingPost,
   error,
   paginationError,
   hasNextPage,
@@ -68,6 +71,7 @@ export function PostFeed({
 
   return (
     <div className="space-y-4">
+      {isUploadingPost && <PostUploadingSkeleton />}
       {posts.map((post, index) => {
         const observedIndex = posts.length > 1 ? posts.length - 2 : posts.length - 1;
         const isObservedPost = index === observedIndex;
