@@ -15,7 +15,10 @@ export function useCreatePost(): UseCreatePostResult {
 
   const createPost = async (body: string, objectKey?: string): Promise<PostNode | undefined> => {
     try {
-      const result = await createPostMutation({ variables: { body, objectKey } });
+      const result = await createPostMutation({
+        variables: { body, objectKey },
+        refetchQueries: objectKey ? ['GetProfile'] : [],
+      });
 
       const responseData = result.data;
       if (!responseData?.createPost.success || !responseData.createPost.post) {

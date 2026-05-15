@@ -1,5 +1,12 @@
 import type { ApiResponse } from '@/shared/types';
 
+export type StorageInfo = {
+  usedBytes: number;
+  quotaBytes: number;
+  remainingBytes: number;
+  usedPercent: number;
+};
+
 export type ProfileUser = {
   id: string;
   username: string;
@@ -7,6 +14,7 @@ export type ProfileUser = {
   position?: string;
   avatarUrl?: string;
   email: string;
+  storageInfo: StorageInfo;
 };
 
 export type GetProfileRequest = { userId: string };

@@ -7,6 +7,12 @@ export const GET_PROFILE = gql`
       username
       bio
       position
+      storageInfo {
+        usedBytes
+        quotaBytes
+        remainingBytes
+        usedPercent
+      }
     }
   }
 `;

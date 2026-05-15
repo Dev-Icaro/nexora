@@ -26,6 +26,15 @@ export function getApiErrorMessage(
   return error?.message;
 }
 
+export function formatBytes(bytes: number): string {
+  if (bytes === 0) return '0 B';
+  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  const value = bytes / Math.pow(1024, i);
+  const formatted = value % 1 === 0 ? value.toString() : value.toFixed(1).replace(/\.0$/, '');
+  return `${formatted} ${units[i]}`;
+}
+
 export function getInitials(name: string): string {
   return name
     .split(' ')

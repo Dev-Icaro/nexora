@@ -8,12 +8,14 @@ import type {
   GetProfileRequest,
   GetProfileResponse,
   ProfileUser,
+  StorageInfo,
   UpdateProfileRequest,
   UpdateProfileResponse,
 } from '../api/profile.types';
 
 export type UseProfileResult = {
   user: ProfileUser | null;
+  storageInfo: StorageInfo | null;
   loading: boolean;
   error: string | undefined;
   updateProfile: (input: UpdateProfileRequest) => Promise<boolean>;
@@ -50,6 +52,7 @@ export function useProfile(userId: string): UseProfileResult {
 
   return {
     user: data?.getUserById ?? null,
+    storageInfo: data?.getUserById?.storageInfo ?? null,
     loading,
     error: error?.message,
     updateProfile,

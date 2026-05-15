@@ -2,6 +2,7 @@ import { useAuth } from '@/features/auth/hooks/use-auth';
 import { useProfile } from '@/features/profile/hooks/use-profile';
 import { AppearanceSection } from '@/features/settings/components/appearance-section';
 import { PersonalInformationForm } from '@/features/settings/components/personal-information-form';
+import { StorageSection } from '@/features/settings/components/storage-section';
 import { useTheme } from '@/shared/hooks/use-theme';
 
 export function SettingsPage() {
@@ -11,7 +12,7 @@ export function SettingsPage() {
     state: { user: authUser },
   } = useAuth();
 
-  const { user, loading: profileLoading, updateProfile, updateLoading } = useProfile(authUser?.id ?? '');
+  const { user, storageInfo, loading: profileLoading, updateProfile, updateLoading } = useProfile(authUser?.id ?? '');
 
   if (profileLoading || !user) return null;
 
@@ -22,6 +23,7 @@ export function SettingsPage() {
     bio: user.bio,
     position: user.position,
     avatarUrl: user.avatarUrl,
+    storageInfo: user.storageInfo,
   };
 
   return (
@@ -33,6 +35,7 @@ export function SettingsPage() {
 
       <PersonalInformationForm profile={profile} loading={updateLoading} onSubmit={updateProfile} />
       <AppearanceSection value={preference} onValueChange={setTheme} />
+      <StorageSection storageInfo={storageInfo} />
     </main>
   );
 }
