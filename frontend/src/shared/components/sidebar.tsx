@@ -6,7 +6,7 @@ import { useAuth } from '@/features/auth/hooks/use-auth';
 import { useProfileNavigation } from '@/shared/hooks/use-profile-navigation';
 import { cn } from '@/shared/lib/utils';
 
-import { Avatar, AvatarFallback } from './ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Button } from './ui/button';
 import { Separator } from './ui/separator';
 import { UserProfileSection } from './user-profile-section';
@@ -74,6 +74,7 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
             aria-label="View your profile"
           >
             <Avatar className="size-10">
+              {user?.avatarUrl && <AvatarImage src={user.avatarUrl} alt={user.username} />}
               <AvatarFallback className="bg-primary/20 text-primary font-semibold text-sm">{initials}</AvatarFallback>
             </Avatar>
           </button>
@@ -82,6 +83,7 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
         <>
           <UserProfileSection
             name={user?.username ?? 'Unknown'}
+            avatarUrl={user?.avatarUrl}
             isVerified={true}
             role="College Doctor"
             bio="Guiding the next generation through the journey of health and knowledge!"

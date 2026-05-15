@@ -23,6 +23,7 @@ export type GetProfileResponse = { getUserById: ProfileUser };
 export type UpdateProfileRequest = {
   bio?: string;
   position?: string;
+  objectKey?: string;
 };
 
 export type UpdateProfileUser = {
@@ -31,8 +32,28 @@ export type UpdateProfileUser = {
   username: string;
   bio?: string;
   position?: string;
+  avatarUrl?: string;
 };
 
 export type UpdateProfileResponse = {
   updateProfile: ApiResponse & { user?: UpdateProfileUser };
+};
+
+export type GetAvatarUploadUrlInput = {
+  filename: string;
+  contentType: string;
+  fileSizeBytes: number;
+};
+
+export type GetAvatarUploadUrlRequest = { request: GetAvatarUploadUrlInput };
+
+export type GetAvatarUploadUrlResponse = {
+  getAvatarUploadUrl: {
+    code: number;
+    message: string;
+    success: boolean;
+    uploadUrl?: string;
+    fields?: string;
+    objectKey?: string;
+  };
 };

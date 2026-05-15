@@ -6,15 +6,15 @@ import { toast } from '@/shared/lib/toast';
 import { GET_UPLOAD_URL } from '../api/post.mutations';
 import type { GetUploadUrlRequest, GetUploadUrlResponse } from '../api/post.types';
 
-type UseUploadMediaResult = {
-  uploadMedia: (file: File) => Promise<string | undefined>;
+type UseUploadPostMediaResult = {
+  uploadPostMedia: (file: File) => Promise<string | undefined>;
   uploading: boolean;
 };
 
-export function useUploadMedia(): UseUploadMediaResult {
+export function useUploadPostMedia(): UseUploadPostMediaResult {
   const [getUploadUrlMutation, { loading }] = useMutation<GetUploadUrlResponse, GetUploadUrlRequest>(GET_UPLOAD_URL);
 
-  const uploadMedia = async (file: File): Promise<string | undefined> => {
+  const uploadPostMedia = async (file: File): Promise<string | undefined> => {
     try {
       const result = await getUploadUrlMutation({
         variables: { request: { filename: file.name, contentType: file.type, fileSizeBytes: file.size } },
@@ -36,5 +36,5 @@ export function useUploadMedia(): UseUploadMediaResult {
     }
   };
 
-  return { uploadMedia, uploading: loading };
+  return { uploadPostMedia, uploading: loading };
 }

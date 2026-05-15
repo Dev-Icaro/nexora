@@ -2,6 +2,7 @@ export type AuthUser = {
   id: string;
   username: string;
   email: string;
+  avatarUrl?: string;
 };
 
 export type AuthState = {
@@ -16,7 +17,8 @@ export type AuthAction =
   | { type: 'RESTORE_SESSION'; payload: { user: AuthUser; token: string } }
   | { type: 'INITIALIZE_DONE' }
   | { type: 'LOGIN'; payload: { user: AuthUser; token: string } }
-  | { type: 'LOGOUT' };
+  | { type: 'LOGOUT' }
+  | { type: 'UPDATE_USER'; payload: Partial<AuthUser> };
 
 export const initialAuthState: AuthState = {
   user: null,
@@ -41,6 +43,8 @@ export function authReducer(state: AuthState, action: AuthAction): AuthState {
       return { ...state, isInitializing: false };
     case 'LOGOUT':
       return { ...initialAuthState, isInitializing: false };
+    case 'UPDATE_USER':
+      return { ...state, user: state.user ? { ...state.user, ...action.payload } : null };
     default:
       return state;
   }

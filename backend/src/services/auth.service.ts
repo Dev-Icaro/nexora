@@ -146,6 +146,7 @@ export class AuthService implements IAuthService {
         email: user.email,
         username: user.username,
         createdAt: user.createdAt,
+        avatarKey: user.avatarKey,
       },
     };
   }
@@ -214,6 +215,7 @@ export class AuthService implements IAuthService {
         email: user.email,
         username: user.username,
         createdAt: user.createdAt,
+        avatarKey: user.avatarKey,
       },
     };
   }

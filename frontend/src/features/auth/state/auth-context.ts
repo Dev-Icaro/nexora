@@ -7,6 +7,7 @@ export type AuthContextValue = {
   state: AuthState;
   login: (user: AuthUser, token: string) => void;
   logout: () => void;
+  updateUser: (updates: Partial<AuthUser>) => void;
 };
 
 export const AuthContext = createContext<AuthContextValue | null>(null);

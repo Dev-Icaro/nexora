@@ -35,6 +35,7 @@ export type CreatePostResponse = {
 export type PostAuthor = {
   id: string;
   username: string;
+  avatarUrl?: string;
 };
 
 export type PostNode = {

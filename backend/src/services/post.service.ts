@@ -13,12 +13,7 @@ import { Like } from '@/models/like.model';
 import { MediaUpload } from '@/models/media-upload.model';
 import { Post } from '@/models/post.model';
 import { User } from '@/models/user.model';
-import {
-  ALLOWED_CONTENT_TYPES,
-  getFileSizeLimit,
-  MAGIC_BYTES_HEADER_LENGTH,
-  validateMagicBytes,
-} from '@/utils/magic-bytes';
+import { getFileSizeLimit, MAGIC_BYTES_HEADER_LENGTH, validateMagicBytes } from '@/utils/magic-bytes';
 import { decodeCursor, encodeCursor } from '@/utils/pagination';
 import { withRetry } from '@/utils/retry';
 import StorageKeyGenerator from '@/utils/storage-key-generator';
@@ -26,6 +21,8 @@ import StorageKeyGenerator from '@/utils/storage-key-generator';
 import type { IPostService } from './interfaces/post.service.interface';
 import type { IStorageProvider } from './interfaces/storage-provider.interface';
 import type { IUserService } from './interfaces/user.service.interface';
+
+const allowedContentTypes = new Set(settings.POST_ALLOWED_CONTENT_TYPES);
 
 export class PostService implements IPostService {
   constructor(
@@ -39,7 +36,7 @@ export class PostService implements IPostService {
     contentType: string,
     fileSizeBytes: number,
   ): Promise<GetUploadUrlResponse> {
-    if (!ALLOWED_CONTENT_TYPES.has(contentType)) {
+    if (!allowedContentTypes.has(contentType)) {
       throw new BadRequestException(`Unsupported content type: ${contentType}`);
     }
 

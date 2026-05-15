@@ -20,6 +20,7 @@ const userSchema = new Schema({
   themePreference: { type: String, default: 'system', required: false },
   tokens: [{ refreshTokenHash: { type: String, required: true }, expiresAt: { type: Date, required: true } }],
   oauthAccounts: { type: [oauthAccountSchema], default: [] },
+  avatarKey: { type: String, required: false },
   storageUsedBytes: { type: Number, default: 0 },
   storageQuotaBytes: { type: Number, default: 524_288_000 },
   uploadCount: { type: Number, default: 0 },

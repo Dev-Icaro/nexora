@@ -3,23 +3,11 @@ import { HardDrive } from 'lucide-react';
 import type { StorageInfo } from '@/features/profile/api/profile.types';
 import { Progress } from '@/shared/components/ui/progress';
 import { Skeleton } from '@/shared/components/ui/skeleton';
-import { cn, formatBytes } from '@/shared/lib/utils';
+import { formatBytes } from '@/shared/lib/utils';
 
 type StorageSectionProps = {
   storageInfo: StorageInfo | null;
 };
-
-function getIndicatorClassName(usedPercent: number): string {
-  if (usedPercent >= 90) return 'bg-destructive';
-  if (usedPercent >= 70) return 'bg-[oklch(0.78_0.17_85)]';
-  return 'bg-[oklch(0.65_0.16_140)]';
-}
-
-function getPercentLabelClassName(usedPercent: number): string {
-  if (usedPercent >= 90) return 'text-destructive';
-  if (usedPercent >= 70) return 'text-[oklch(0.55_0.13_85)]';
-  return 'text-muted-foreground';
-}
 
 export function StorageSection({ storageInfo }: StorageSectionProps) {
   return (
@@ -51,17 +39,10 @@ function StorageSectionContent({ storageInfo }: { storageInfo: StorageInfo }) {
             {formatBytes(quotaBytes)} used
           </span>
         </div>
-        <span className={cn('text-xs font-medium tabular-nums', getPercentLabelClassName(clamped))}>
-          {clamped.toFixed(1)}%
-        </span>
+        <span className="text-xs font-medium tabular-nums text-muted-foreground">{clamped.toFixed(1)}%</span>
       </div>
 
-      <Progress
-        value={clamped}
-        max={100}
-        aria-label="Storage used"
-        indicatorClassName={getIndicatorClassName(clamped)}
-      />
+      <Progress value={clamped} max={100} aria-label="Storage used" indicatorClassName="bg-primary" />
 
       <p className="text-[12px] text-muted-foreground">{formatBytes(remainingBytes)} remaining</p>
     </>

@@ -1,4 +1,4 @@
-import { UploadCloud } from 'lucide-react';
+import { Loader2, UploadCloud } from 'lucide-react';
 import { type ChangeEvent, type DragEvent, useRef, useState } from 'react';
 
 import { Button } from '@/shared/components/ui/button';
@@ -11,45 +11,60 @@ const MAX_SIZE_BYTES = 5 * 1024 * 1024;
 type AvatarUploadModalProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onUpload: (file: File) => Promise<void>;
+  uploading?: boolean;
 };
 
-export function AvatarUploadModal({ open, onOpenChange }: AvatarUploadModalProps) {
+export function AvatarUploadModal({ open, onOpenChange, onUpload, uploading = false }: AvatarUploadModalProps) {
   const [preview, setPreview] = useState<string | null>(null);
+  const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const dragCounter = useRef(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  function handleFile(file: File) {
-    if (!ACCEPTED_TYPES.has(file.type)) {
+  function handleFile(selected: File) {
+    if (!ACCEPTED_TYPES.has(selected.type)) {
       setError('Only JPEG, PNG, and WebP files are accepted.');
       setPreview(null);
+      setFile(null);
       return;
     }
-    if (file.size > MAX_SIZE_BYTES) {
+    if (selected.size > MAX_SIZE_BYTES) {
       setError('File must be under 5 MB.');
       setPreview(null);
+      setFile(null);
       return;
     }
     setError(null);
-    setPreview(URL.createObjectURL(file));
+    setFile(selected);
+    setPreview(URL.createObjectURL(selected));
   }
 
   function handleDrop(e: DragEvent) {
     e.preventDefault();
+    dragCounter.current = 0;
     setIsDragging(false);
-    const file = e.dataTransfer.files[0];
-    if (file) handleFile(file);
+    const dropped = e.dataTransfer.files[0];
+    if (dropped) handleFile(dropped);
   }
 
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (file) handleFile(file);
+    const selected = e.target.files?.[0];
+    if (selected) handleFile(selected);
   }
 
   function handleClose() {
     setPreview(null);
+    setFile(null);
     setError(null);
     onOpenChange(false);
+  }
+
+  async function handleSave() {
+    if (!file || uploading) return;
+    await onUpload(file);
+    handleClose();
   }
 
   return (
@@ -68,11 +83,16 @@ export function AvatarUploadModal({ open, onOpenChange }: AvatarUploadModalProps
           )}
           onClick={() => inputRef.current?.click()}
           onKeyDown={e => e.key === 'Enter' && inputRef.current?.click()}
-          onDragOver={e => {
+          onDragEnter={e => {
             e.preventDefault();
+            dragCounter.current++;
             setIsDragging(true);
           }}
-          onDragLeave={() => setIsDragging(false)}
+          onDragOver={e => e.preventDefault()}
+          onDragLeave={() => {
+            dragCounter.current--;
+            if (dragCounter.current === 0) setIsDragging(false);
+          }}
           onDrop={handleDrop}
         >
           {preview ? (
@@ -100,11 +120,18 @@ export function AvatarUploadModal({ open, onOpenChange }: AvatarUploadModalProps
         {error && <p className="text-sm text-destructive">{error}</p>}
 
         <DialogFooter>
-          <Button variant="outline" onClick={handleClose}>
+          <Button variant="outline" onClick={handleClose} disabled={uploading}>
             Cancel
           </Button>
-          <Button disabled={!preview} onClick={handleClose}>
-            Save
+          <Button disabled={!file || uploading} onClick={handleSave}>
+            {uploading ? (
+              <>
+                <Loader2 className="size-3.5 animate-spin" />
+                Saving…
+              </>
+            ) : (
+              'Save'
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

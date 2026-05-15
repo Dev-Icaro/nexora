@@ -8,14 +8,14 @@ export type GetPostByIdResponse = {
     body: string;
     mediaUrl: string | null;
     createdAt: string;
-    author: { id: string; username: string };
+    author: { id: string; username: string; avatarUrl?: string };
     likeCount: number;
     commentCount: number;
     comments: Array<{
       id: string;
       body: string;
       createdAt: string;
-      author: { id: string; username: string };
+      author: { id: string; username: string; avatarUrl?: string };
     }>;
     likes: Array<{
       id: string;
@@ -34,6 +34,7 @@ export const GET_POST_BY_ID = gql`
       author {
         id
         username
+        avatarUrl
       }
       likeCount
       commentCount
@@ -44,6 +45,7 @@ export const GET_POST_BY_ID = gql`
         author {
           id
           username
+          avatarUrl
         }
       }
       likes {
@@ -70,6 +72,7 @@ export const GET_USER_POSTS = gql`
           author {
             id
             username
+            avatarUrl
           }
           likeCount
           commentCount
@@ -100,6 +103,7 @@ export const NEW_POST_SUBSCRIPTION = gql`
       author {
         id
         username
+        avatarUrl
       }
       likeCount
       commentCount
@@ -127,6 +131,7 @@ export const GET_FEED = gql`
           author {
             id
             username
+            avatarUrl
           }
           likeCount
           commentCount

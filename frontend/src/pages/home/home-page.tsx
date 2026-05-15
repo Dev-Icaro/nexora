@@ -9,7 +9,7 @@ import { PostFeed } from '@/features/post/components/post-feed';
 import { useCreatePost } from '@/features/post/hooks/use-create-post';
 import { useFeed } from '@/features/post/hooks/use-feed';
 import { useNewPostsNotification } from '@/features/post/hooks/use-new-posts-notification';
-import { useUploadMedia } from '@/features/post/hooks/use-upload-media';
+import { useUploadPostMedia } from '@/features/post/hooks/use-upload-post-media';
 
 export function HomePage() {
   const { state } = useAuth();
@@ -18,7 +18,7 @@ export function HomePage() {
   const navigate = useNavigate();
 
   const { createPost } = useCreatePost();
-  const { uploadMedia } = useUploadMedia();
+  const { uploadPostMedia } = useUploadPostMedia();
   const [isUploadingPost, setIsUploadingPost] = useState(false);
   const {
     posts,
@@ -40,7 +40,7 @@ export function HomePage() {
     try {
       let objectKey: string | undefined;
       if (mediaFile) {
-        objectKey = await uploadMedia(mediaFile);
+        objectKey = await uploadPostMedia(mediaFile);
         if (!objectKey) return false;
       }
       const post = await createPost(body, objectKey);

@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '@/features/auth/hooks/use-auth';
 import { useProfileNavigation } from '@/shared/hooks/use-profile-navigation';
 
-import { Avatar, AvatarFallback } from './ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Button } from './ui/button';
 
 export function MobileTopBar() {
@@ -29,6 +29,7 @@ export function MobileTopBar() {
           aria-label="View your profile"
         >
           <Avatar className="size-8">
+            {user?.avatarUrl && <AvatarImage src={user.avatarUrl} alt={user.username} />}
             <AvatarFallback className="bg-primary/20 text-primary text-xs font-semibold">{initials}</AvatarFallback>
           </Avatar>
         </button>

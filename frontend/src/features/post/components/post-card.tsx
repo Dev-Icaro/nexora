@@ -5,7 +5,7 @@ import { Bookmark, Heart, MessageCircle, MoreHorizontal, Send } from 'lucide-rea
 import { useState } from 'react';
 
 import { useAuth } from '@/features/auth/hooks/use-auth';
-import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar';
 import { Badge } from '@/shared/components/ui/badge';
 import { Button } from '@/shared/components/ui/button';
 import { Card, CardContent } from '@/shared/components/ui/card';
@@ -76,6 +76,7 @@ export function PostCard({ post, onOpenModal }: PostCardProps) {
               aria-label={`View ${post.author.username}'s profile`}
             >
               <Avatar className="size-12">
+                {post.author.avatarUrl && <AvatarImage src={post.author.avatarUrl} alt={post.author.username} />}
                 <AvatarFallback className="bg-primary/20 text-primary font-semibold">{initials}</AvatarFallback>
               </Avatar>
             </button>

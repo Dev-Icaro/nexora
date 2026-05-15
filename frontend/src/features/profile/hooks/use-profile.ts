@@ -1,5 +1,6 @@
 import { useMutation, useQuery } from '@apollo/client/react';
 
+import { useAuth } from '@/features/auth/hooks/use-auth';
 import { toast } from '@/shared/lib/toast';
 
 import { UPDATE_PROFILE_MUTATION } from '../api/profile.mutations';
@@ -23,6 +24,7 @@ export type UseProfileResult = {
 };
 
 export function useProfile(userId: string): UseProfileResult {
+  const { updateUser } = useAuth();
   const { data, loading, error } = useQuery<GetProfileResponse, GetProfileRequest>(GET_PROFILE, {
     variables: { userId },
   });
@@ -40,6 +42,10 @@ export function useProfile(userId: string): UseProfileResult {
       if (!response?.success) {
         toast.error(response?.message ?? 'Failed to update profile');
         return false;
+      }
+
+      if (response.user?.avatarUrl) {
+        updateUser({ avatarUrl: response.user.avatarUrl });
       }
 
       toast.success('Profile updated successfully');

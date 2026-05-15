@@ -1,5 +1,6 @@
 import { useAuth } from '@/features/auth/hooks/use-auth';
 import { useProfile } from '@/features/profile/hooks/use-profile';
+import { useUploadAvatar } from '@/features/profile/hooks/use-upload-avatar';
 import { AppearanceSection } from '@/features/settings/components/appearance-section';
 import { PersonalInformationForm } from '@/features/settings/components/personal-information-form';
 import { StorageSection } from '@/features/settings/components/storage-section';
@@ -13,6 +14,7 @@ export function SettingsPage() {
   } = useAuth();
 
   const { user, storageInfo, loading: profileLoading, updateProfile, updateLoading } = useProfile(authUser?.id ?? '');
+  const { uploadAvatar, loading: avatarLoading } = useUploadAvatar();
 
   if (profileLoading || !user) return null;
 
@@ -33,7 +35,13 @@ export function SettingsPage() {
         <p className="text-sm text-muted-foreground mt-1">Manage your account and preferences</p>
       </div>
 
-      <PersonalInformationForm profile={profile} loading={updateLoading} onSubmit={updateProfile} />
+      <PersonalInformationForm
+        profile={profile}
+        loading={updateLoading}
+        onSubmit={updateProfile}
+        onPrepareAvatar={uploadAvatar}
+        avatarPreparing={avatarLoading}
+      />
       <AppearanceSection value={preference} onValueChange={setTheme} />
       <StorageSection storageInfo={storageInfo} />
     </main>

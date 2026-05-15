@@ -5,6 +5,7 @@ import { PostFeed } from '@/features/post/components/post-feed';
 import { useUserPosts } from '@/features/post/hooks/use-user-posts';
 import { ProfileHeader } from '@/features/profile/components/profile-header';
 import { useProfile } from '@/features/profile/hooks/use-profile';
+import { useUploadAvatar } from '@/features/profile/hooks/use-upload-avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
 
 export function ProfilePage() {
@@ -13,9 +14,16 @@ export function ProfilePage() {
   const navigate = useNavigate();
   const isOwnProfile = userId === state.user?.id;
 
-  const { user: userData } = useProfile(userId);
+  const { user: userData, updateProfile } = useProfile(userId);
+  const { uploadAvatar, loading: avatarLoading } = useUploadAvatar();
   const { posts, loading, isFetchingNextPage, error, paginationError, refetch, fetchNextPage, hasNextPage } =
     useUserPosts(userId);
+
+  async function handleAvatarUpload(file: File): Promise<void> {
+    const result = await uploadAvatar(file);
+    if (!result) return;
+    await updateProfile({ objectKey: result.objectKey });
+  }
 
   const user = userData
     ? {
@@ -23,13 +31,21 @@ export function ProfilePage() {
         username: userData.username,
         role: userData.position,
         bio: userData.bio,
+        avatarUrl: userData.avatarUrl,
         stats: { posts: 0, followers: 0, following: 0 },
       }
     : null;
 
   return (
     <main className="max-w-2xl w-full mx-auto px-4 py-6 space-y-3">
-      {user && <ProfileHeader isOwnProfile={isOwnProfile} user={user} />}
+      {user && (
+        <ProfileHeader
+          isOwnProfile={isOwnProfile}
+          user={user}
+          onAvatarUpload={handleAvatarUpload}
+          avatarUploading={avatarLoading}
+        />
+      )}
 
       <Tabs defaultValue="posts" className="gap-3">
         <TabsList className="h-auto w-full rounded-2xl border border-border bg-card gap-3 py-5">

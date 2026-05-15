@@ -12,7 +12,21 @@ export const UPDATE_PROFILE_MUTATION = gql`
         username
         bio
         position
+        avatarUrl
       }
+    }
+  }
+`;
+
+export const GET_AVATAR_UPLOAD_URL = gql`
+  mutation GetAvatarUploadUrl($request: GetUploadUrlRequest!) {
+    getAvatarUploadUrl(request: $request) {
+      code
+      message
+      success
+      uploadUrl
+      fields
+      objectKey
     }
   }
 `;

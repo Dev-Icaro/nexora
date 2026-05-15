@@ -21,9 +21,11 @@ type ProfileUser = {
 type ProfileHeaderProps = {
   isOwnProfile: boolean;
   user: ProfileUser;
+  onAvatarUpload: (file: File) => Promise<void>;
+  avatarUploading?: boolean;
 };
 
-export function ProfileHeader({ isOwnProfile, user }: ProfileHeaderProps) {
+export function ProfileHeader({ isOwnProfile, user, onAvatarUpload, avatarUploading }: ProfileHeaderProps) {
   const [isFollowing, setIsFollowing] = useState(false);
   const [uploadOpen, setUploadOpen] = useState(false);
   const navigate = useNavigate();
@@ -46,7 +48,7 @@ export function ProfileHeader({ isOwnProfile, user }: ProfileHeaderProps) {
             </Avatar>
             {isOwnProfile && (
               <button
-                className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                 onClick={() => setUploadOpen(true)}
                 aria-label="Change avatar"
               >
@@ -95,7 +97,12 @@ export function ProfileHeader({ isOwnProfile, user }: ProfileHeaderProps) {
         </div>
       </div>
 
-      <AvatarUploadModal open={uploadOpen} onOpenChange={setUploadOpen} />
+      <AvatarUploadModal
+        open={uploadOpen}
+        onOpenChange={setUploadOpen}
+        onUpload={onAvatarUpload}
+        uploading={avatarUploading}
+      />
     </div>
   );
 }

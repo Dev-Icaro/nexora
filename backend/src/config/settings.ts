@@ -19,6 +19,8 @@ interface AppSettings {
   VIDEO_FILE_SIZE_LIMIT_BYTES: number;
   PRESIGNED_UPLOAD_URL_EXPIRY_SECONDS: number;
   STORAGE_QUOTA_FREE_BYTES: number;
+  POST_ALLOWED_CONTENT_TYPES: readonly string[];
+  AVATAR_POST_ALLOWED_CONTENT_TYPES: readonly string[];
 }
 
 const settings: AppSettings = {
@@ -42,6 +44,8 @@ const settings: AppSettings = {
   VIDEO_FILE_SIZE_LIMIT_BYTES: 200 * 1024 * 1024, // 200 MB
   PRESIGNED_UPLOAD_URL_EXPIRY_SECONDS: 900, // 15 minutes
   STORAGE_QUOTA_FREE_BYTES: 524_288_000, // 500 MB
+  POST_ALLOWED_CONTENT_TYPES: ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/webm'],
+  AVATAR_POST_ALLOWED_CONTENT_TYPES: ['image/jpeg', 'image/png', 'image/webp'],
 };
 
 export default settings;

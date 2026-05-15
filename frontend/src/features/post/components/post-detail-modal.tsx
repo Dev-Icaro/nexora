@@ -6,7 +6,7 @@ import type { CSSProperties, KeyboardEvent } from 'react';
 import { useEffect, useRef, useState } from 'react';
 
 import { useAuth } from '@/features/auth/hooks/use-auth';
-import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar';
 import { Badge } from '@/shared/components/ui/badge';
 import { Button } from '@/shared/components/ui/button';
 import { Dialog, DialogContent } from '@/shared/components/ui/dialog';
@@ -112,6 +112,7 @@ function CommentItem({ comment, onLike, onAuthorClick }: CommentItemProps) {
         aria-label={`View ${comment.author.username}'s profile`}
       >
         <Avatar className="size-8">
+          {comment.author.avatarUrl && <AvatarImage src={comment.author.avatarUrl} alt={comment.author.username} />}
           <AvatarFallback className="bg-primary/20 text-primary font-semibold text-xs">{initials}</AvatarFallback>
         </Avatar>
       </button>
@@ -167,6 +168,7 @@ function PostContentPanel({ post, liked, likeCount, saved, onLike, onSave, onAut
           aria-label={`View ${post.author.username}'s profile`}
         >
           <Avatar className="size-12">
+            {post.author.avatarUrl && <AvatarImage src={post.author.avatarUrl} alt={post.author.username} />}
             <AvatarFallback className="bg-primary/20 text-primary font-semibold">{initials}</AvatarFallback>
           </Avatar>
         </button>
@@ -303,6 +305,7 @@ function CommentsPanel({
           <Separator />
           <div className="flex items-end gap-2.5 p-3 shrink-0">
             <Avatar className="size-8 shrink-0">
+              {state.user?.avatarUrl && <AvatarImage src={state.user.avatarUrl} alt={state.user.username} />}
               <AvatarFallback className="bg-primary/20 text-primary font-semibold text-xs">{initials}</AvatarFallback>
             </Avatar>
             <div className="flex-1 relative">

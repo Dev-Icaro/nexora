@@ -7,6 +7,7 @@ type UserDto = {
   bio?: string;
   position?: string;
   themePreference?: string;
+  avatarKey?: string;
   storageUsedBytes?: number;
   storageQuotaBytes?: number;
 };

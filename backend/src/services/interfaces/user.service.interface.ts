@@ -1,4 +1,5 @@
 import type CreateUserDto from '@/dtos/create-user.dto';
+import type GetUploadUrlResponse from '@/dtos/get-upload-url-response.dto';
 import type UpdateProfileRequestDto from '@/dtos/update-profile-request.dto';
 import type UpdateProfileResponseDto from '@/dtos/update-profile-response.dto';
 import type UpdateThemePreferenceRequestDto from '@/dtos/update-theme-preference-request.dto';
@@ -90,10 +91,11 @@ export interface IUserService {
 
   /**
    * Updates the profile fields (bio, position) of the authenticated user.
+   * When `objectKey` is present in `data`, also validates, moves, and confirms the pending avatar upload.
    *
    * @param userId - The unique identifier of the user.
-   * @param data - Partial profile fields to update. See {@link UpdateProfileRequestDto}.
-   * @returns A promise resolving to the updated {@link UserDto}.
+   * @param data - Partial profile fields to update and optional avatar object key. See {@link UpdateProfileRequestDto}.
+   * @returns A promise resolving to the updated profile response.
    */
   updateProfile(userId: string, data: UpdateProfileRequestDto): Promise<UpdateProfileResponseDto>;
 
@@ -108,4 +110,20 @@ export interface IUserService {
     userId: string,
     data: UpdateThemePreferenceRequestDto,
   ): Promise<UpdateThemePreferenceResponseDto>;
+
+  /**
+   * Generates a presigned S3 POST URL for uploading a user avatar (images only: jpeg, png, webp).
+   *
+   * @param userId - The authenticated user's ID.
+   * @param filename - Original filename, used for extension extraction only.
+   * @param contentType - MIME type declared by the client (validated server-side via magic bytes on confirm).
+   * @param fileSizeBytes - Declared file size in bytes (validated against the image size limit).
+   * @returns A promise resolving to the presigned upload URL, form fields, and object key.
+   */
+  getAvatarUploadUrl(
+    userId: string,
+    filename: string,
+    contentType: string,
+    fileSizeBytes: number,
+  ): Promise<GetUploadUrlResponse>;
 }

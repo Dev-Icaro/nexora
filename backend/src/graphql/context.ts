@@ -59,9 +59,9 @@ export interface SubscriptionContext {
  * @returns A fully initialised {@link DataSources} object.
  */
 function createDataSources(): DataSources {
-  const userService = new UserService();
   const emailService = new ResendEmailService();
   const storageProvider = new S3StorageProvider();
+  const userService = new UserService(storageProvider);
   return {
     authService: new AuthService(userService, emailService),
     userService,

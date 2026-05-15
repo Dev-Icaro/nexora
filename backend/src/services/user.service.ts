@@ -1,16 +1,28 @@
+import mongoose from 'mongoose';
+
 import settings from '@/config/settings';
 import type CreateUserDto from '@/dtos/create-user.dto';
+import type GetUploadUrlResponse from '@/dtos/get-upload-url-response.dto';
 import type UpdateProfileRequestDto from '@/dtos/update-profile-request.dto';
 import type UpdateProfileResponseDto from '@/dtos/update-profile-response.dto';
 import type UpdateThemePreferenceRequestDto from '@/dtos/update-theme-preference-request.dto';
 import type UpdateThemePreferenceResponseDto from '@/dtos/update-theme-preference-response.dto';
 import type UserDto from '@/dtos/user.dto';
-import { BadRequestException, NotFoundException } from '@/exceptions';
+import { BadRequestException, ForbiddenException, NotFoundException } from '@/exceptions';
+import { MediaUpload } from '@/models/media-upload.model';
 import { User } from '@/models/user.model';
+import { getFileSizeLimit, MAGIC_BYTES_HEADER_LENGTH, validateMagicBytes } from '@/utils/magic-bytes';
+import { withRetry } from '@/utils/retry';
+import StorageKeyGenerator from '@/utils/storage-key-generator';
 
+import type { IStorageProvider } from './interfaces/storage-provider.interface';
 import type { IUserService } from './interfaces/user.service.interface';
 
+const avatarAllowedTypes = new Set(settings.AVATAR_POST_ALLOWED_CONTENT_TYPES);
+
 export class UserService implements IUserService {
+  constructor(private readonly storageProvider: IStorageProvider) {}
+
   async findById(userId: string): Promise<UserDto | null> {
     const user = await User.findById(userId);
     if (!user) return null;
@@ -22,6 +34,7 @@ export class UserService implements IUserService {
       createdAt: user.createdAt,
       bio: user.bio ?? undefined,
       position: user.position ?? undefined,
+      avatarKey: user.avatarKey ?? undefined,
       storageUsedBytes: user.storageUsedBytes ?? 0,
       storageQuotaBytes: user.storageQuotaBytes ?? settings.STORAGE_QUOTA_FREE_BYTES,
     };
@@ -38,6 +51,7 @@ export class UserService implements IUserService {
       createdAt: user.createdAt,
       bio: user.bio ?? undefined,
       position: user.position ?? undefined,
+      avatarKey: user.avatarKey ?? undefined,
       storageUsedBytes: user.storageUsedBytes ?? 0,
       storageQuotaBytes: user.storageQuotaBytes ?? settings.STORAGE_QUOTA_FREE_BYTES,
     };
@@ -62,6 +76,7 @@ export class UserService implements IUserService {
       createdAt: user.createdAt,
       bio: user.bio ?? undefined,
       position: user.position ?? undefined,
+      avatarKey: user.avatarKey ?? undefined,
       storageUsedBytes: user.storageUsedBytes ?? 0,
       storageQuotaBytes: user.storageQuotaBytes ?? settings.STORAGE_QUOTA_FREE_BYTES,
     };
@@ -90,6 +105,7 @@ export class UserService implements IUserService {
       createdAt: user.createdAt,
       bio: user.bio ?? undefined,
       position: user.position ?? undefined,
+      avatarKey: user.avatarKey ?? undefined,
       storageUsedBytes: user.storageUsedBytes ?? 0,
       storageQuotaBytes: user.storageQuotaBytes ?? settings.STORAGE_QUOTA_FREE_BYTES,
     };
@@ -144,30 +160,180 @@ export class UserService implements IUserService {
     };
   }
 
-  async updateProfile(userId: string, { bio, position }: UpdateProfileRequestDto): Promise<UpdateProfileResponseDto> {
+  async updateProfile(
+    userId: string,
+    { bio, position, objectKey }: UpdateProfileRequestDto,
+  ): Promise<UpdateProfileResponseDto> {
     if (bio !== undefined && bio.length > 160) {
       throw new BadRequestException('Bio must not exceed 160 characters');
     }
 
-    const updates: Record<string, string> = {};
-    if (bio !== undefined) updates.bio = bio;
-    if (position !== undefined) updates.position = position;
+    const profileUpdates: Record<string, unknown> = {};
+    if (bio !== undefined) profileUpdates.bio = bio;
+    if (position !== undefined) profileUpdates.position = position;
 
-    const user = await User.findByIdAndUpdate(userId, { $set: updates }, { new: true });
-    if (!user) throw new NotFoundException('User not found');
+    let updatedUser: InstanceType<typeof User>;
+
+    if (objectKey) {
+      const avatar = await this.prepareAvatarConfirmation(userId, objectKey);
+      const session = await mongoose.connection.startSession();
+      try {
+        session.startTransaction();
+
+        updatedUser = (await User.findByIdAndUpdate(
+          userId,
+          {
+            $set: { ...profileUpdates, avatarKey: avatar.confirmedKey },
+            $inc: { storageUsedBytes: avatar.contentLength - avatar.oldSizeBytes, uploadCount: 1 },
+          },
+          { new: true, session },
+        ))!;
+
+        await MediaUpload.create(
+          [
+            {
+              userId,
+              entityType: 'avatar',
+              entityId: userId,
+              status: 'confirmed',
+              objectKey: avatar.confirmedKey,
+              confirmedUrl: avatar.confirmedKey,
+              mimeType: avatar.contentType,
+              sizeBytes: avatar.contentLength,
+              createdAt: new Date(),
+            },
+          ],
+          { session },
+        );
+
+        await session.commitTransaction();
+      } catch (error) {
+        await session.abortTransaction();
+        throw error;
+      } finally {
+        session.endSession();
+      }
+    } else {
+      const user = await User.findByIdAndUpdate(userId, { $set: profileUpdates }, { new: true });
+      if (!user) throw new NotFoundException('User not found');
+      updatedUser = user;
+    }
 
     return {
       code: 200,
       message: 'Profile updated successfully',
       success: true,
       user: {
-        id: user.id as string,
-        email: user.email,
-        username: user.username,
-        createdAt: user.createdAt,
-        bio: user.bio ?? undefined,
-        position: user.position ?? undefined,
+        id: updatedUser.id as string,
+        email: updatedUser.email,
+        username: updatedUser.username,
+        createdAt: updatedUser.createdAt,
+        bio: updatedUser.bio ?? undefined,
+        position: updatedUser.position ?? undefined,
+        avatarKey: updatedUser.avatarKey ?? undefined,
+        storageUsedBytes: updatedUser.storageUsedBytes ?? 0,
+        storageQuotaBytes: updatedUser.storageQuotaBytes ?? settings.STORAGE_QUOTA_FREE_BYTES,
       },
+    };
+  }
+
+  private async prepareAvatarConfirmation(
+    userId: string,
+    objectKey: string,
+  ): Promise<{ confirmedKey: string; contentType: string; contentLength: number; oldSizeBytes: number }> {
+    if (!objectKey.includes(`/${userId}/`)) {
+      throw new ForbiddenException('Object key does not belong to the authenticated user');
+    }
+
+    const {
+      body: headerBytes,
+      contentType,
+      contentLength,
+    } = await withRetry(() => this.storageProvider.getObjectRange(objectKey, 0, MAGIC_BYTES_HEADER_LENGTH - 1));
+
+    if (!avatarAllowedTypes.has(contentType)) {
+      throw new BadRequestException(`Unsupported content type for avatar: ${contentType}`);
+    }
+
+    validateMagicBytes(contentType, headerBytes);
+
+    if (contentLength > getFileSizeLimit(contentType)) {
+      throw new BadRequestException('Uploaded file exceeds the maximum allowed size');
+    }
+
+    const confirmedKey = objectKey.replace('pending/avatars/', 'confirmed/avatars/');
+    const existingUser = await User.findById(userId);
+    if (!existingUser) throw new NotFoundException('User not found');
+
+    let oldSizeBytes = 0;
+    const oldAvatarKey = existingUser.avatarKey as string | undefined;
+    if (oldAvatarKey) {
+      const oldMediaUpload = await MediaUpload.findOne({ objectKey: oldAvatarKey, status: 'confirmed' });
+      oldSizeBytes = oldMediaUpload?.sizeBytes ?? 0;
+      await Promise.all([
+        this.storageProvider.deleteFile(oldAvatarKey).catch(() => {}),
+        MediaUpload.deleteOne({ objectKey: oldAvatarKey }),
+      ]);
+    }
+
+    await withRetry(() => this.storageProvider.moveFile(objectKey, confirmedKey));
+    return { confirmedKey, contentType, contentLength, oldSizeBytes };
+  }
+
+  async getAvatarUploadUrl(
+    userId: string,
+    filename: string,
+    contentType: string,
+    fileSizeBytes: number,
+  ): Promise<GetUploadUrlResponse> {
+    if (!avatarAllowedTypes.has(contentType)) {
+      throw new BadRequestException(`Unsupported content type for avatar: ${contentType}`);
+    }
+
+    const maxFileSizeBytes = getFileSizeLimit(contentType);
+    if (fileSizeBytes > maxFileSizeBytes) {
+      throw new BadRequestException('File size exceeds the maximum allowed size for avatars');
+    }
+
+    const user = await User.findById(userId);
+    if (!user) throw new NotFoundException('User not found');
+
+    const storageUsed = user.storageUsedBytes ?? 0;
+    const storageQuota = user.storageQuotaBytes ?? settings.STORAGE_QUOTA_FREE_BYTES;
+
+    if (storageUsed + fileSizeBytes > storageQuota) {
+      throw new BadRequestException('Storage quota exceeded');
+    }
+
+    const objectKey = StorageKeyGenerator.generatePendingAvatarKey(userId, filename);
+
+    const { url, fields } = await withRetry(() =>
+      this.storageProvider.getPresignedUploadUrl(objectKey, {
+        contentType,
+        maxFileSizeBytes,
+        expiresIn: settings.PRESIGNED_UPLOAD_URL_EXPIRY_SECONDS,
+      }),
+    );
+
+    await MediaUpload.create({
+      userId,
+      entityType: 'avatar',
+      entityId: null,
+      status: 'pending',
+      objectKey,
+      confirmedUrl: null,
+      mimeType: contentType,
+      sizeBytes: 0,
+      createdAt: new Date(),
+    });
+
+    return {
+      code: 200,
+      success: true,
+      message: 'Upload URL generated',
+      uploadUrl: url,
+      fields: JSON.stringify(fields),
+      objectKey,
     };
   }
 }

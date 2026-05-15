@@ -21,6 +21,7 @@ export const LOGIN_MUTATION = gql`
         id
         email
         username
+        avatarUrl
       }
     }
   }
@@ -37,6 +38,7 @@ export const REFRESH_MUTATION = gql`
         id
         email
         username
+        avatarUrl
       }
     }
   }

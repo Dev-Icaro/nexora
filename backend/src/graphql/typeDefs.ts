@@ -39,6 +39,7 @@ export const typeDefs = `#graphql
     bio: String
     position: String
     themePreference: String
+    avatarUrl: String
     storageInfo: StorageInfo!
   }
 
@@ -161,6 +162,7 @@ export const typeDefs = `#graphql
   input UpdateProfileRequest {
     bio: String
     position: String
+    objectKey: String
   }
 
   type UpdateProfileResponse {
@@ -224,6 +226,8 @@ export const typeDefs = `#graphql
 
     updateProfile(updateProfileRequest: UpdateProfileRequest!): UpdateProfileResponse!
     updateThemePreference(theme: String!): UpdateThemePreferenceResponse!
+
+    getAvatarUploadUrl(request: GetUploadUrlRequest!): GetUploadUrlResponse!
   }
 
   type Subscription {

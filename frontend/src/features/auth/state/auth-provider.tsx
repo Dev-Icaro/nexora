@@ -46,6 +46,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     dispatch({ type: 'LOGIN', payload: { user, token } });
   };
 
+  const updateUser = (updates: Partial<AuthUser>) => {
+    dispatch({ type: 'UPDATE_USER', payload: updates });
+  };
+
   const logout = useCallback(() => {
     setAccessToken(null);
     dispatch({ type: 'LOGOUT' });
@@ -57,5 +61,5 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return () => setOnUnauthenticated(() => {});
   }, [logout]);
 
-  return <AuthContext value={{ state, login, logout }}>{children}</AuthContext>;
+  return <AuthContext value={{ state, login, logout, updateUser }}>{children}</AuthContext>;
 }

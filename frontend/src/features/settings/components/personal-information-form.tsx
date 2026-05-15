@@ -6,6 +6,7 @@ import { z } from 'zod';
 
 import type { ProfileUser } from '@/features/profile/api/profile.types';
 import { AvatarUploadModal } from '@/features/profile/components/avatar-upload-modal';
+import type { PreparedAvatar } from '@/features/profile/hooks/use-upload-avatar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar';
 import { Button } from '@/shared/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/components/ui/form';
@@ -22,7 +23,9 @@ type PersonalInfoFormValues = z.infer<typeof personalInfoSchema>;
 type PersonalInformationFormProps = {
   profile: ProfileUser;
   loading: boolean;
-  onSubmit: (values: { bio?: string; position?: string }) => Promise<boolean>;
+  onSubmit: (values: { bio?: string; position?: string; objectKey?: string }) => Promise<boolean>;
+  onPrepareAvatar: (file: File) => Promise<PreparedAvatar | null>;
+  avatarPreparing?: boolean;
 };
 
 // Matches design: muted bg, invisible border until focused, ring-shadow on focus
@@ -37,9 +40,16 @@ function FieldHint({ children }: { children: ReactNode }) {
   return <span className="text-[11px] text-muted-foreground">{children}</span>;
 }
 
-export function PersonalInformationForm({ profile, loading, onSubmit }: PersonalInformationFormProps) {
+export function PersonalInformationForm({
+  profile,
+  loading,
+  onSubmit,
+  onPrepareAvatar,
+  avatarPreparing,
+}: PersonalInformationFormProps) {
   const [saved, setSaved] = useState(false);
   const [uploadOpen, setUploadOpen] = useState(false);
+  const [pendingAvatar, setPendingAvatar] = useState<PreparedAvatar | null>(null);
 
   const form = useForm<PersonalInfoFormValues>({
     resolver: zodResolver(personalInfoSchema),
@@ -57,10 +67,12 @@ export function PersonalInformationForm({ profile, loading, onSubmit }: Personal
     const success = await onSubmit({
       bio: values.bio || undefined,
       position: values.position || undefined,
+      objectKey: pendingAvatar?.objectKey,
     });
     if (success) {
       form.reset(values);
       setSaved(true);
+      setPendingAvatar(null);
     }
   }
 
@@ -81,7 +93,9 @@ export function PersonalInformationForm({ profile, loading, onSubmit }: Personal
               <div className="flex items-center gap-5">
                 <div className="relative">
                   <Avatar className="size-[72px]">
-                    {profile.avatarUrl && <AvatarImage src={profile.avatarUrl} alt={profile.username} />}
+                    {(pendingAvatar?.previewUrl ?? profile.avatarUrl) && (
+                      <AvatarImage src={pendingAvatar?.previewUrl ?? profile.avatarUrl} alt={profile.username} />
+                    )}
                     <AvatarFallback className="bg-primary/20 text-primary font-semibold text-2xl">
                       {getInitials(profile.username)}
                     </AvatarFallback>
@@ -97,7 +111,7 @@ export function PersonalInformationForm({ profile, loading, onSubmit }: Personal
                 </div>
                 <div>
                   <p className="text-sm font-medium">Profile photo</p>
-                  <p className="text-[12px] text-muted-foreground mt-0.5">JPG, PNG or GIF — max 5MB</p>
+                  <p className="text-[12px] text-muted-foreground mt-0.5">JPG, PNG or WebP — max 10MB</p>
                 </div>
               </div>
 
@@ -175,7 +189,7 @@ export function PersonalInformationForm({ profile, loading, onSubmit }: Personal
               <div className="flex justify-end pt-1">
                 <Button
                   type="submit"
-                  disabled={!isDirty || isSubmitting || loading}
+                  disabled={(!isDirty && !pendingAvatar) || isSubmitting || loading}
                   className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full text-sm font-medium bg-primary text-primary-foreground hover:bg-[oklch(0.78_0.17_55)] transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 >
                   {saved ? (
@@ -193,7 +207,15 @@ export function PersonalInformationForm({ profile, loading, onSubmit }: Personal
         </Form>
       </div>
 
-      <AvatarUploadModal open={uploadOpen} onOpenChange={setUploadOpen} />
+      <AvatarUploadModal
+        open={uploadOpen}
+        onOpenChange={setUploadOpen}
+        onUpload={async file => {
+          const result = await onPrepareAvatar(file);
+          if (result) setPendingAvatar(result);
+        }}
+        uploading={avatarPreparing}
+      />
     </>
   );
 }

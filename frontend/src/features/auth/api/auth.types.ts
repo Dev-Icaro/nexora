@@ -23,6 +23,7 @@ export type LoginResponse = {
       id: string;
       email: string;
       username: string;
+      avatarUrl?: string;
     };
   };
 };
@@ -34,6 +35,7 @@ export type RefreshResponse = {
       id: string;
       email: string;
       username: string;
+      avatarUrl?: string;
     };
   };
 };

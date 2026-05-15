@@ -18,8 +18,7 @@ const MAGIC_BYTES: Record<string, MagicBytesSpec[]> = {
   'video/webm': [{ offset: 0, hex: '1a45dfa3' }],
 };
 
-/** MIME types accepted by the upload pipeline. */
-export const ALLOWED_CONTENT_TYPES = new Set(Object.keys(MAGIC_BYTES));
+const ALLOWED_CONTENT_TYPES = new Set(settings.POST_ALLOWED_CONTENT_TYPES);
 
 /**
  * Validates that the actual bytes of an uploaded file match its stored MIME type.

@@ -4,7 +4,8 @@ import { type ChangeEvent, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
-import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar';
+import { useAuth } from '@/features/auth/hooks/use-auth';
+import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar';
 import { Button } from '@/shared/components/ui/button';
 import { Card, CardContent } from '@/shared/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/shared/components/ui/form';
@@ -32,6 +33,7 @@ type PostComposerProps = {
 };
 
 export function PostComposer({ username, loading, onSubmit }: PostComposerProps) {
+  const { state } = useAuth();
   const form = useForm<PostFormValues>({
     resolver: zodResolver(postSchema),
     mode: 'onChange',
@@ -84,6 +86,8 @@ export function PostComposer({ username, loading, onSubmit }: PostComposerProps)
 
   const initials = username.slice(0, 2).toUpperCase();
 
+  console.log(state.user?.avatarUrl);
+
   return (
     <Card className="bg-card border border-border">
       <CardContent className="p-4 space-y-3">
@@ -91,6 +95,7 @@ export function PostComposer({ username, loading, onSubmit }: PostComposerProps)
           <form onSubmit={form.handleSubmit(handleSubmit)}>
             <div className="flex items-center gap-3">
               <Avatar className="size-10 shrink-0">
+                {state.user?.avatarUrl && <AvatarImage src={state.user.avatarUrl} alt={username} />}
                 <AvatarFallback className="bg-primary/20 text-primary font-semibold">{initials}</AvatarFallback>
               </Avatar>
               <FormField
