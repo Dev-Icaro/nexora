@@ -103,6 +103,16 @@ const wsLink = new GraphQLWsLink(
   }),
 );
 
+const transactionIdLink = new ApolloLink((operation, forward) => {
+  const def = getMainDefinition(operation.query);
+  if (def.kind === 'OperationDefinition' && def.operation === 'mutation') {
+    operation.setContext(({ headers = {} }: { headers: Record<string, string> }) => ({
+      headers: { ...headers, 'x-transaction-id': crypto.randomUUID() },
+    }));
+  }
+  return forward(operation);
+});
+
 const retryLink = new RetryLink({
   delay: { initial: 300, max: 3000, jitter: true },
   attempts: {
@@ -121,7 +131,7 @@ const splitLink = split(
     return def.kind === 'OperationDefinition' && def.operation === 'subscription';
   },
   wsLink,
-  from([retryLink, errorLink, authLink, httpLink]),
+  from([transactionIdLink, retryLink, errorLink, authLink, httpLink]),
 );
 
 export const client = new ApolloClient({

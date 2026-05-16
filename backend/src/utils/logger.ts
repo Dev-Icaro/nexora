@@ -11,11 +11,11 @@
  */
 import 'winston-daily-rotate-file';
 
-import httpContext from 'express-http-context';
 import * as path from 'path';
 import { addColors, createLogger, format, transports } from 'winston';
 
 import env from '@/config/environment';
+import { getTransactionId, getUserId } from '@/utils/async-context';
 
 const logDirectory = path.resolve(__dirname, '../../logs');
 const customLevels = {
@@ -50,9 +50,9 @@ const logger = createLogger({
     format(info => ({ ...info, level: info.level.toUpperCase() }))(),
     format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
     format.printf(({ timestamp, level, message, stack }) => {
-      const reqId = httpContext?.get('reqId') || 'SYSTEM';
-      const userId = httpContext?.get('userId') || '#';
-      return `[${level}] - ${timestamp} - ${reqId} - ${userId}: ${stack || message}`;
+      const transactionId = getTransactionId() || 'SYSTEM';
+      const userId = getUserId();
+      return `[${level}] - ${timestamp} - ${transactionId} - ${userId}: ${stack || message}`;
     }),
   ),
   transports: [
@@ -80,9 +80,8 @@ if (env.NODE_ENV !== 'production') {
         format.colorize(),
         format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
         format.printf(({ timestamp, level, message, stack }) => {
-          const reqId = httpContext?.get('reqId') || 'SYSTEM';
-          const userId = httpContext?.get('userId') || '#';
-          return `[${level}] - ${timestamp} - ${reqId} - ${userId}: ${stack || message}`;
+          const transactionId = getTransactionId();
+          return `[${level}] - ${timestamp} - ${transactionId} - #: ${stack || message}`;
         }),
       ),
     }),

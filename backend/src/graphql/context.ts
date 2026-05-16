@@ -12,6 +12,7 @@ import type { IStorageProvider } from '@/services/interfaces/storage-provider.in
 import type { IUserService } from '@/services/interfaces/user.service.interface';
 import { PostService } from '@/services/post.service';
 import { UserService } from '@/services/user.service';
+import { setUserId } from '@/utils/async-context';
 import { type IUserTokenInfo, verifyAccessToken } from '@/utils/auth';
 
 import { createLoaders, type Loaders } from './loaders';
@@ -95,6 +96,7 @@ export const createSubscriptionContext = async (
     throw new GraphQLError('Unauthorized', { extensions: { code: 'UNAUTHORIZED' } });
   }
 
+  setUserId(currentUser.userId);
   return { currentUser, loaders: createLoaders(), dataSources: createDataSources() };
 };
 
@@ -126,6 +128,7 @@ export const createContext = async ({
     } catch {
       throw new GraphQLError('Unauthorized', { extensions: { code: 'UNAUTHORIZED' } });
     }
+    setUserId(currentUser.userId);
   }
 
   return { req, res, currentUser, loaders: createLoaders(), dataSources: createDataSources() };

@@ -23,6 +23,7 @@ import { typeDefs } from '@/graphql/typeDefs';
 import { startCleanupPendingUploadsJob } from '@/jobs/cleanup-pending-uploads.job';
 import { startReconcileStorageCountersJob } from '@/jobs/reconcile-storage-counters.job';
 import httpErrorHandler from '@/rest/middlewares/error-handler';
+import { transactionIdMiddleware } from '@/rest/middlewares/transaction-id.middleware';
 import { authRouter } from '@/rest/routes/auth.router';
 import logger from '@/utils/logger';
 
@@ -40,6 +41,7 @@ const bootstrap = async (): Promise<void> => {
   app.use(cors<cors.CorsRequest>({ origin: env.CORS_ORIGIN, credentials: true }));
   app.use(cookieParser());
   app.use(express.json());
+  app.use(transactionIdMiddleware);
 
   const httpServer = http.createServer(app);
 
