@@ -32,6 +32,7 @@ const environmentSchema = z.object({
   AWS_CLOUDFRONT_KEY_PAIR_ID: z.string().min(1),
   AWS_CLOUDFRONT_PRIVATE_KEY_SECRET_NAME: z.string().min(1),
   AWS_CLOUDFRONT_REGION: z.string().min(1),
+  AWS_CLOUDFRONT_DISTRIBUTION_ID: z.string().min(1),
 });
 
 export default environmentSchema.parse(process.env);

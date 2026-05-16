@@ -72,6 +72,17 @@ export default class StorageKeyGenerator {
   }
 
   /**
+   * Generates the canonical confirmed-avatar key for a user.
+   * Always the same key regardless of filename/extension — overwrites the existing object in-place.
+   *
+   * @param userId - The authenticated user's ID.
+   * @returns Storage key in format: `confirmed/avatars/{userId}/avatar`
+   */
+  static generateConfirmedAvatarKey(userId: string): string {
+    return `confirmed/avatars/${userId}/avatar`;
+  }
+
+  /**
    * Extract and validate file extension from filename
    * Only uses the last extension to prevent tricks like "image.jpg.exe"
    * Limits extension length to prevent abuse

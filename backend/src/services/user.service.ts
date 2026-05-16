@@ -11,10 +11,12 @@ import type UserDto from '@/dtos/user.dto';
 import { BadRequestException, ForbiddenException, NotFoundException } from '@/exceptions';
 import { MediaUpload } from '@/models/media-upload.model';
 import { User } from '@/models/user.model';
+import logger from '@/utils/logger';
 import { getFileSizeLimit, MAGIC_BYTES_HEADER_LENGTH, validateMagicBytes } from '@/utils/magic-bytes';
 import { withRetry } from '@/utils/retry';
 import StorageKeyGenerator from '@/utils/storage-key-generator';
 
+import { invalidateMediaUrl } from './cloud/cloud-front';
 import type { IStorageProvider } from './interfaces/storage-provider.interface';
 import type { IUserService } from './interfaces/user.service.interface';
 
@@ -176,6 +178,13 @@ export class UserService implements IUserService {
 
     if (objectKey) {
       const avatar = await this.prepareAvatarConfirmation(userId, objectKey);
+
+      if (avatar.hadPreviousAvatar) {
+        await invalidateMediaUrl(avatar.confirmedKey).catch(error => {
+          logger.error(error);
+        });
+      }
+
       const session = await mongoose.connection.startSession();
       try {
         session.startTransaction();
@@ -240,7 +249,13 @@ export class UserService implements IUserService {
   private async prepareAvatarConfirmation(
     userId: string,
     objectKey: string,
-  ): Promise<{ confirmedKey: string; contentType: string; contentLength: number; oldSizeBytes: number }> {
+  ): Promise<{
+    confirmedKey: string;
+    contentType: string;
+    contentLength: number;
+    oldSizeBytes: number;
+    hadPreviousAvatar: boolean;
+  }> {
     if (!objectKey.includes(`/${userId}/`)) {
       throw new ForbiddenException('Object key does not belong to the authenticated user');
     }
@@ -261,7 +276,7 @@ export class UserService implements IUserService {
       throw new BadRequestException('Uploaded file exceeds the maximum allowed size');
     }
 
-    const confirmedKey = objectKey.replace('pending/avatars/', 'confirmed/avatars/');
+    const confirmedKey = StorageKeyGenerator.generateConfirmedAvatarKey(userId);
     const existingUser = await User.findById(userId);
     if (!existingUser) throw new NotFoundException('User not found');
 
@@ -270,14 +285,12 @@ export class UserService implements IUserService {
     if (oldAvatarKey) {
       const oldMediaUpload = await MediaUpload.findOne({ objectKey: oldAvatarKey, status: 'confirmed' });
       oldSizeBytes = oldMediaUpload?.sizeBytes ?? 0;
-      await Promise.all([
-        this.storageProvider.deleteFile(oldAvatarKey).catch(() => {}),
-        MediaUpload.deleteOne({ objectKey: oldAvatarKey }),
-      ]);
+      // Free the unique-index slot; the S3 object is overwritten in-place by moveFile below
+      await MediaUpload.deleteOne({ objectKey: oldAvatarKey });
     }
 
     await withRetry(() => this.storageProvider.moveFile(objectKey, confirmedKey));
-    return { confirmedKey, contentType, contentLength, oldSizeBytes };
+    return { confirmedKey, contentType, contentLength, oldSizeBytes, hadPreviousAvatar: !!oldAvatarKey };
   }
 
   async getAvatarUploadUrl(
