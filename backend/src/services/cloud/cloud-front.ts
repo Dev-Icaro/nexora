@@ -3,13 +3,17 @@ import { GetSecretValueCommand, SecretsManagerClient } from '@aws-sdk/client-sec
 import { getSignedUrl } from '@aws-sdk/cloudfront-signer';
 
 import env from '@/config/environment';
+import secrets from '@/config/secrets';
 
 let privateKey: string;
 async function getPrivateKey(): Promise<string> {
   if (privateKey) return privateKey;
-  const sm = new SecretsManagerClient({
-    region: env.AWS_CLOUDFRONT_REGION,
-  });
+
+  const smConfig: ConstructorParameters<typeof SecretsManagerClient>[0] = { region: env.AWS_CLOUDFRONT_REGION };
+  if (secrets.AWS_ACCESS_KEY_ID && secrets.AWS_SECRET_ACCESS_KEY) {
+    smConfig.credentials = { accessKeyId: secrets.AWS_ACCESS_KEY_ID, secretAccessKey: secrets.AWS_SECRET_ACCESS_KEY };
+  }
+  const sm = new SecretsManagerClient(smConfig);
   const secret = await sm.send(
     new GetSecretValueCommand({
       SecretId: env.AWS_CLOUDFRONT_PRIVATE_KEY_SECRET_NAME,
@@ -21,7 +25,13 @@ async function getPrivateKey(): Promise<string> {
 
 let cfClient: CloudFrontClient;
 function getCloudFrontClient(): CloudFrontClient {
-  if (!cfClient) cfClient = new CloudFrontClient({ region: env.AWS_CLOUDFRONT_REGION });
+  if (cfClient) return cfClient;
+
+  const cfConfig: ConstructorParameters<typeof CloudFrontClient>[0] = { region: env.AWS_CLOUDFRONT_REGION };
+  if (secrets.AWS_ACCESS_KEY_ID && secrets.AWS_SECRET_ACCESS_KEY) {
+    cfConfig.credentials = { accessKeyId: secrets.AWS_ACCESS_KEY_ID, secretAccessKey: secrets.AWS_SECRET_ACCESS_KEY };
+  }
+  cfClient = new CloudFrontClient(cfConfig);
   return cfClient;
 }
 

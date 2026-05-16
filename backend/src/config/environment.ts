@@ -14,8 +14,8 @@ const environmentSchema = z.object({
     // eslint-disable-next-line sonarjs/no-clear-text-protocols
     .default('http://localhost:5173,https://studio.apollographql.com')
     .transform(v => v.split(',').map(s => s.trim())),
-  ACCESS_TOKEN_SECRET: z.string().min(1),
-  REFRESH_TOKEN_SECRET: z.string().min(1),
+  APP_ACCESS_TOKEN_FILE: z.string().min(1),
+  APP_REFRESH_TOKEN_FILE: z.string().min(1),
   GITHUB_CLIENT_ID: z.string().min(1),
   GITHUB_CLIENT_SECRET: z.string().min(1),
   GOOGLE_CLIENT_ID: z.string().min(1),
@@ -26,8 +26,8 @@ const environmentSchema = z.object({
   APP_EMAIL: z.string().email(),
   AWS_S3_REGION: z.string().min(1),
   AWS_S3_BUCKET_NAME: z.string().min(1),
-  AWS_ACCESS_KEY_ID: z.string().optional(),
-  AWS_SECRET_ACCESS_KEY: z.string().optional(),
+  AWS_ACCESS_KEY_ID_FILE: z.string().min(1).optional(),
+  AWS_SECRET_ACCESS_KEY_FILE: z.string().min(1).optional(),
   AWS_CLOUDFRONT_DOMAIN: z.string().url(),
   AWS_CLOUDFRONT_KEY_PAIR_ID: z.string().min(1),
   AWS_CLOUDFRONT_PRIVATE_KEY_SECRET_NAME: z.string().min(1),

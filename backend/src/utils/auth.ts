@@ -2,7 +2,7 @@ import { createHmac } from 'node:crypto';
 
 import jwt from 'jsonwebtoken';
 
-import env from '@/config/environment';
+import secrets from '@/config/secrets';
 import settings from '@/config/settings';
 
 export interface IUserTokenInfo {
@@ -19,7 +19,7 @@ export interface IUserTokenInfo {
  * @returns - The generated access token.
  */
 export const createAccessToken = (user: IUserTokenInfo) => {
-  return jwt.sign({ ...user }, env.ACCESS_TOKEN_SECRET, {
+  return jwt.sign({ ...user }, secrets.ACCESS_TOKEN_SECRET, {
     audience: 'urn:jwt:type:access',
     issuer: 'urn:system:token-issuer:type:access',
     expiresIn: `${settings.ACCESS_TOKEN_DURATION_MINUTES}m`,
@@ -36,7 +36,7 @@ export const createAccessToken = (user: IUserTokenInfo) => {
  * @returns - The generated refresh token.
  */
 export const createRefreshToken = (user: IUserTokenInfo) => {
-  return jwt.sign({ userId: user.userId }, env.REFRESH_TOKEN_SECRET, {
+  return jwt.sign({ userId: user.userId }, secrets.REFRESH_TOKEN_SECRET, {
     audience: 'urn:jwt:type:refresh',
     issuer: 'urn:system:token-issuer:type:refresh',
     expiresIn: `${settings.REFRESH_TOKEN_DURATION_MINUTES}m`,
@@ -53,7 +53,7 @@ export const createRefreshToken = (user: IUserTokenInfo) => {
  * @returns - The hash of the refresh token.
  */
 export const createHashForRefreshToken = (token: string) => {
-  return createHmac('sha512', env.REFRESH_TOKEN_SECRET).update(token).digest('hex');
+  return createHmac('sha512', secrets.REFRESH_TOKEN_SECRET).update(token).digest('hex');
 };
 
 /**
@@ -65,7 +65,7 @@ export const createHashForRefreshToken = (token: string) => {
  * @throws {TokenExpiredError} if the token has expired.
  */
 export const verifyAccessToken = (token: string): IUserTokenInfo => {
-  return jwt.verify(token, env.ACCESS_TOKEN_SECRET, {
+  return jwt.verify(token, secrets.ACCESS_TOKEN_SECRET, {
     audience: 'urn:jwt:type:access',
     issuer: 'urn:system:token-issuer:type:access',
   }) as IUserTokenInfo;

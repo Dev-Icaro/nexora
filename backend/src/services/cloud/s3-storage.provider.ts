@@ -9,6 +9,7 @@ import { createPresignedPost } from '@aws-sdk/s3-presigned-post';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 import env from '@/config/environment';
+import secrets from '@/config/secrets';
 import { AppException } from '@/exceptions';
 import { DocumentDownloadMode } from '@/types/storage';
 import logger from '@/utils/logger';
@@ -24,10 +25,10 @@ export default class S3StorageProvider implements IStorageProvider {
 
     const clientConfig: S3ClientConfig = { region: env.AWS_S3_REGION };
 
-    if (env.AWS_ACCESS_KEY_ID && env.AWS_SECRET_ACCESS_KEY) {
+    if (secrets.AWS_ACCESS_KEY_ID && secrets.AWS_SECRET_ACCESS_KEY) {
       clientConfig.credentials = {
-        accessKeyId: env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
+        accessKeyId: secrets.AWS_ACCESS_KEY_ID,
+        secretAccessKey: secrets.AWS_SECRET_ACCESS_KEY,
       };
     }
 

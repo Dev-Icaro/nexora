@@ -105,12 +105,12 @@ web_modules/
 .tern-port
 
 # project specific
-backend/db-data
-backend/redis-data
-backend/secrets
-!backend/secrets/.gitkeep
+db-data
+redis-data
+secrets/
+!secrets/.gitkeep
 stuff
-backend/docs
+docs
 compose.dev.yaml
 
 # IDE files
