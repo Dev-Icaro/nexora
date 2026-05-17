@@ -1,6 +1,7 @@
 import { Resend } from 'resend';
 
 import env from '@/config/environment';
+import secrets from '@/config/secrets';
 import { BadRequestException } from '@/exceptions';
 import logger from '@/utils/logger';
 
@@ -10,7 +11,7 @@ export class ResendEmailService implements IEmailService {
   private readonly resend: Resend;
 
   constructor() {
-    this.resend = new Resend(env.RESEND_API_KEY);
+    this.resend = new Resend(secrets.RESEND_API_KEY);
   }
 
   async sendEmail({ to, subject, html }: SendEmailOptions): Promise<void> {

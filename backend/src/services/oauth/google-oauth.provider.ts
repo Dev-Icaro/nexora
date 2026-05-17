@@ -1,11 +1,12 @@
 import env from '@/config/environment';
+import secrets from '@/config/secrets';
 import { AppException } from '@/exceptions';
 
 import type { IOAuthProvider, OAuthUserInfo } from './oauth-provider.interface';
 
 export class GoogleOAuthProvider implements IOAuthProvider {
   private readonly clientId = env.GOOGLE_CLIENT_ID;
-  private readonly clientSecret = env.GOOGLE_CLIENT_SECRET;
+  private readonly clientSecret = secrets.GOOGLE_CLIENT_SECRET;
 
   generateAuthorizationUrl(callbackUrl: string): string {
     const params = new URLSearchParams({
