@@ -21,7 +21,7 @@ export default class S3StorageProvider implements IStorageProvider {
   private bucketName: string;
 
   constructor() {
-    this.bucketName = env.AWS_S3_BUCKET_NAME;
+    this.bucketName = secrets.AWS_S3_BUCKET_NAME;
 
     const clientConfig: S3ClientConfig = { region: env.AWS_S3_REGION };
 

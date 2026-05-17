@@ -1,11 +1,10 @@
-import env from '@/config/environment';
 import secrets from '@/config/secrets';
 import { AppException } from '@/exceptions';
 
 import type { IOAuthProvider, OAuthUserInfo } from './oauth-provider.interface';
 
 export class GithubOAuthProvider implements IOAuthProvider {
-  private readonly clientId = env.GITHUB_CLIENT_ID;
+  private readonly clientId = secrets.GITHUB_CLIENT_ID;
   private readonly clientSecret = secrets.GITHUB_CLIENT_SECRET;
 
   generateAuthorizationUrl(callbackUrl: string): string {

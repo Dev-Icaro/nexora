@@ -16,7 +16,7 @@ async function getPrivateKey(): Promise<string> {
   const sm = new SecretsManagerClient(smConfig);
   const secret = await sm.send(
     new GetSecretValueCommand({
-      SecretId: env.AWS_CLOUDFRONT_PRIVATE_KEY_SECRET_NAME,
+      SecretId: secrets.AWS_CLOUDFRONT_PRIVATE_KEY_SECRET_NAME,
     }),
   );
   privateKey = secret.SecretString!;
@@ -40,7 +40,7 @@ export async function signMediaUrl(confirmedKey: string): Promise<string> {
 
   return getSignedUrl({
     url: `${env.AWS_CLOUDFRONT_DOMAIN}/${confirmedKey}`,
-    keyPairId: env.AWS_CLOUDFRONT_KEY_PAIR_ID,
+    keyPairId: secrets.AWS_CLOUDFRONT_KEY_PAIR_ID,
     privateKey: key,
     dateLessThan: new Date(Date.now() + 60 * 60 * 1000).toISOString(), // 1 hour
   });
@@ -54,7 +54,7 @@ export async function signMediaUrl(confirmedKey: string): Promise<string> {
 export async function invalidateMediaUrl(key: string): Promise<void> {
   await getCloudFrontClient().send(
     new CreateInvalidationCommand({
-      DistributionId: env.AWS_CLOUDFRONT_DISTRIBUTION_ID,
+      DistributionId: secrets.AWS_CLOUDFRONT_DISTRIBUTION_ID,
       InvalidationBatch: {
         CallerReference: `${key}-${Date.now()}`,
         Paths: { Quantity: 1, Items: [`/${key}`] },
