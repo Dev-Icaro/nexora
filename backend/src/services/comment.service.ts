@@ -28,7 +28,7 @@ export class CommentService implements ICommentService {
       success: true,
       message: 'Comment created successfully',
       comment: {
-        id: comment.id as string,
+        id: comment._id.toString(),
         postId: comment.postId.toString(),
         body: comment.body,
         authorId: comment.userId.toString(),
@@ -51,7 +51,7 @@ export class CommentService implements ICommentService {
       success: true,
       message: 'Comment deleted successfully',
       comment: {
-        id: comment.id as string,
+        id: comment._id.toString(),
         postId: comment.postId.toString(),
         body: comment.body,
         authorId: comment.userId.toString(),
@@ -63,7 +63,7 @@ export class CommentService implements ICommentService {
   async getCommentsByPostId(postId: string): Promise<CommentDto[]> {
     const comments = await Comment.find({ postId }).sort({ _id: 1 });
     return comments.map(c => ({
-      id: c.id as string,
+      id: c._id.toString(),
       postId: c.postId.toString(),
       body: c.body,
       authorId: c.userId.toString(),

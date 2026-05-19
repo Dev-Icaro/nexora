@@ -1,6 +1,18 @@
-import { model, Schema } from 'mongoose';
+import { model, Schema, type Types } from 'mongoose';
 
-const mediaUploadSchema = new Schema({
+export interface IMediaUploadDocument {
+  userId: Types.ObjectId;
+  entityType: 'post' | 'avatar';
+  entityId?: Types.ObjectId | null;
+  status: 'pending' | 'confirmed';
+  objectKey: string;
+  confirmedUrl?: string | null;
+  mimeType: string;
+  sizeBytes: number;
+  createdAt: Date;
+}
+
+const mediaUploadSchema = new Schema<IMediaUploadDocument>({
   userId: { type: Schema.Types.ObjectId, ref: 'users', required: true },
   entityType: { type: String, enum: ['post', 'avatar'], required: true },
   entityId: { type: Schema.Types.ObjectId, default: null },
@@ -16,4 +28,5 @@ mediaUploadSchema.index({ userId: 1, status: 1, createdAt: 1 });
 mediaUploadSchema.index({ entityId: 1 });
 mediaUploadSchema.index({ objectKey: 1 }, { unique: true });
 
-export const MediaUpload = model('media_uploads', mediaUploadSchema);
+export const MediaUpload = model<IMediaUploadDocument>('media_uploads', mediaUploadSchema);
+export type MediaUploadDocument = ReturnType<(typeof MediaUpload)['hydrate']>;

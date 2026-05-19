@@ -44,9 +44,9 @@ export class AuthService implements IAuthService {
       success: true,
       message: 'Account created successfully',
       user: {
-        id: newUser.id as string,
-        email: newUser.email ?? '',
-        username: newUser.username ?? '',
+        id: newUser._id.toString(),
+        email: newUser.email,
+        username: newUser.username,
         createdAt,
       },
     };

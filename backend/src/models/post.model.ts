@@ -1,8 +1,19 @@
-import mongoose from 'mongoose';
+import mongoose, { type Types } from 'mongoose';
 
 const { Schema } = mongoose;
 
-const postSchema = new Schema({
+export interface IPostDocument {
+  body?: string;
+  mediaUrl?: string;
+  mediaKey?: string;
+  username?: string;
+  createdAt?: string;
+  likeCount?: number;
+  commentCount?: number;
+  user?: Types.ObjectId;
+}
+
+const postSchema = new Schema<IPostDocument>({
   body: String,
   mediaUrl: String,
   mediaKey: String,
@@ -16,4 +27,5 @@ const postSchema = new Schema({
   },
 });
 
-export const Post = mongoose.model('posts', postSchema);
+export const Post = mongoose.model<IPostDocument>('posts', postSchema);
+export type PostDocument = ReturnType<(typeof Post)['hydrate']>;

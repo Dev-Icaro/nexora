@@ -10,7 +10,7 @@ import type UpdateThemePreferenceResponseDto from '@/dtos/update-theme-preferenc
 import type UserDto from '@/dtos/user.dto';
 import { BadRequestException, ForbiddenException, NotFoundException } from '@/exceptions';
 import { MediaUpload } from '@/models/media-upload.model';
-import { User } from '@/models/user.model';
+import { User, type UserDocument } from '@/models/user.model';
 import logger from '@/utils/logger';
 import { getFileSizeLimit, MAGIC_BYTES_HEADER_LENGTH, validateMagicBytes } from '@/utils/magic-bytes';
 import { withRetry } from '@/utils/retry';
@@ -28,7 +28,7 @@ export class UserService implements IUserService {
     const user = await User.findById(userId);
     if (!user) return null;
     return {
-      id: user.id as string,
+      id: user._id.toString(),
       email: user.email,
       username: user.username,
       password: user.password ?? undefined,
@@ -45,7 +45,7 @@ export class UserService implements IUserService {
     const user = await User.findOne({ email });
     if (!user) return null;
     return {
-      id: user.id as string,
+      id: user._id.toString(),
       email: user.email,
       username: user.username,
       password: user.password ?? undefined,
@@ -70,7 +70,7 @@ export class UserService implements IUserService {
     });
     if (!user) return null;
     return {
-      id: user.id as string,
+      id: user._id.toString(),
       email: user.email,
       username: user.username,
       password: user.password ?? undefined,
@@ -99,7 +99,7 @@ export class UserService implements IUserService {
     });
     if (!user) return null;
     return {
-      id: user.id as string,
+      id: user._id.toString(),
       email: user.email,
       username: user.username,
       password: user.password ?? undefined,
@@ -125,7 +125,7 @@ export class UserService implements IUserService {
         : {}),
     });
     return {
-      id: user.id as string,
+      id: user._id.toString(),
       email: user.email,
       username: user.username,
       createdAt,
@@ -150,13 +150,13 @@ export class UserService implements IUserService {
       message: 'Theme preference updated',
       success: true,
       user: {
-        id: user.id as string,
+        id: user._id.toString(),
         email: user.email,
         username: user.username,
         createdAt: user.createdAt,
         bio: user.bio ?? undefined,
         position: user.position ?? undefined,
-        themePreference: (user.themePreference as 'light' | 'dark' | 'system') ?? 'system',
+        themePreference: user.themePreference ?? 'system',
       },
     };
   }
@@ -173,7 +173,7 @@ export class UserService implements IUserService {
     if (bio !== undefined) profileUpdates.bio = bio;
     if (position !== undefined) profileUpdates.position = position;
 
-    let updatedUser: InstanceType<typeof User>;
+    let updatedUser: UserDocument;
 
     if (objectKey) {
       const avatar = await this.prepareAvatarConfirmation(userId, objectKey);
@@ -232,7 +232,7 @@ export class UserService implements IUserService {
       message: 'Profile updated successfully',
       success: true,
       user: {
-        id: updatedUser.id as string,
+        id: updatedUser._id.toString(),
         email: updatedUser.email,
         username: updatedUser.username,
         createdAt: updatedUser.createdAt,
@@ -280,7 +280,7 @@ export class UserService implements IUserService {
     if (!existingUser) throw new NotFoundException('User not found');
 
     let oldSizeBytes = 0;
-    const oldAvatarKey = existingUser.avatarKey as string | undefined;
+    const oldAvatarKey = existingUser.avatarKey;
     if (oldAvatarKey) {
       const oldMediaUpload = await MediaUpload.findOne({ objectKey: oldAvatarKey, status: 'confirmed' });
       oldSizeBytes = oldMediaUpload?.sizeBytes ?? 0;

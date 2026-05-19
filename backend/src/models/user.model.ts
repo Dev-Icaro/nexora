@@ -1,8 +1,34 @@
-import mongoose from 'mongoose';
+import mongoose, { type Types } from 'mongoose';
 
 const { Schema } = mongoose;
 
-const oauthAccountSchema = new Schema(
+interface IRefreshToken {
+  refreshTokenHash: string;
+  expiresAt: Date;
+}
+
+interface IOAuthAccount {
+  provider: string;
+  providerId: string;
+}
+
+export interface IUserDocument {
+  username: string;
+  password?: string;
+  email: string;
+  createdAt: string;
+  bio?: string;
+  position?: string;
+  themePreference?: 'light' | 'dark' | 'system';
+  tokens: IRefreshToken[];
+  oauthAccounts: IOAuthAccount[];
+  avatarKey?: string;
+  storageUsedBytes?: number;
+  storageQuotaBytes?: number;
+  uploadCount?: number;
+}
+
+const oauthAccountSchema = new Schema<IOAuthAccount>(
   {
     provider: { type: String, required: true },
     providerId: { type: String, required: true },
@@ -10,7 +36,7 @@ const oauthAccountSchema = new Schema(
   { _id: false },
 );
 
-const userSchema = new Schema({
+const userSchema = new Schema<IUserDocument>({
   username: { type: String, required: true },
   password: { type: String, required: false },
   email: { type: String, required: true },
@@ -26,4 +52,5 @@ const userSchema = new Schema({
   uploadCount: { type: Number, default: 0 },
 });
 
-export const User = mongoose.model('users', userSchema);
+export const User = mongoose.model<IUserDocument>('users', userSchema);
+export type UserDocument = ReturnType<(typeof User)['hydrate']>;

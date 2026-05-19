@@ -11,7 +11,7 @@ import { BadRequestException, ForbiddenException, NotFoundException } from '@/ex
 import { Comment } from '@/models/comment.model';
 import { Like } from '@/models/like.model';
 import { MediaUpload } from '@/models/media-upload.model';
-import { Post } from '@/models/post.model';
+import { Post, type PostDocument } from '@/models/post.model';
 import { User } from '@/models/user.model';
 import { getFileSizeLimit, MAGIC_BYTES_HEADER_LENGTH, validateMagicBytes } from '@/utils/magic-bytes';
 import { decodeCursor, encodeCursor } from '@/utils/pagination';
@@ -120,7 +120,7 @@ export class PostService implements IPostService {
 
     const createdAt = new Date().toISOString();
     const session = await mongoose.connection.startSession();
-    let post: InstanceType<typeof Post>;
+    let post: PostDocument;
     try {
       session.startTransaction();
 
@@ -159,7 +159,7 @@ export class PostService implements IPostService {
       success: true,
       message: 'Post created successfully',
       post: {
-        id: post.id as string,
+        id: post._id.toString(),
         body: post.body ?? '',
         mediaKey: post.mediaKey ?? undefined,
         authorId: String(post.user ?? userId),
@@ -197,7 +197,7 @@ export class PostService implements IPostService {
     const post = await Post.findById(postId);
     if (!post) return null;
     return {
-      id: post.id as string,
+      id: post._id.toString(),
       body: post.body ?? '',
       mediaUrl: post.mediaUrl ?? undefined,
       mediaKey: post.mediaKey ?? undefined,
@@ -225,7 +225,7 @@ export class PostService implements IPostService {
 
     const edges = nodes.map(post => ({
       node: {
-        id: post.id as string,
+        id: post._id.toString(),
         body: post.body ?? '',
         mediaUrl: post.mediaUrl ?? undefined,
         mediaKey: post.mediaKey ?? undefined,
@@ -265,7 +265,7 @@ export class PostService implements IPostService {
 
     const edges = nodes.map(post => ({
       node: {
-        id: post.id as string,
+        id: post._id.toString(),
         body: post.body ?? '',
         mediaUrl: post.mediaUrl ?? undefined,
         mediaKey: post.mediaKey ?? undefined,
@@ -313,7 +313,7 @@ export class PostService implements IPostService {
       success: true,
       message: alreadyLiked ? 'Post unliked successfully' : 'Post liked successfully',
       post: {
-        id: post.id as string,
+        id: post._id.toString(),
         body: post.body ?? '',
         mediaUrl: post.mediaUrl ?? undefined,
         mediaKey: post.mediaKey ?? undefined,

@@ -1,8 +1,16 @@
-import mongoose from 'mongoose';
+import mongoose, { type Types } from 'mongoose';
 
 const { Schema } = mongoose;
 
-const commentSchema = new Schema({
+export interface ICommentDocument {
+  postId: Types.ObjectId;
+  userId: Types.ObjectId;
+  username: string;
+  body: string;
+  createdAt: string;
+}
+
+const commentSchema = new Schema<ICommentDocument>({
   postId: { type: Schema.Types.ObjectId, ref: 'posts', required: true },
   userId: { type: Schema.Types.ObjectId, ref: 'users', required: true },
   username: { type: String, required: true },
@@ -12,4 +20,5 @@ const commentSchema = new Schema({
 
 commentSchema.index({ postId: 1, _id: -1 });
 
-export const Comment = mongoose.model('comments', commentSchema);
+export const Comment = mongoose.model<ICommentDocument>('comments', commentSchema);
+export type CommentDocument = ReturnType<(typeof Comment)['hydrate']>;
