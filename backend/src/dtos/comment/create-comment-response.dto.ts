@@ -1,5 +1,6 @@
+import type { ApiResponse } from '@/dtos/shared';
+
 import type CommentDto from './comment.dto';
-import type { ApiResponse } from '@/types/api-reponse';
 
 type CreateCommentResponse = ApiResponse & {
   comment?: CommentDto;

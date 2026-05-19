@@ -1,4 +1,4 @@
-import type { ApiResponse } from '@/types/api-reponse';
+import type { ApiResponse } from '@/dtos/shared';
 
 type GetUploadUrlResponse = ApiResponse & {
   uploadUrl?: string;

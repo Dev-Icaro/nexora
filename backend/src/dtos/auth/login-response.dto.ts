@@ -1,5 +1,5 @@
+import type { ApiResponse } from '@/dtos/shared';
 import type UserDto from '@/dtos/user/user.dto';
-import type { ApiResponse } from '@/types/api-reponse';
 
 type LoginResponse = ApiResponse & {
   accessToken?: string;

@@ -1,4 +1,4 @@
-import { ApiResponse } from '@/types/api-reponse';
+import { ApiResponse } from '@/dtos/shared';
 
 type RegisterResponse = ApiResponse & {
   user?: {

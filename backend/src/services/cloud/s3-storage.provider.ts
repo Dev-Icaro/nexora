@@ -11,7 +11,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import env from '@/config/environment';
 import secrets from '@/config/secrets';
 import { AppException } from '@/exceptions';
-import { DocumentDownloadMode } from '@/types/storage';
+import { DocumentDownloadMode } from '@/services/interfaces/storage-provider.interface';
 import logger from '@/utils/logger';
 
 import { IStorageProvider } from '../interfaces/storage-provider.interface';
