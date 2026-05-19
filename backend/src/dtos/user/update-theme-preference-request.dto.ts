@@ -1,5 +1,5 @@
 type UpdateThemePreferenceRequestDto = {
-  theme: string;
+  theme: 'light' | 'dark' | 'system';
 };
 
 export default UpdateThemePreferenceRequestDto;

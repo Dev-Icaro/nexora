@@ -9,7 +9,7 @@ export const userMutations = {
 
   updateThemePreference: async (
     _: unknown,
-    { theme }: { theme: string },
+    { theme }: { theme: 'light' | 'dark' | 'system' },
     { dataSources, currentUser }: GraphQLContext,
   ) => dataSources.userService.updateThemePreference(currentUser!.userId, { theme }),
 

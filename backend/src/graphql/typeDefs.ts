@@ -1,4 +1,10 @@
 export const typeDefs = `#graphql
+  enum ThemePreference {
+    light
+    dark
+    system
+  }
+
   type Post {
     id: ID!
     body: String!
@@ -38,7 +44,7 @@ export const typeDefs = `#graphql
     createdAt: String!
     bio: String
     position: String
-    themePreference: String
+    themePreference: ThemePreference
     avatarUrl: String
     storageInfo: StorageInfo!
   }
@@ -225,7 +231,7 @@ export const typeDefs = `#graphql
     likePost(postId: ID!): LikePostResponse!
 
     updateProfile(updateProfileRequest: UpdateProfileRequest!): UpdateProfileResponse!
-    updateThemePreference(theme: String!): UpdateThemePreferenceResponse!
+    updateThemePreference(theme: ThemePreference!): UpdateThemePreferenceResponse!
 
     getAvatarUploadUrl(request: GetUploadUrlRequest!): GetUploadUrlResponse!
   }
