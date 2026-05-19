@@ -27,6 +27,7 @@ export const CREATE_POST = gql`
         author {
           id
           username
+          avatarUrl
         }
         likeCount
         commentCount

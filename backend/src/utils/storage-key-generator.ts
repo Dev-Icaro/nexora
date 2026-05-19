@@ -72,14 +72,18 @@ export default class StorageKeyGenerator {
   }
 
   /**
-   * Generates the canonical confirmed-avatar key for a user.
-   * Always the same key regardless of filename/extension — overwrites the existing object in-place.
+   * Generates a unique confirmed-avatar key for a user derived from the pending key's extension.
+   * Each upload gets its own UUID-based key, so the URL changes on every upload and CDN cache
+   * invalidation is unnecessary.
    *
    * @param userId - The authenticated user's ID.
-   * @returns Storage key in format: `confirmed/avatars/{userId}/avatar`
+   * @param pendingKey - The pending upload key, used only for extension extraction.
+   * @returns Storage key in format: `confirmed/avatars/{userId}/{uuid}.{ext}`
    */
-  static generateConfirmedAvatarKey(userId: string): string {
-    return `confirmed/avatars/${userId}/avatar`;
+  static generateConfirmedAvatarKey(userId: string, pendingKey: string): string {
+    const uuid = randomUUID();
+    const ext = path.extname(pendingKey).toLowerCase().replace(/[^a-z0-9.]/g, '');
+    return `confirmed/avatars/${userId}/${uuid}${ext}`;
   }
 
   /**

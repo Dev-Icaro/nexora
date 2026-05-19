@@ -1,4 +1,3 @@
-import { CloudFrontClient, CreateInvalidationCommand } from '@aws-sdk/client-cloudfront';
 import { GetSecretValueCommand, SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
 import { getSignedUrl } from '@aws-sdk/cloudfront-signer';
 
@@ -23,18 +22,6 @@ async function getPrivateKey(): Promise<string> {
   return privateKey;
 }
 
-let cfClient: CloudFrontClient;
-function getCloudFrontClient(): CloudFrontClient {
-  if (cfClient) return cfClient;
-
-  const cfConfig: ConstructorParameters<typeof CloudFrontClient>[0] = { region: env.AWS_CLOUDFRONT_REGION };
-  if (secrets.AWS_ACCESS_KEY_ID && secrets.AWS_SECRET_ACCESS_KEY) {
-    cfConfig.credentials = { accessKeyId: secrets.AWS_ACCESS_KEY_ID, secretAccessKey: secrets.AWS_SECRET_ACCESS_KEY };
-  }
-  cfClient = new CloudFrontClient(cfConfig);
-  return cfClient;
-}
-
 export async function signMediaUrl(confirmedKey: string): Promise<string> {
   const key = await getPrivateKey();
 
@@ -46,19 +33,3 @@ export async function signMediaUrl(confirmedKey: string): Promise<string> {
   });
 }
 
-/**
- * Creates a CloudFront invalidation for a single object key.
- *
- * @param key - The confirmed S3 object key (without leading slash).
- */
-export async function invalidateMediaUrl(key: string): Promise<void> {
-  await getCloudFrontClient().send(
-    new CreateInvalidationCommand({
-      DistributionId: secrets.AWS_CLOUDFRONT_DISTRIBUTION_ID,
-      InvalidationBatch: {
-        CallerReference: `${key}-${Date.now()}`,
-        Paths: { Quantity: 1, Items: [`/${key}`] },
-      },
-    }),
-  );
-}
