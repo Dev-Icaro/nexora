@@ -1,15 +1,17 @@
 import env from '@/config/environment';
 import settings from '@/config/settings';
-import type ApplyPasswordResetRequest from '@/dtos/apply-password-reset-request.dto';
-import type ApplyPasswordResetResponse from '@/dtos/apply-password-reset-response.dto';
-import type LoginRequest from '@/dtos/login-request.dto';
-import type LoginResponse from '@/dtos/login-response.dto';
-import type LogoutResponse from '@/dtos/logout-response.dto';
-import type RefreshResponse from '@/dtos/refresh-response.dto';
-import type RegisterRequest from '@/dtos/register-request.dto';
-import type RegisterResponse from '@/dtos/register-response.dto';
-import type RequestPasswordResetResponse from '@/dtos/request-password-reset-response.dto';
-import type ValidatePasswordResetTokenResponse from '@/dtos/validate-password-reset-token-response.dto';
+import type {
+  ApplyPasswordResetRequest,
+  ApplyPasswordResetResponse,
+  LoginRequest,
+  LoginResponse,
+  LogoutResponse,
+  RefreshResponse,
+  RegisterRequest,
+  RegisterResponse,
+  RequestPasswordResetResponse,
+  ValidatePasswordResetTokenResponse,
+} from '@/dtos/auth';
 import { BadRequestException, ConflictException, UnauthorizedException } from '@/exceptions';
 import { PasswordResetToken } from '@/models/password-reset-token.model';
 import { User } from '@/models/user.model';

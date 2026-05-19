@@ -1,6 +1,4 @@
-import type CommentDto from '@/dtos/comment.dto';
-import type CreateCommentResponse from '@/dtos/create-comment-response.dto';
-import type DeleteCommentResponse from '@/dtos/delete-comment-response.dto';
+import type { CommentDto, CreateCommentResponse, DeleteCommentResponse } from '@/dtos/comment';
 import { ForbiddenException, NotFoundException } from '@/exceptions';
 import { Comment, type CommentDocument } from '@/models/comment.model';
 import { Post } from '@/models/post.model';

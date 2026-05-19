@@ -1,4 +1,4 @@
-import type UserDto from '@/dtos/user.dto';
+import type UserDto from './user.dto';
 
 type UpdateThemePreferenceResponseDto = {
   code: number;

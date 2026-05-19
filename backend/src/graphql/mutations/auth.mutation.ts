@@ -1,9 +1,6 @@
 import env from '@/config/environment';
 import settings from '@/config/settings';
-import type ApplyPasswordResetRequest from '@/dtos/apply-password-reset-request.dto';
-import type LoginRequest from '@/dtos/login-request.dto';
-import type RegisterRequest from '@/dtos/register-request.dto';
-import type RequestPasswordResetRequest from '@/dtos/request-password-reset-request.dto';
+import type { ApplyPasswordResetRequest, LoginRequest, RegisterRequest, RequestPasswordResetRequest } from '@/dtos/auth';
 import { UnauthorizedException } from '@/exceptions';
 
 import type { GraphQLContext } from '../context';

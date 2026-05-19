@@ -1,9 +1,5 @@
-import type CreatePostResponse from '@/dtos/create-post-response.dto';
-import type DeletePostResponse from '@/dtos/delete-post-response.dto';
-import type GetUploadUrlResponse from '@/dtos/get-upload-url-response.dto';
-import type LikePostResponse from '@/dtos/like-post-response.dto';
-import type PostDto from '@/dtos/post.dto';
-import type PostConnectionDto from '@/dtos/post-connection.dto';
+import type { GetUploadUrlResponse } from '@/dtos/shared';
+import type { CreatePostResponse, DeletePostResponse, LikePostResponse, PostConnectionDto, PostDto } from '@/dtos/post';
 
 /** Defines the contract for post creation, deletion, and social interactions. */
 export interface IPostService {

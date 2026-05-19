@@ -1,6 +1,4 @@
-import type CommentDto from '@/dtos/comment.dto';
-import type CreateCommentResponse from '@/dtos/create-comment-response.dto';
-import type DeleteCommentResponse from '@/dtos/delete-comment-response.dto';
+import type { CommentDto, CreateCommentResponse, DeleteCommentResponse } from '@/dtos/comment';
 
 /** Defines the contract for comment creation, deletion, and retrieval. */
 export interface ICommentService {

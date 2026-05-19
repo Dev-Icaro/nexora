@@ -1,13 +1,15 @@
-import type ApplyPasswordResetRequest from '@/dtos/apply-password-reset-request.dto';
-import type ApplyPasswordResetResponse from '@/dtos/apply-password-reset-response.dto';
-import type LoginRequest from '@/dtos/login-request.dto';
-import type LoginResponse from '@/dtos/login-response.dto';
-import type LogoutResponse from '@/dtos/logout-response.dto';
-import type RefreshResponse from '@/dtos/refresh-response.dto';
-import type RegisterRequest from '@/dtos/register-request.dto';
-import type RegisterResponse from '@/dtos/register-response.dto';
-import type RequestPasswordResetResponse from '@/dtos/request-password-reset-response.dto';
-import type ValidatePasswordResetTokenResponse from '@/dtos/validate-password-reset-token-response.dto';
+import type {
+  ApplyPasswordResetRequest,
+  ApplyPasswordResetResponse,
+  LoginRequest,
+  LoginResponse,
+  LogoutResponse,
+  RefreshResponse,
+  RegisterRequest,
+  RegisterResponse,
+  RequestPasswordResetResponse,
+  ValidatePasswordResetTokenResponse,
+} from '@/dtos/auth';
 import type { OAuthUserInfo } from '@/services/oauth/oauth-provider.interface';
 
 /** Defines the contract for authentication operations: registration, login, and token refresh. */

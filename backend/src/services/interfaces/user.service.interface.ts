@@ -1,10 +1,12 @@
-import type CreateUserDto from '@/dtos/create-user.dto';
-import type GetUploadUrlResponse from '@/dtos/get-upload-url-response.dto';
-import type UpdateProfileRequestDto from '@/dtos/update-profile-request.dto';
-import type UpdateProfileResponseDto from '@/dtos/update-profile-response.dto';
-import type UpdateThemePreferenceRequestDto from '@/dtos/update-theme-preference-request.dto';
-import type UpdateThemePreferenceResponseDto from '@/dtos/update-theme-preference-response.dto';
-import type UserDto from '@/dtos/user.dto';
+import type { CreateUserDto } from '@/dtos/auth';
+import type { GetUploadUrlResponse } from '@/dtos/shared';
+import type {
+  UpdateProfileRequestDto,
+  UpdateProfileResponseDto,
+  UpdateThemePreferenceRequestDto,
+  UpdateThemePreferenceResponseDto,
+  UserDto,
+} from '@/dtos/user';
 
 /** Defines the contract for user data access and refresh-token hash lifecycle management. */
 export interface IUserService {

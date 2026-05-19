@@ -1,4 +1,4 @@
-import type PostDto from '@/dtos/post.dto';
+import type PostDto from './post.dto';
 import type { ApiResponse } from '@/types/api-reponse';
 
 type CreatePostResponse = ApiResponse & {
