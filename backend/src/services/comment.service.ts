@@ -2,7 +2,7 @@ import type CommentDto from '@/dtos/comment.dto';
 import type CreateCommentResponse from '@/dtos/create-comment-response.dto';
 import type DeleteCommentResponse from '@/dtos/delete-comment-response.dto';
 import { ForbiddenException, NotFoundException } from '@/exceptions';
-import { Comment } from '@/models/comment.model';
+import { Comment, type CommentDocument } from '@/models/comment.model';
 import { Post } from '@/models/post.model';
 
 import type { ICommentService } from './interfaces/comment.service.interface';
@@ -10,6 +10,16 @@ import type { IUserService } from './interfaces/user.service.interface';
 
 export class CommentService implements ICommentService {
   constructor(private readonly userService: IUserService) {}
+
+  private toCommentDto(doc: CommentDocument): CommentDto {
+    return {
+      id: doc._id.toString(),
+      postId: doc.postId.toString(),
+      body: doc.body,
+      authorId: doc.userId.toString(),
+      createdAt: doc.createdAt,
+    };
+  }
 
   async createComment(userId: string, postId: string, body: string): Promise<CreateCommentResponse> {
     const post = await Post.findById(postId);
@@ -27,13 +37,7 @@ export class CommentService implements ICommentService {
       code: 201,
       success: true,
       message: 'Comment created successfully',
-      comment: {
-        id: comment._id.toString(),
-        postId: comment.postId.toString(),
-        body: comment.body,
-        authorId: comment.userId.toString(),
-        createdAt: comment.createdAt,
-      },
+      comment: this.toCommentDto(comment),
     };
   }
 
@@ -50,24 +54,12 @@ export class CommentService implements ICommentService {
       code: 200,
       success: true,
       message: 'Comment deleted successfully',
-      comment: {
-        id: comment._id.toString(),
-        postId: comment.postId.toString(),
-        body: comment.body,
-        authorId: comment.userId.toString(),
-        createdAt: comment.createdAt,
-      },
+      comment: this.toCommentDto(comment),
     };
   }
 
   async getCommentsByPostId(postId: string): Promise<CommentDto[]> {
     const comments = await Comment.find({ postId }).sort({ _id: 1 });
-    return comments.map(c => ({
-      id: c._id.toString(),
-      postId: c.postId.toString(),
-      body: c.body,
-      authorId: c.userId.toString(),
-      createdAt: c.createdAt,
-    }));
+    return comments.map(c => this.toCommentDto(c));
   }
 }

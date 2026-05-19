@@ -24,38 +24,32 @@ const avatarAllowedTypes = new Set(settings.AVATAR_POST_ALLOWED_CONTENT_TYPES);
 export class UserService implements IUserService {
   constructor(private readonly storageProvider: IStorageProvider) {}
 
+  private toUserDto(doc: UserDocument): UserDto {
+    return {
+      id: doc._id.toString(),
+      email: doc.email,
+      username: doc.username,
+      password: doc.password,
+      createdAt: doc.createdAt,
+      bio: doc.bio,
+      position: doc.position,
+      themePreference: doc.themePreference,
+      avatarKey: doc.avatarKey,
+      storageUsedBytes: doc.storageUsedBytes ?? 0,
+      storageQuotaBytes: doc.storageQuotaBytes ?? settings.STORAGE_QUOTA_FREE_BYTES,
+    };
+  }
+
   async findById(userId: string): Promise<UserDto | null> {
     const user = await User.findById(userId);
     if (!user) return null;
-    return {
-      id: user._id.toString(),
-      email: user.email,
-      username: user.username,
-      password: user.password ?? undefined,
-      createdAt: user.createdAt,
-      bio: user.bio ?? undefined,
-      position: user.position ?? undefined,
-      avatarKey: user.avatarKey ?? undefined,
-      storageUsedBytes: user.storageUsedBytes ?? 0,
-      storageQuotaBytes: user.storageQuotaBytes ?? settings.STORAGE_QUOTA_FREE_BYTES,
-    };
+    return this.toUserDto(user);
   }
 
   async findByEmail(email: string): Promise<UserDto | null> {
     const user = await User.findOne({ email });
     if (!user) return null;
-    return {
-      id: user._id.toString(),
-      email: user.email,
-      username: user.username,
-      password: user.password ?? undefined,
-      createdAt: user.createdAt,
-      bio: user.bio ?? undefined,
-      position: user.position ?? undefined,
-      avatarKey: user.avatarKey ?? undefined,
-      storageUsedBytes: user.storageUsedBytes ?? 0,
-      storageQuotaBytes: user.storageQuotaBytes ?? settings.STORAGE_QUOTA_FREE_BYTES,
-    };
+    return this.toUserDto(user);
   }
 
   async saveRefreshTokenHash(userId: string, hash: string, expiresAt: Date): Promise<void> {
@@ -69,18 +63,7 @@ export class UserService implements IUserService {
       tokens: { $elemMatch: { refreshTokenHash: hash, expiresAt: { $gt: new Date() } } },
     });
     if (!user) return null;
-    return {
-      id: user._id.toString(),
-      email: user.email,
-      username: user.username,
-      password: user.password ?? undefined,
-      createdAt: user.createdAt,
-      bio: user.bio ?? undefined,
-      position: user.position ?? undefined,
-      avatarKey: user.avatarKey ?? undefined,
-      storageUsedBytes: user.storageUsedBytes ?? 0,
-      storageQuotaBytes: user.storageQuotaBytes ?? settings.STORAGE_QUOTA_FREE_BYTES,
-    };
+    return this.toUserDto(user);
   }
 
   async removeRefreshTokenHash(userId: string, hash: string): Promise<void> {
@@ -98,18 +81,7 @@ export class UserService implements IUserService {
       oauthAccounts: { $elemMatch: { provider, providerId } },
     });
     if (!user) return null;
-    return {
-      id: user._id.toString(),
-      email: user.email,
-      username: user.username,
-      password: user.password ?? undefined,
-      createdAt: user.createdAt,
-      bio: user.bio ?? undefined,
-      position: user.position ?? undefined,
-      avatarKey: user.avatarKey ?? undefined,
-      storageUsedBytes: user.storageUsedBytes ?? 0,
-      storageQuotaBytes: user.storageQuotaBytes ?? settings.STORAGE_QUOTA_FREE_BYTES,
-    };
+    return this.toUserDto(user);
   }
 
   async create(userData: CreateUserDto): Promise<UserDto> {
@@ -124,12 +96,7 @@ export class UserService implements IUserService {
         ? { oauthAccounts: [{ provider: userData.provider, providerId: userData.providerId }] }
         : {}),
     });
-    return {
-      id: user._id.toString(),
-      email: user.email,
-      username: user.username,
-      createdAt,
-    };
+    return this.toUserDto(user);
   }
 
   async linkOAuthAccount(userId: string, provider: string, providerId: string): Promise<void> {
@@ -149,15 +116,7 @@ export class UserService implements IUserService {
       code: 200,
       message: 'Theme preference updated',
       success: true,
-      user: {
-        id: user._id.toString(),
-        email: user.email,
-        username: user.username,
-        createdAt: user.createdAt,
-        bio: user.bio ?? undefined,
-        position: user.position ?? undefined,
-        themePreference: user.themePreference ?? 'system',
-      },
+      user: this.toUserDto(user),
     };
   }
 
@@ -231,17 +190,7 @@ export class UserService implements IUserService {
       code: 200,
       message: 'Profile updated successfully',
       success: true,
-      user: {
-        id: updatedUser._id.toString(),
-        email: updatedUser.email,
-        username: updatedUser.username,
-        createdAt: updatedUser.createdAt,
-        bio: updatedUser.bio ?? undefined,
-        position: updatedUser.position ?? undefined,
-        avatarKey: updatedUser.avatarKey ?? undefined,
-        storageUsedBytes: updatedUser.storageUsedBytes ?? 0,
-        storageQuotaBytes: updatedUser.storageQuotaBytes ?? settings.STORAGE_QUOTA_FREE_BYTES,
-      },
+      user: this.toUserDto(updatedUser),
     };
   }
 

@@ -30,6 +30,19 @@ export class PostService implements IPostService {
     private readonly storageProvider: IStorageProvider,
   ) {}
 
+  private toPostDto(doc: PostDocument): PostDto {
+    return {
+      id: doc._id.toString(),
+      body: doc.body ?? '',
+      mediaUrl: doc.mediaUrl,
+      mediaKey: doc.mediaKey,
+      authorId: String(doc.user),
+      createdAt: doc.createdAt ?? '',
+      likeCount: doc.likeCount ?? 0,
+      commentCount: doc.commentCount ?? 0,
+    };
+  }
+
   async getUploadUrl(
     userId: string,
     filename: string,
@@ -158,15 +171,7 @@ export class PostService implements IPostService {
       code: 201,
       success: true,
       message: 'Post created successfully',
-      post: {
-        id: post._id.toString(),
-        body: post.body ?? '',
-        mediaKey: post.mediaKey ?? undefined,
-        authorId: String(post.user ?? userId),
-        createdAt: post.createdAt ?? createdAt,
-        likeCount: 0,
-        commentCount: 0,
-      },
+      post: this.toPostDto(post),
     };
   }
 
@@ -196,16 +201,7 @@ export class PostService implements IPostService {
   async getPostById(postId: string): Promise<PostDto | null> {
     const post = await Post.findById(postId);
     if (!post) return null;
-    return {
-      id: post._id.toString(),
-      body: post.body ?? '',
-      mediaUrl: post.mediaUrl ?? undefined,
-      mediaKey: post.mediaKey ?? undefined,
-      authorId: String(post.user),
-      createdAt: post.createdAt ?? '',
-      likeCount: post.likeCount ?? 0,
-      commentCount: post.commentCount ?? 0,
-    };
+    return this.toPostDto(post);
   }
 
   async getFeed(first = 10, after?: string): Promise<PostConnectionDto> {
@@ -224,16 +220,7 @@ export class PostService implements IPostService {
     const nodes = hasNextPage ? docs.slice(0, limit) : docs;
 
     const edges = nodes.map(post => ({
-      node: {
-        id: post._id.toString(),
-        body: post.body ?? '',
-        mediaUrl: post.mediaUrl ?? undefined,
-        mediaKey: post.mediaKey ?? undefined,
-        authorId: String(post.user),
-        createdAt: post.createdAt ?? '',
-        likeCount: post.likeCount ?? 0,
-        commentCount: post.commentCount ?? 0,
-      },
+      node: this.toPostDto(post),
       cursor: encodeCursor(post._id.toString()),
     }));
 
@@ -264,16 +251,7 @@ export class PostService implements IPostService {
     const nodes = hasNextPage ? docs.slice(0, limit) : docs;
 
     const edges = nodes.map(post => ({
-      node: {
-        id: post._id.toString(),
-        body: post.body ?? '',
-        mediaUrl: post.mediaUrl ?? undefined,
-        mediaKey: post.mediaKey ?? undefined,
-        authorId: String(post.user),
-        createdAt: post.createdAt ?? '',
-        likeCount: post.likeCount ?? 0,
-        commentCount: post.commentCount ?? 0,
-      },
+      node: this.toPostDto(post),
       cursor: encodeCursor(post._id.toString()),
     }));
 
@@ -312,16 +290,7 @@ export class PostService implements IPostService {
       code: 200,
       success: true,
       message: alreadyLiked ? 'Post unliked successfully' : 'Post liked successfully',
-      post: {
-        id: post._id.toString(),
-        body: post.body ?? '',
-        mediaUrl: post.mediaUrl ?? undefined,
-        mediaKey: post.mediaKey ?? undefined,
-        authorId: String(post.user),
-        createdAt: post.createdAt ?? '',
-        likeCount: post.likeCount ?? 0,
-        commentCount: post.commentCount ?? 0,
-      },
+      post: this.toPostDto(post),
     };
   }
 }
