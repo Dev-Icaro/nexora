@@ -181,6 +181,8 @@ export class AuthService implements IAuthService {
       }
     }
 
+    if (!user) throw new UnauthorizedException('Unauthorized');
+
     const tokenInfo = { userId: user.id };
     const refreshToken = createRefreshToken(tokenInfo);
     const refreshTokenHash = createHashForRefreshToken(refreshToken);
@@ -192,19 +194,20 @@ export class AuthService implements IAuthService {
   }
 
   async login({ email, password }: LoginRequest): Promise<LoginResponse & { refreshToken: string }> {
-    const user = await this.userService.findByEmail(email);
-    if (!user) throw new UnauthorizedException('Invalid credentials');
+    const doc = await User.findOne({ email });
+    if (!doc) throw new UnauthorizedException('Invalid credentials');
 
-    const passwordMatch = await comparePassword(password, user.password ?? '');
+    const passwordMatch = await comparePassword(password, doc.password ?? '');
     if (!passwordMatch) throw new UnauthorizedException('Invalid credentials');
 
-    const tokenInfo = { userId: user.id };
+    const userId = doc._id.toString();
+    const tokenInfo = { userId };
     const accessToken = createAccessToken(tokenInfo);
     const refreshToken = createRefreshToken(tokenInfo);
     const refreshTokenHash = createHashForRefreshToken(refreshToken);
     const expiresAt = new Date(Date.now() + settings.REFRESH_TOKEN_DURATION_MINUTES * 60 * 1000);
 
-    await this.userService.saveRefreshTokenHash(user.id, refreshTokenHash, expiresAt);
+    await this.userService.saveRefreshTokenHash(userId, refreshTokenHash, expiresAt);
 
     return {
       code: 200,
@@ -213,11 +216,11 @@ export class AuthService implements IAuthService {
       accessToken,
       refreshToken,
       user: {
-        id: user.id,
-        email: user.email,
-        username: user.username,
-        createdAt: user.createdAt,
-        avatarKey: user.avatarKey,
+        id: userId,
+        email: doc.email,
+        username: doc.username,
+        createdAt: doc.createdAt,
+        avatarKey: doc.avatarKey,
       },
     };
   }

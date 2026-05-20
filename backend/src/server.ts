@@ -15,7 +15,6 @@ import { apolloErrorHandler } from '@/graphql/apollo-error-handler';
 import { createContext, createSubscriptionContext, type GraphQLContext } from '@/graphql/context';
 import { rateLimiterPlugin } from '@/graphql/plugins/rate-limiter.plugin';
 import { authResolver } from '@/graphql/resolvers/auth.resolver';
-import { mutationResolver } from '@/graphql/resolvers/mutation.resolver';
 import { postResolver } from '@/graphql/resolvers/post.resolver';
 import { subscriptionResolver } from '@/graphql/resolvers/subscription.resolver';
 import { userResolver } from '@/graphql/resolvers/user.resolver';
@@ -29,7 +28,7 @@ import logger from '@/utils/logger';
 
 const schema = makeExecutableSchema({
   typeDefs,
-  resolvers: [postResolver, mutationResolver, userResolver, authResolver, subscriptionResolver],
+  resolvers: [authResolver, postResolver, userResolver, subscriptionResolver],
 });
 
 const bootstrap = async (): Promise<void> => {

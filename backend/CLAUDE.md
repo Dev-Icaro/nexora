@@ -114,7 +114,6 @@ All interface files must include:
 ### General rules
 
 - Interface/type declarations forming a public contract (e.g., `GraphQLContext`) need a minimum one-line description.
-- HOFs (e.g., `withErrorHandling`) must document generics with `@typeParam`.
 - Do not add TSDoc to private implementation details unless the logic is non-obvious.
 - Follow `src/utils/auth.ts` as the reference style pattern.
 
@@ -170,7 +169,7 @@ Levels (highest → lowest): `error`, `warn`, `info`, `http`, `verbose`, `query`
 4. **Service implementation**: `src/services/<name>.service.ts` — imports model directly (or repository if available).
 5. **Register service**: Add to `createContext` in `src/graphql/context.ts` and type in `GraphQLContext`.
 6. **typeDefs**: Extend `src/graphql/typeDefs.ts` with new types, inputs, queries, or mutations.
-7. **Mutation/Query**: Create `src/graphql/mutations/<name>.mutation.ts` or `src/graphql/queries/<name>.query.ts`. Wrap with `withErrorHandling`.
+7. **Mutation/Query**: Create `src/graphql/mutations/<name>.mutation.ts` or `src/graphql/queries/<name>.query.ts`.
 8. **Resolver map**: Import and spread into the appropriate resolver file (`mutation.resolver.ts` for mutations, etc.).
 9. **Env vars** (if needed): Add to `environment.ts` Zod schema and `.env.example`.
 

@@ -1,4 +1,4 @@
-type CommentDto = {
+export type CommentDto = {
   id: string;
   postId: string;
   body: string;

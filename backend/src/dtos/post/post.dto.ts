@@ -1,4 +1,4 @@
-type PostDto = {
+export type PostDto = {
   id: string;
   body: string;
   mediaUrl?: string;

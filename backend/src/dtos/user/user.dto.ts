@@ -1,8 +1,7 @@
-type UserDto = {
+export type UserDto = {
   id: string;
   email: string;
   username: string;
-  password?: string;
   createdAt: string;
   bio?: string;
   position?: string;

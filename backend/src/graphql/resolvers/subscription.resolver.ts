@@ -1,7 +1,12 @@
-import { postSubscriptions } from '@/graphql/subscriptions/post.subscription';
+import type { PostDto } from '@/dtos/post';
+import type { Resolvers } from '@/graphql/__generated__/types';
+import { pubsub, TOPICS } from '@/graphql/pubsub';
 
-export const subscriptionResolver = {
+export const subscriptionResolver: Resolvers = {
   Subscription: {
-    ...postSubscriptions,
+    newPost: {
+      subscribe: () => pubsub.asyncIterableIterator(TOPICS.NEW_POST),
+      resolve: (payload: { newPost: PostDto }) => payload.newPost,
+    },
   },
 };

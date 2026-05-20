@@ -32,4 +32,3 @@ export async function signMediaUrl(confirmedKey: string): Promise<string> {
     dateLessThan: new Date(Date.now() + 60 * 60 * 1000).toISOString(), // 1 hour
   });
 }
-

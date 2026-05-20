@@ -82,7 +82,10 @@ export default class StorageKeyGenerator {
    */
   static generateConfirmedAvatarKey(userId: string, pendingKey: string): string {
     const uuid = randomUUID();
-    const ext = path.extname(pendingKey).toLowerCase().replace(/[^a-z0-9.]/g, '');
+    const ext = path
+      .extname(pendingKey)
+      .toLowerCase()
+      .replace(/[^a-z0-9.]/g, '');
     return `confirmed/avatars/${userId}/${uuid}${ext}`;
   }
 

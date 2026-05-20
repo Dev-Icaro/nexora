@@ -1,8 +1,14 @@
-import type { GetUploadUrlResponse } from '@/dtos/shared';
 import type { CreatePostResponse, DeletePostResponse, LikePostResponse, PostConnectionDto, PostDto } from '@/dtos/post';
+import type { GetUploadUrlResponse } from '@/dtos/shared';
 
 /** Defines the contract for post creation, deletion, and social interactions. */
 export interface IPostService {
+  /**
+   * Returns all posts as DTOs. Intended only for the legacy unbounded `getPosts` query.
+   *
+   * @returns A promise resolving to an array of {@link PostDto}.
+   */
+  getAllPosts(): Promise<PostDto[]>;
   /**
    * Generates a presigned POST URL for uploading post media directly to S3.
    * Magic-byte validation happens server-side in {@link createPost} — not here.

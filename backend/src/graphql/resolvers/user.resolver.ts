@@ -1,13 +1,32 @@
 import settings from '@/config/settings';
-import { userQueries } from '@/graphql/queries/user.query';
+import type { Resolvers } from '@/graphql/__generated__/types';
 import { signMediaUrl } from '@/services/cloud/cloud-front';
 
-export const userResolver = {
+export const userResolver: Resolvers = {
   Query: {
-    ...userQueries,
+    getUserById: (_, { userId }, { dataSources }) => dataSources.userService.findById(userId),
+  },
+  Mutation: {
+    updateProfile: (_, { updateProfileRequest }, { dataSources, currentUser }) =>
+      dataSources.userService.updateProfile(currentUser!.userId, {
+        bio: updateProfileRequest.bio ?? undefined,
+        position: updateProfileRequest.position ?? undefined,
+        objectKey: updateProfileRequest.objectKey ?? undefined,
+      }),
+
+    updateThemePreference: (_, { theme }, { dataSources, currentUser }) =>
+      dataSources.userService.updateThemePreference(currentUser!.userId, { theme }),
+
+    getAvatarUploadUrl: (_, { request }, { dataSources, currentUser }) =>
+      dataSources.userService.getAvatarUploadUrl(
+        currentUser!.userId,
+        request.filename,
+        request.contentType,
+        request.fileSizeBytes,
+      ),
   },
   User: {
-    storageInfo: (parent: { storageUsedBytes?: number; storageQuotaBytes?: number }) => {
+    storageInfo: parent => {
       const used = parent.storageUsedBytes ?? 0;
       const quota = parent.storageQuotaBytes ?? settings.STORAGE_QUOTA_FREE_BYTES;
       return {
@@ -17,7 +36,7 @@ export const userResolver = {
         usedPercent: quota > 0 ? (used / quota) * 100 : 0,
       };
     },
-    avatarUrl: async (parent: { avatarKey?: string }): Promise<string | null> => {
+    avatarUrl: async parent => {
       if (parent.avatarKey) return signMediaUrl(parent.avatarKey);
       return null;
     },

@@ -1,8 +1,8 @@
 import mongoose from 'mongoose';
 
 import settings from '@/config/settings';
-import type { GetUploadUrlResponse } from '@/dtos/shared';
 import type { CreatePostResponse, DeletePostResponse, LikePostResponse, PostConnectionDto, PostDto } from '@/dtos/post';
+import type { GetUploadUrlResponse } from '@/dtos/shared';
 import { BadRequestException, ForbiddenException, NotFoundException } from '@/exceptions';
 import { Comment } from '@/models/comment.model';
 import { Like } from '@/models/like.model';
@@ -25,6 +25,11 @@ export class PostService implements IPostService {
     private readonly userService: IUserService,
     private readonly storageProvider: IStorageProvider,
   ) {}
+
+  async getAllPosts(): Promise<PostDto[]> {
+    const posts = await Post.find();
+    return posts.map(post => this.toPostDto(post));
+  }
 
   private toPostDto(doc: PostDocument): PostDto {
     return {

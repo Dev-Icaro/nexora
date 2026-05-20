@@ -1,4 +1,4 @@
-type LikeDto = {
+export type LikeDto = {
   id: string;
   postId: string;
   authorId: string;

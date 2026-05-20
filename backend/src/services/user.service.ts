@@ -31,7 +31,6 @@ export class UserService implements IUserService {
       id: doc._id.toString(),
       email: doc.email,
       username: doc.username,
-      password: doc.password,
       createdAt: doc.createdAt,
       bio: doc.bio,
       position: doc.position,
