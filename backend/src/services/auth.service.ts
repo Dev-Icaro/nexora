@@ -1,17 +1,7 @@
 import env from '@/config/environment';
 import settings from '@/config/settings';
-import type {
-  ApplyPasswordResetRequest,
-  ApplyPasswordResetResponse,
-  LoginRequest,
-  LoginResponse,
-  LogoutResponse,
-  RefreshResponse,
-  RegisterRequest,
-  RegisterResponse,
-  RequestPasswordResetResponse,
-  ValidatePasswordResetTokenResponse,
-} from '@/dtos/auth';
+import type { ApplyPasswordResetDto, LoginDto, RegisterDto, TokenInfoDto } from '@/dtos/auth';
+import type UserDto from '@/dtos/user/user.dto';
 import { BadRequestException, ConflictException, UnauthorizedException } from '@/exceptions';
 import { PasswordResetToken } from '@/models/password-reset-token.model';
 import { User } from '@/models/user.model';
@@ -30,7 +20,7 @@ export class AuthService implements IAuthService {
     private readonly emailService: IEmailService,
   ) {}
 
-  async register({ username, email, password, confirmPassword }: RegisterRequest): Promise<RegisterResponse> {
+  async register({ username, email, password, confirmPassword }: RegisterDto): Promise<UserDto> {
     if (password !== confirmPassword) throw new BadRequestException('Passwords do not match');
 
     const existing = await User.findOne({ email });
@@ -38,31 +28,84 @@ export class AuthService implements IAuthService {
 
     const hashedPassword = await hashPassword(password);
     const createdAt = new Date().toISOString();
-
     const newUser = await User.create({ username, email, password: hashedPassword, createdAt });
 
     return {
-      code: 201,
-      success: true,
-      message: 'Account created successfully',
+      id: newUser._id.toString(),
+      email: newUser.email,
+      username: newUser.username,
+      createdAt,
+    };
+  }
+
+  async login({ email, password }: LoginDto): Promise<TokenInfoDto> {
+    const doc = await User.findOne({ email });
+    if (!doc) throw new UnauthorizedException('Invalid credentials');
+
+    const passwordMatch = await comparePassword(password, doc.password ?? '');
+    if (!passwordMatch) throw new UnauthorizedException('Invalid credentials');
+
+    const userId = doc._id.toString();
+    const tokenInfo = { userId };
+    const accessToken = createAccessToken(tokenInfo);
+    const refreshToken = createRefreshToken(tokenInfo);
+    const refreshTokenHash = createHashForRefreshToken(refreshToken);
+    const expiresAt = new Date(Date.now() + settings.REFRESH_TOKEN_DURATION_MINUTES * 60 * 1000);
+
+    await this.userService.saveRefreshTokenHash(userId, refreshTokenHash, expiresAt);
+
+    return {
+      accessToken,
+      refreshToken,
       user: {
-        id: newUser._id.toString(),
-        email: newUser.email,
-        username: newUser.username,
-        createdAt,
+        id: userId,
+        email: doc.email,
+        username: doc.username,
+        createdAt: doc.createdAt,
+        avatarKey: doc.avatarKey,
       },
     };
   }
 
-  async requestPasswordReset(email: string): Promise<RequestPasswordResetResponse> {
-    const successResponse = (): RequestPasswordResetResponse => ({
-      code: 200,
-      success: true,
-      message: 'If this email is registered, you will receive a reset link.',
-    });
+  async refresh(incomingRefreshToken: string): Promise<TokenInfoDto> {
+    const hash = createHashForRefreshToken(incomingRefreshToken);
+    const user = await this.userService.getByRefreshTokenHash(hash);
+    if (!user) throw new UnauthorizedException('Unauthorized');
 
+    await this.userService.removeRefreshTokenHash(user.id, hash);
+
+    const tokenInfo = { userId: user.id };
+    const accessToken = createAccessToken(tokenInfo);
+    const refreshToken = createRefreshToken(tokenInfo);
+    const refreshTokenHash = createHashForRefreshToken(refreshToken);
+    const expiresAt = new Date(Date.now() + settings.REFRESH_TOKEN_DURATION_MINUTES * 60 * 1000);
+
+    await this.userService.saveRefreshTokenHash(user.id, refreshTokenHash, expiresAt);
+
+    return {
+      accessToken,
+      refreshToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        createdAt: user.createdAt,
+        avatarKey: user.avatarKey,
+      },
+    };
+  }
+
+  async logout(refreshToken: string): Promise<void> {
+    const hash = createHashForRefreshToken(refreshToken);
+    const user = await this.userService.getByRefreshTokenHash(hash);
+    if (user) {
+      await this.userService.removeRefreshTokenHash(user.id, hash);
+    }
+  }
+
+  async requestPasswordReset(email: string): Promise<void> {
     const user = await this.userService.getByEmail(email);
-    if (!user) return successResponse();
+    if (!user) return;
 
     const rawToken = generatePasswordResetToken();
     const tokenHash = hashPasswordResetToken(rawToken);
@@ -85,15 +128,9 @@ export class AuthService implements IAuthService {
       subject: 'Reset your Nexora password',
       html,
     });
-
-    return successResponse();
   }
 
-  async applyPasswordReset({
-    token,
-    newPassword,
-    confirmPassword,
-  }: ApplyPasswordResetRequest): Promise<ApplyPasswordResetResponse> {
+  async applyPasswordReset({ token, newPassword, confirmPassword }: ApplyPasswordResetDto): Promise<void> {
     if (newPassword !== confirmPassword) throw new BadRequestException('Passwords do not match');
     if (newPassword.length < 8) throw new BadRequestException('Password must be at least 8 characters');
 
@@ -101,70 +138,23 @@ export class AuthService implements IAuthService {
 
     const tokenHash = hashPasswordResetToken(token);
     const record = await PasswordResetToken.findOne({ tokenHash });
-
     const hashedPassword = await hashPassword(newPassword);
 
     await User.findByIdAndUpdate(record!.userId, { $set: { password: hashedPassword } });
     await PasswordResetToken.findOneAndUpdate({ tokenHash }, { $set: { usedAt: new Date() } });
     await this.userService.clearAllRefreshTokens(record!.userId.toString());
-
-    return { code: 200, success: true, message: 'Password reset successfully' };
   }
 
-  async validatePasswordResetToken(token: string): Promise<ValidatePasswordResetTokenResponse> {
+  async validatePasswordResetToken(token: string): Promise<void> {
     const tokenHash = hashPasswordResetToken(token);
     const record = await PasswordResetToken.findOne({ tokenHash });
 
     if (!record) throw new BadRequestException('Invalid or expired reset link');
     if (record.usedAt !== null) throw new BadRequestException('This reset link has already been used');
     if (record.expiresAt <= new Date()) throw new BadRequestException('Invalid or expired reset link');
-
-    return { code: 200, success: true, message: 'Token is valid' };
   }
 
-  async refresh(incomingRefreshToken: string): Promise<RefreshResponse & { refreshToken: string }> {
-    const hash = createHashForRefreshToken(incomingRefreshToken);
-    const user = await this.userService.getByRefreshTokenHash(hash);
-    if (!user) throw new UnauthorizedException('Unauthorized');
-
-    await this.userService.removeRefreshTokenHash(user.id, hash);
-
-    const tokenInfo = { userId: user.id };
-    const accessToken = createAccessToken(tokenInfo);
-    const refreshToken = createRefreshToken(tokenInfo);
-    const refreshTokenHash = createHashForRefreshToken(refreshToken);
-    const expiresAt = new Date(Date.now() + settings.REFRESH_TOKEN_DURATION_MINUTES * 60 * 1000);
-
-    await this.userService.saveRefreshTokenHash(user.id, refreshTokenHash, expiresAt);
-
-    return {
-      code: 200,
-      success: true,
-      message: 'Token refreshed',
-      accessToken,
-      refreshToken,
-      user: {
-        id: user.id,
-        email: user.email,
-        username: user.username,
-        createdAt: user.createdAt,
-        avatarKey: user.avatarKey,
-      },
-    };
-  }
-
-  async logout(refreshToken: string): Promise<LogoutResponse> {
-    const hash = createHashForRefreshToken(refreshToken);
-    const user = await this.userService.getByRefreshTokenHash(hash);
-
-    if (user) {
-      await this.userService.removeRefreshTokenHash(user.id, hash);
-    }
-
-    return { code: 200, success: true, message: 'Logged out successfully' };
-  }
-
-  async loginWithOAuth(provider: string, oauthUser: OAuthUserInfo): Promise<{ refreshToken: string }> {
+  async loginWithOAuth(provider: string, oauthUser: OAuthUserInfo): Promise<Pick<TokenInfoDto, 'refreshToken'>> {
     let user = await this.userService.getByOAuthAccount(provider, oauthUser.providerId);
 
     if (!user) {
@@ -191,37 +181,5 @@ export class AuthService implements IAuthService {
     await this.userService.saveRefreshTokenHash(user.id, refreshTokenHash, expiresAt);
 
     return { refreshToken };
-  }
-
-  async login({ email, password }: LoginRequest): Promise<LoginResponse & { refreshToken: string }> {
-    const doc = await User.findOne({ email });
-    if (!doc) throw new UnauthorizedException('Invalid credentials');
-
-    const passwordMatch = await comparePassword(password, doc.password ?? '');
-    if (!passwordMatch) throw new UnauthorizedException('Invalid credentials');
-
-    const userId = doc._id.toString();
-    const tokenInfo = { userId };
-    const accessToken = createAccessToken(tokenInfo);
-    const refreshToken = createRefreshToken(tokenInfo);
-    const refreshTokenHash = createHashForRefreshToken(refreshToken);
-    const expiresAt = new Date(Date.now() + settings.REFRESH_TOKEN_DURATION_MINUTES * 60 * 1000);
-
-    await this.userService.saveRefreshTokenHash(userId, refreshTokenHash, expiresAt);
-
-    return {
-      code: 200,
-      success: true,
-      message: 'Login successful',
-      accessToken,
-      refreshToken,
-      user: {
-        id: userId,
-        email: doc.email,
-        username: doc.username,
-        createdAt: doc.createdAt,
-        avatarKey: doc.avatarKey,
-      },
-    };
   }
 }

@@ -1,12 +1,5 @@
-export type { default as ApplyPasswordResetRequest } from './apply-password-reset-request.dto';
-export type { default as ApplyPasswordResetResponse } from './apply-password-reset-response.dto';
+export type { default as ApplyPasswordResetDto } from './apply-password-reset.dto';
 export type { default as CreateUserDto } from './create-user.dto';
-export type { default as LoginRequest } from './login-request.dto';
-export type { default as LoginResponse } from './login-response.dto';
-export type { default as LogoutResponse } from './logout-response.dto';
-export type { default as RefreshResponse } from './refresh-response.dto';
-export type { default as RegisterRequest } from './register-request.dto';
-export type { default as RegisterResponse } from './register-response.dto';
-export type { default as RequestPasswordResetRequest } from './request-password-reset-request.dto';
-export type { default as RequestPasswordResetResponse } from './request-password-reset-response.dto';
-export type { default as ValidatePasswordResetTokenResponse } from './validate-password-reset-token-response.dto';
+export type { default as LoginDto } from './login-credentials.dto';
+export type { default as RegisterDto } from './register-credentials.dto';
+export type { default as TokenInfoDto } from './token-info.dto';

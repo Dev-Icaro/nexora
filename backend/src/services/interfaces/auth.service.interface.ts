@@ -1,15 +1,5 @@
-import type {
-  ApplyPasswordResetRequest,
-  ApplyPasswordResetResponse,
-  LoginRequest,
-  LoginResponse,
-  LogoutResponse,
-  RefreshResponse,
-  RegisterRequest,
-  RegisterResponse,
-  RequestPasswordResetResponse,
-  ValidatePasswordResetTokenResponse,
-} from '@/dtos/auth';
+import type { ApplyPasswordResetDto, LoginDto, RegisterDto, TokenInfoDto } from '@/dtos/auth';
+import type UserDto from '@/dtos/user/user.dto';
 import type { OAuthUserInfo } from '@/services/oauth/oauth-provider.interface';
 
 /** Defines the contract for authentication operations: registration, login, and token refresh. */
@@ -17,46 +7,44 @@ export interface IAuthService {
   /**
    * Registers a new user account.
    *
-   * @param request - Registration payload containing username, email, password, and confirmPassword.
-   * @returns A promise resolving to a {@link RegisterResponse} with the created user data.
+   * @param credentials - Registration payload containing username, email, password, and confirmPassword.
+   * @returns A promise resolving to the created {@link UserDto}.
    */
-  register(request: RegisterRequest): Promise<RegisterResponse>;
+  register(credentials: RegisterDto): Promise<UserDto>;
 
   /**
    * Authenticates a user with email and password credentials.
    *
-   * @param request - Login payload containing email and password.
-   * @returns A promise resolving to a {@link LoginResponse} extended with a `refreshToken` string.
+   * @param credentials - Login payload containing email and password.
+   * @returns A promise resolving to a {@link TokenInfoDto} with the authenticated user and issued tokens.
    */
-  login(request: LoginRequest): Promise<LoginResponse & { refreshToken: string }>;
+  login(credentials: LoginDto): Promise<TokenInfoDto>;
 
   /**
    * Issues a new access token and rotates the refresh token.
    *
    * @param refreshToken - The current refresh token from login or a previous refresh.
-   * @returns A promise resolving to a {@link RefreshResponse} extended with the new `refreshToken`.
+   * @returns A promise resolving to a {@link TokenInfoDto} with the refreshed user and new tokens.
    */
-  refresh(refreshToken: string): Promise<RefreshResponse & { refreshToken: string }>;
+  refresh(refreshToken: string): Promise<TokenInfoDto>;
 
   /**
    * Invalidates a refresh token by removing its hash from the database.
    *
    * @param refreshToken - The current refresh token to invalidate.
-   * @returns A promise resolving to a {@link LogoutResponse}.
    */
-  logout(refreshToken: string): Promise<LogoutResponse>;
+  logout(refreshToken: string): Promise<void>;
 
   /**
    * Initiates a password reset flow for the given email address.
    *
    * Generates a time-limited token, stores its hash, and sends a reset email when
-   * the email is registered. Always returns a generic success response to avoid
-   * leaking whether the email exists.
+   * the email is registered. Returns silently when email is not registered to avoid
+   * leaking whether the address exists.
    *
    * @param email - The email address of the account to reset.
-   * @returns A promise resolving to a {@link RequestPasswordResetResponse}.
    */
-  requestPasswordReset(email: string): Promise<RequestPasswordResetResponse>;
+  requestPasswordReset(email: string): Promise<void>;
 
   /**
    * Applies a password reset by validating the token and updating the user's password.
@@ -64,10 +52,9 @@ export interface IAuthService {
    * Re-validates the token before making any changes, hashes the new password, marks
    * the token as consumed, and clears all active sessions (global logout).
    *
-   * @param request - Payload containing token, newPassword, and confirmPassword.
-   * @returns A promise resolving to an {@link ApplyPasswordResetResponse}.
+   * @param dto - Payload containing token, newPassword, and confirmPassword.
    */
-  applyPasswordReset(request: ApplyPasswordResetRequest): Promise<ApplyPasswordResetResponse>;
+  applyPasswordReset(dto: ApplyPasswordResetDto): Promise<void>;
 
   /**
    * Validates a password reset token without consuming it.
@@ -76,9 +63,8 @@ export interface IAuthService {
    * invalid state so the resolver returns a GraphQL error to the client.
    *
    * @param token - The raw reset token from the URL query parameter.
-   * @returns A promise resolving to a {@link ValidatePasswordResetTokenResponse} when the token is valid.
    */
-  validatePasswordResetToken(token: string): Promise<ValidatePasswordResetTokenResponse>;
+  validatePasswordResetToken(token: string): Promise<void>;
 
   /**
    * Authenticates or provisions a user via an OAuth provider.
@@ -88,7 +74,7 @@ export interface IAuthService {
    *
    * @param provider - The OAuth provider name (e.g. `'github'`, `'google'`).
    * @param oauthUser - The normalized user profile returned by the provider.
-   * @returns A promise resolving to an object containing the issued `refreshToken`.
+   * @returns A promise resolving to the issued `refreshToken`.
    */
-  loginWithOAuth(provider: string, oauthUser: OAuthUserInfo): Promise<{ refreshToken: string }>;
+  loginWithOAuth(provider: string, oauthUser: OAuthUserInfo): Promise<Pick<TokenInfoDto, 'refreshToken'>>;
 }

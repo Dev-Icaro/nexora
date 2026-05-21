@@ -5,53 +5,58 @@ import type { Resolvers } from '@/graphql/__generated__/types';
 
 export const authResolver: Resolvers = {
   Query: {
-    validatePasswordResetToken: (_, { token }, { dataSources }) =>
-      dataSources.authService.validatePasswordResetToken(token),
+    validatePasswordResetToken: async (_, { token }, { dataSources }) => {
+      await dataSources.authService.validatePasswordResetToken(token);
+      return { code: 200, success: true, message: 'Token is valid' };
+    },
   },
   Mutation: {
-    register: (_, { registerRequest }, { dataSources }) => dataSources.authService.register(registerRequest),
+    register: async (_, { registerRequest }, { dataSources }) => {
+      const user = await dataSources.authService.register(registerRequest);
+      return { code: 201, success: true, message: 'Account created successfully', user };
+    },
 
     login: async (_, { loginRequest }, { dataSources, res }) => {
-      const { refreshToken, ...response } = await dataSources.authService.login(loginRequest);
+      const { user, accessToken, refreshToken } = await dataSources.authService.login(loginRequest);
       res.cookie(settings.REFRESH_TOKEN_COOKIE_NAME, refreshToken, {
         httpOnly: true,
         secure: env.NODE_ENV === 'production',
         sameSite: settings.REFRESH_TOKEN_COOKIE_SAME_SITE,
         maxAge: settings.REFRESH_TOKEN_DURATION_MINUTES * 60 * 1000,
       });
-      return response;
+      return { code: 200, success: true, message: 'Login successful', accessToken, user };
     },
 
     refresh: async (_, __, { dataSources, req, res }) => {
       const token = req.cookies[settings.REFRESH_TOKEN_COOKIE_NAME] as string | undefined;
       if (!token) throw new UnauthorizedException('Unauthorized');
 
-      const { refreshToken, ...response } = await dataSources.authService.refresh(token);
+      const { user, accessToken, refreshToken } = await dataSources.authService.refresh(token);
       res.cookie(settings.REFRESH_TOKEN_COOKIE_NAME, refreshToken, {
         httpOnly: true,
         secure: env.NODE_ENV === 'production',
         sameSite: settings.REFRESH_TOKEN_COOKIE_SAME_SITE,
         maxAge: settings.REFRESH_TOKEN_DURATION_MINUTES * 60 * 1000,
       });
-      return response;
+      return { code: 200, success: true, message: 'Token refreshed', accessToken, user };
     },
 
     logout: async (_, __, { dataSources, req, res }) => {
       const token = req.cookies[settings.REFRESH_TOKEN_COOKIE_NAME] as string | undefined;
-      const response = token
-        ? await dataSources.authService.logout(token)
-        : { code: 200, success: true, message: 'Logged out successfully' };
+      if (token) await dataSources.authService.logout(token);
       res.clearCookie(settings.REFRESH_TOKEN_COOKIE_NAME);
-      return response;
+      return { code: 200, success: true, message: 'Logged out successfully' };
     },
 
-    requestPasswordReset: (_, { requestPasswordResetRequest }, { dataSources }) =>
-      dataSources.authService.requestPasswordReset(requestPasswordResetRequest.email),
+    requestPasswordReset: async (_, { requestPasswordResetRequest }, { dataSources }) => {
+      await dataSources.authService.requestPasswordReset(requestPasswordResetRequest.email);
+      return { code: 200, success: true, message: 'If this email is registered, you will receive a reset link.' };
+    },
 
     applyPasswordReset: async (_, { applyPasswordResetRequest }, { dataSources, res }) => {
-      const response = await dataSources.authService.applyPasswordReset(applyPasswordResetRequest);
+      await dataSources.authService.applyPasswordReset(applyPasswordResetRequest);
       res.clearCookie(settings.REFRESH_TOKEN_COOKIE_NAME);
-      return response;
+      return { code: 200, success: true, message: 'Password reset successfully' };
     },
   },
 };
