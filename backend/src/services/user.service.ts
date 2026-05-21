@@ -3,13 +3,7 @@ import mongoose from 'mongoose';
 import settings from '@/config/settings';
 import type { CreateUserDto } from '@/dtos/auth';
 import type { UploadUrlDto } from '@/dtos/shared';
-import type {
-  UpdateProfileRequestDto,
-  UpdateProfileResponseDto,
-  UpdateThemePreferenceRequestDto,
-  UpdateThemePreferenceResponseDto,
-  UserDto,
-} from '@/dtos/user';
+import type { GetAvatarUploadUrlDto, UpdateProfileDto, UpdateThemePreferenceDto, UserDto } from '@/dtos/user';
 import { BadRequestException, ForbiddenException, NotFoundException } from '@/exceptions';
 import { MediaUpload } from '@/models/media-upload.model';
 import { User, type UserDocument } from '@/models/user.model';
@@ -106,25 +100,13 @@ export class UserService implements IUserService {
     });
   }
 
-  async updateThemePreference(
-    userId: string,
-    { theme }: UpdateThemePreferenceRequestDto,
-  ): Promise<UpdateThemePreferenceResponseDto> {
+  async updateThemePreference({ userId, theme }: UpdateThemePreferenceDto): Promise<UserDto> {
     const user = await User.findByIdAndUpdate(userId, { $set: { themePreference: theme } }, { new: true });
     if (!user) throw new NotFoundException('User not found');
-
-    return {
-      code: 200,
-      message: 'Theme preference updated',
-      success: true,
-      user: this.toUserDto(user),
-    };
+    return this.toUserDto(user);
   }
 
-  async updateProfile(
-    userId: string,
-    { bio, position, objectKey }: UpdateProfileRequestDto,
-  ): Promise<UpdateProfileResponseDto> {
+  async updateProfile({ userId, bio, position, objectKey }: UpdateProfileDto): Promise<UserDto> {
     if (bio !== undefined && bio.length > 160) {
       throw new BadRequestException('Bio must not exceed 160 characters');
     }
@@ -187,12 +169,7 @@ export class UserService implements IUserService {
       updatedUser = user;
     }
 
-    return {
-      code: 200,
-      message: 'Profile updated successfully',
-      success: true,
-      user: this.toUserDto(updatedUser),
-    };
+    return this.toUserDto(updatedUser);
   }
 
   private async prepareAvatarConfirmation(
@@ -241,12 +218,12 @@ export class UserService implements IUserService {
     return { confirmedKey, contentType, contentLength, oldSizeBytes, oldAvatarKey };
   }
 
-  async getAvatarUploadUrl(
-    userId: string,
-    filename: string,
-    contentType: string,
-    fileSizeBytes: number,
-  ): Promise<UploadUrlDto> {
+  async getAvatarUploadUrl({
+    userId,
+    filename,
+    contentType,
+    fileSizeBytes,
+  }: GetAvatarUploadUrlDto): Promise<UploadUrlDto> {
     if (!avatarAllowedTypes.has(contentType)) {
       throw new BadRequestException(`Unsupported content type for avatar: ${contentType}`);
     }

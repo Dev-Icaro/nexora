@@ -7,23 +7,29 @@ export const userResolver: Resolvers = {
     getUserById: (_, { userId }, { dataSources }) => dataSources.userService.getById(userId),
   },
   Mutation: {
-    updateProfile: (_, { updateProfileRequest }, { dataSources, currentUser }) =>
-      dataSources.userService.updateProfile(currentUser!.userId, {
+    updateProfile: async (_, { updateProfileRequest }, { dataSources, currentUser }) => {
+      const user = await dataSources.userService.updateProfile({
+        userId: currentUser!.userId,
         bio: updateProfileRequest.bio ?? undefined,
         position: updateProfileRequest.position ?? undefined,
         objectKey: updateProfileRequest.objectKey ?? undefined,
-      }),
+      });
+      return { code: 200, success: true, message: 'Profile updated successfully', user };
+    },
 
-    updateThemePreference: (_, { theme }, { dataSources, currentUser }) =>
-      dataSources.userService.updateThemePreference(currentUser!.userId, { theme }),
+    updateThemePreference: async (_, { theme }, { dataSources, currentUser }) => {
+      const user = await dataSources.userService.updateThemePreference({
+        userId: currentUser!.userId,
+        theme,
+      });
+      return { code: 200, success: true, message: 'Theme preference updated', user };
+    },
 
     getAvatarUploadUrl: async (_, { request }, { dataSources, currentUser }) => {
-      const { uploadUrl, fields, objectKey } = await dataSources.userService.getAvatarUploadUrl(
-        currentUser!.userId,
-        request.filename,
-        request.contentType,
-        request.fileSizeBytes,
-      );
+      const { uploadUrl, fields, objectKey } = await dataSources.userService.getAvatarUploadUrl({
+        userId: currentUser!.userId,
+        ...request,
+      });
       return { code: 200, success: true, message: 'Upload URL generated', uploadUrl, fields, objectKey };
     },
   },

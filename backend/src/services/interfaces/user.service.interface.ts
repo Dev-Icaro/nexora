@@ -1,12 +1,6 @@
 import type { CreateUserDto } from '@/dtos/auth';
 import type { UploadUrlDto } from '@/dtos/shared';
-import type {
-  UpdateProfileRequestDto,
-  UpdateProfileResponseDto,
-  UpdateThemePreferenceRequestDto,
-  UpdateThemePreferenceResponseDto,
-  UserDto,
-} from '@/dtos/user';
+import type { GetAvatarUploadUrlDto, UpdateProfileDto, UpdateThemePreferenceDto, UserDto } from '@/dtos/user';
 
 /** Defines the contract for user data access and refresh-token hash lifecycle management. */
 export interface IUserService {
@@ -32,7 +26,6 @@ export interface IUserService {
    * @param userId - The unique identifier of the user.
    * @param hash - The SHA-512 HMAC hash of the refresh token (see `createHashForRefreshToken`).
    * @param expiresAt - The UTC date/time at which the token hash expires.
-   * @returns A promise that resolves when the operation completes.
    */
   saveRefreshTokenHash(userId: string, hash: string, expiresAt: Date): Promise<void>;
 
@@ -49,7 +42,6 @@ export interface IUserService {
    *
    * @param userId - The unique identifier of the user.
    * @param hash - The SHA-512 HMAC hash of the refresh token to remove.
-   * @returns A promise that resolves when the token hash has been removed.
    */
   removeRefreshTokenHash(userId: string, hash: string): Promise<void>;
 
@@ -76,7 +68,6 @@ export interface IUserService {
    * Removes all stored refresh token hashes for a user, forcing a global logout.
    *
    * @param userId - The unique identifier of the user.
-   * @returns A promise that resolves when all token hashes have been removed.
    */
   clearAllRefreshTokens(userId: string): Promise<void>;
 
@@ -87,45 +78,31 @@ export interface IUserService {
    * @param userId - The unique identifier of the user to link the OAuth account to.
    * @param provider - The OAuth provider name (e.g. `'github'`, `'google'`).
    * @param providerId - The provider's stable unique identifier for the user.
-   * @returns A promise that resolves when the link has been persisted.
    */
   linkOAuthAccount(userId: string, provider: string, providerId: string): Promise<void>;
 
   /**
    * Updates the profile fields (bio, position) of the authenticated user.
-   * When `objectKey` is present in `data`, also validates, moves, and confirms the pending avatar upload.
+   * When `objectKey` is present, also validates, moves, and confirms the pending avatar upload.
    *
-   * @param userId - The unique identifier of the user.
-   * @param data - Partial profile fields to update and optional avatar object key. See {@link UpdateProfileRequestDto}.
-   * @returns A promise resolving to the updated profile response.
+   * @param dto - Profile fields to update, optional avatar object key, and the user's ID.
+   * @returns A promise resolving to the updated {@link UserDto}.
    */
-  updateProfile(userId: string, data: UpdateProfileRequestDto): Promise<UpdateProfileResponseDto>;
+  updateProfile(dto: UpdateProfileDto): Promise<UserDto>;
 
   /**
    * Persists the user's theme preference (`light`, `dark`, or `system`).
    *
-   * @param userId - The unique identifier of the user.
-   * @param data - The theme preference to store. See {@link UpdateThemePreferenceRequestDto}.
-   * @returns A promise resolving to the updated user response.
+   * @param dto - The theme preference to store and the user's ID.
+   * @returns A promise resolving to the updated {@link UserDto}.
    */
-  updateThemePreference(
-    userId: string,
-    data: UpdateThemePreferenceRequestDto,
-  ): Promise<UpdateThemePreferenceResponseDto>;
+  updateThemePreference(dto: UpdateThemePreferenceDto): Promise<UserDto>;
 
   /**
    * Generates a presigned S3 POST URL for uploading a user avatar (images only: jpeg, png, webp).
    *
-   * @param userId - The authenticated user's ID.
-   * @param filename - Original filename, used for extension extraction only.
-   * @param contentType - MIME type declared by the client (validated server-side via magic bytes on confirm).
-   * @param fileSizeBytes - Declared file size in bytes (validated against the image size limit).
-   * @returns A promise resolving to the presigned upload URL, form fields, and object key.
+   * @param dto - Upload parameters including userId, filename, contentType, and declared file size.
+   * @returns A promise resolving to an {@link UploadUrlDto} with the presigned URL, form fields, and object key.
    */
-  getAvatarUploadUrl(
-    userId: string,
-    filename: string,
-    contentType: string,
-    fileSizeBytes: number,
-  ): Promise<UploadUrlDto>;
+  getAvatarUploadUrl(dto: GetAvatarUploadUrlDto): Promise<UploadUrlDto>;
 }
