@@ -67,6 +67,22 @@ Use **yarn** for all installs and scripts. Never use npm.
 | DTO               | `src/dtos/<action>-<type>.dto.ts`                     | `login-request.dto.ts`      |
 | Exception         | `src/exceptions/<name>.exception.ts`                  | `not-found.exception.ts`    |
 
+### Service Method Naming
+
+Service methods use `<verb><Selector>` — the entity name is omitted because the class already provides that context.
+
+| Pattern              | Example                              | Avoid                |
+| -------------------- | ------------------------------------ | -------------------- |
+| `create`             | `commentService.create(...)`         | `createComment`      |
+| `delete`             | `postService.delete(...)`            | `deletePost`         |
+| `getAll`             | `postService.getAll()`               | `getAllPosts`         |
+| `getById`            | `postService.getById(id)`            | `getPostById`, `findById`   |
+| `getByEmail`         | `userService.getByEmail(email)`      | `findByEmail`               |
+| `getByUserId`        | `postService.getByUserId(id)`        | `getUserPosts`              |
+| `toggleLike`         | `postService.toggleLike(userId, id)` | `likePost`           |
+
+**Exception**: include a sub-resource name when the method operates on something other than the primary entity — e.g., `getAvatarUploadUrl` in `UserService` is correct because "avatar" is a sub-resource, not the user itself.
+
 ---
 
 ## Architecture Layers (summary — see `docs/architecture.md` for full detail)

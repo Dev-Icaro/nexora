@@ -16,7 +16,7 @@ export interface IUserService {
    * @param userId - The MongoDB ObjectId string of the user.
    * @returns A promise resolving to the matching {@link UserDto}, or `null` if not found.
    */
-  findById(userId: string): Promise<UserDto | null>;
+  getById(userId: string): Promise<UserDto | null>;
 
   /**
    * Finds a user by their email address.
@@ -24,7 +24,7 @@ export interface IUserService {
    * @param email - The email address to search for.
    * @returns A promise resolving to the matching {@link UserDto}, or `null` if not found.
    */
-  findByEmail(email: string): Promise<UserDto | null>;
+  getByEmail(email: string): Promise<UserDto | null>;
 
   /**
    * Persists a hashed refresh token for a user with an expiry date.
@@ -42,7 +42,7 @@ export interface IUserService {
    * @param hash - The SHA-512 HMAC hash of the refresh token to look up.
    * @returns A promise resolving to the matching {@link UserDto}, or `null` if not found or expired.
    */
-  findByRefreshTokenHash(hash: string): Promise<UserDto | null>;
+  getByRefreshTokenHash(hash: string): Promise<UserDto | null>;
 
   /**
    * Removes a specific refresh token hash from a user's stored tokens.
@@ -60,7 +60,7 @@ export interface IUserService {
    * @param providerId - The provider's stable unique identifier for the user.
    * @returns A promise resolving to the matching {@link UserDto}, or `null` if not found.
    */
-  findByOAuthAccount(provider: string, providerId: string): Promise<UserDto | null>;
+  getByOAuthAccount(provider: string, providerId: string): Promise<UserDto | null>;
 
   /**
    * Creates a new user account from the given data.

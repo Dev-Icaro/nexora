@@ -4,7 +4,7 @@ import { signMediaUrl } from '@/services/cloud/cloud-front';
 
 export const userResolver: Resolvers = {
   Query: {
-    getUserById: (_, { userId }, { dataSources }) => dataSources.userService.findById(userId),
+    getUserById: (_, { userId }, { dataSources }) => dataSources.userService.getById(userId),
   },
   Mutation: {
     updateProfile: (_, { updateProfileRequest }, { dataSources, currentUser }) =>

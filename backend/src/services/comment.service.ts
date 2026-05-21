@@ -19,11 +19,11 @@ export class CommentService implements ICommentService {
     };
   }
 
-  async createComment(userId: string, postId: string, body: string): Promise<CreateCommentResponse> {
+  async create(userId: string, postId: string, body: string): Promise<CreateCommentResponse> {
     const post = await Post.findById(postId);
     if (!post) throw new NotFoundException('Post not found');
 
-    const user = await this.userService.findById(userId);
+    const user = await this.userService.getById(userId);
     if (!user) throw new NotFoundException('User not found');
 
     const createdAt = new Date().toISOString();
@@ -39,7 +39,7 @@ export class CommentService implements ICommentService {
     };
   }
 
-  async deleteComment(userId: string, postId: string, commentId: string): Promise<DeleteCommentResponse> {
+  async delete(userId: string, postId: string, commentId: string): Promise<DeleteCommentResponse> {
     const comment = await Comment.findById(commentId);
     if (!comment) throw new NotFoundException('Comment not found');
 
@@ -56,7 +56,7 @@ export class CommentService implements ICommentService {
     };
   }
 
-  async getCommentsByPostId(postId: string): Promise<CommentDto[]> {
+  async getByPostId(postId: string): Promise<CommentDto[]> {
     const comments = await Comment.find({ postId }).sort({ _id: 1 });
     return comments.map(c => this.toCommentDto(c));
   }

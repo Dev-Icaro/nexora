@@ -10,7 +10,7 @@ export interface ICommentService {
    * @param body - The text content of the comment.
    * @returns A promise resolving to a {@link CreateCommentResponse} with the created comment.
    */
-  createComment(userId: string, postId: string, body: string): Promise<CreateCommentResponse>;
+  create(userId: string, postId: string, body: string): Promise<CreateCommentResponse>;
 
   /**
    * Deletes a comment from a post. Only the comment author may delete their own comment.
@@ -20,7 +20,7 @@ export interface ICommentService {
    * @param commentId - The ID of the comment to delete.
    * @returns A promise resolving to a {@link DeleteCommentResponse} with the deleted comment.
    */
-  deleteComment(userId: string, postId: string, commentId: string): Promise<DeleteCommentResponse>;
+  delete(userId: string, postId: string, commentId: string): Promise<DeleteCommentResponse>;
 
   /**
    * Retrieves all comments for a given post, ordered by creation time ascending.
@@ -28,5 +28,5 @@ export interface ICommentService {
    * @param postId - The ID of the post.
    * @returns A promise resolving to an array of {@link CommentDto}.
    */
-  getCommentsByPostId(postId: string): Promise<CommentDto[]>;
+  getByPostId(postId: string): Promise<CommentDto[]>;
 }

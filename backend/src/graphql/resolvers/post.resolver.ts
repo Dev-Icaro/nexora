@@ -13,11 +13,11 @@ async function loadAuthor(id: string, loaders: Loaders) {
 
 export const postResolver: Resolvers = {
   Query: {
-    getPosts: (_, __, { dataSources }) => dataSources.postService.getAllPosts(),
-    getPost: (_, { postId }, { dataSources }) => dataSources.postService.getPostById(postId),
+    getPosts: (_, __, { dataSources }) => dataSources.postService.getAll(),
+    getPost: (_, { postId }, { dataSources }) => dataSources.postService.getById(postId),
     feed: (_, { first, after }, { dataSources }) => dataSources.postService.getFeed(first ?? 10, after ?? undefined),
     getUserPosts: (_, { userId, first, after }, { dataSources }) =>
-      dataSources.postService.getUserPosts(userId, first ?? 10, after ?? undefined),
+      dataSources.postService.getByUserId(userId, first ?? 10, after ?? undefined),
   },
   Mutation: {
     getUploadUrl: (_, { request }, { dataSources, currentUser }) =>
@@ -29,7 +29,7 @@ export const postResolver: Resolvers = {
       ),
 
     createPost: async (_, { body, objectKey }, { dataSources, currentUser }) => {
-      const result = await dataSources.postService.createPost(currentUser!.userId, body, objectKey ?? undefined);
+      const result = await dataSources.postService.create(currentUser!.userId, body, objectKey ?? undefined);
       if (result.success && result.post) {
         pubsub
           .publish(TOPICS.NEW_POST, { newPost: result.post })
@@ -39,16 +39,16 @@ export const postResolver: Resolvers = {
     },
 
     deletePost: (_, { postId }, { dataSources, currentUser }) =>
-      dataSources.postService.deletePost(currentUser!.userId, postId),
+      dataSources.postService.delete(currentUser!.userId, postId),
 
     likePost: (_, { postId }, { dataSources, currentUser }) =>
-      dataSources.postService.likePost(currentUser!.userId, postId),
+      dataSources.postService.toggleLike(currentUser!.userId, postId),
 
     createComment: (_, { postId, body }, { dataSources, currentUser }) =>
-      dataSources.commentService.createComment(currentUser!.userId, postId, body),
+      dataSources.commentService.create(currentUser!.userId, postId, body),
 
     deleteComment: (_, { postId, commentId }, { dataSources, currentUser }) =>
-      dataSources.commentService.deleteComment(currentUser!.userId, postId, commentId),
+      dataSources.commentService.delete(currentUser!.userId, postId, commentId),
   },
   Post: {
     author: (parent, _, { loaders }) => loadAuthor(parent.authorId, loaders),

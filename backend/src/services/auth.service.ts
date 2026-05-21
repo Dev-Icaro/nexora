@@ -61,7 +61,7 @@ export class AuthService implements IAuthService {
       message: 'If this email is registered, you will receive a reset link.',
     });
 
-    const user = await this.userService.findByEmail(email);
+    const user = await this.userService.getByEmail(email);
     if (!user) return successResponse();
 
     const rawToken = generatePasswordResetToken();
@@ -124,7 +124,7 @@ export class AuthService implements IAuthService {
 
   async refresh(incomingRefreshToken: string): Promise<RefreshResponse & { refreshToken: string }> {
     const hash = createHashForRefreshToken(incomingRefreshToken);
-    const user = await this.userService.findByRefreshTokenHash(hash);
+    const user = await this.userService.getByRefreshTokenHash(hash);
     if (!user) throw new UnauthorizedException('Unauthorized');
 
     await this.userService.removeRefreshTokenHash(user.id, hash);
@@ -155,7 +155,7 @@ export class AuthService implements IAuthService {
 
   async logout(refreshToken: string): Promise<LogoutResponse> {
     const hash = createHashForRefreshToken(refreshToken);
-    const user = await this.userService.findByRefreshTokenHash(hash);
+    const user = await this.userService.getByRefreshTokenHash(hash);
 
     if (user) {
       await this.userService.removeRefreshTokenHash(user.id, hash);
@@ -165,10 +165,10 @@ export class AuthService implements IAuthService {
   }
 
   async loginWithOAuth(provider: string, oauthUser: OAuthUserInfo): Promise<{ refreshToken: string }> {
-    let user = await this.userService.findByOAuthAccount(provider, oauthUser.providerId);
+    let user = await this.userService.getByOAuthAccount(provider, oauthUser.providerId);
 
     if (!user) {
-      user = await this.userService.findByEmail(oauthUser.email);
+      user = await this.userService.getByEmail(oauthUser.email);
       if (user) {
         await this.userService.linkOAuthAccount(user.id, provider, oauthUser.providerId);
       } else {

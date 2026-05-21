@@ -8,10 +8,10 @@ export interface IPostService {
    *
    * @returns A promise resolving to an array of {@link PostDto}.
    */
-  getAllPosts(): Promise<PostDto[]>;
+  getAll(): Promise<PostDto[]>;
   /**
    * Generates a presigned POST URL for uploading post media directly to S3.
-   * Magic-byte validation happens server-side in {@link createPost} — not here.
+   * Magic-byte validation happens server-side in {@link create} — not here.
    *
    * @param userId - The authenticated user's ID (embedded in the object key path).
    * @param filename - Original filename; used for extension extraction and key generation.
@@ -35,7 +35,7 @@ export interface IPostService {
    * @param objectKey - Optional S3 pending object key from {@link getUploadUrl}.
    * @returns A promise resolving to a {@link CreatePostResponse} with the created post.
    */
-  createPost(userId: string, body: string, objectKey?: string): Promise<CreatePostResponse>;
+  create(userId: string, body: string, objectKey?: string): Promise<CreatePostResponse>;
 
   /**
    * Deletes a post. Only the post owner may delete their own post.
@@ -44,7 +44,7 @@ export interface IPostService {
    * @param postId - The ID of the post to delete.
    * @returns A promise resolving to a {@link DeletePostResponse} confirming the deletion.
    */
-  deletePost(userId: string, postId: string): Promise<DeletePostResponse>;
+  delete(userId: string, postId: string): Promise<DeletePostResponse>;
 
   /**
    * Toggles a like on a post. Adds a like if the user hasn't liked the post yet;
@@ -54,7 +54,7 @@ export interface IPostService {
    * @param postId - The ID of the post to like or unlike.
    * @returns A promise resolving to a {@link LikePostResponse} with the updated post.
    */
-  likePost(userId: string, postId: string): Promise<LikePostResponse>;
+  toggleLike(userId: string, postId: string): Promise<LikePostResponse>;
 
   /**
    * Retrieves a single post by its ID.
@@ -62,7 +62,7 @@ export interface IPostService {
    * @param postId - The ID of the post to fetch.
    * @returns A promise resolving to a {@link PostDto} if found, or `null` if no post matches the ID.
    */
-  getPostById(postId: string): Promise<PostDto | null>;
+  getById(postId: string): Promise<PostDto | null>;
 
   /**
    * Returns a paginated connection of posts ordered most recent first,
@@ -82,5 +82,5 @@ export interface IPostService {
    * @param after - Opaque cursor from a previous page's `pageInfo.endCursor`.
    * @returns A promise resolving to a {@link PostConnectionDto} with edges and page info.
    */
-  getUserPosts(userId: string, first: number, after?: string): Promise<PostConnectionDto>;
+  getByUserId(userId: string, first: number, after?: string): Promise<PostConnectionDto>;
 }

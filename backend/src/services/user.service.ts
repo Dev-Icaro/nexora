@@ -41,13 +41,13 @@ export class UserService implements IUserService {
     };
   }
 
-  async findById(userId: string): Promise<UserDto | null> {
+  async getById(userId: string): Promise<UserDto | null> {
     const user = await User.findById(userId);
     if (!user) return null;
     return this.toUserDto(user);
   }
 
-  async findByEmail(email: string): Promise<UserDto | null> {
+  async getByEmail(email: string): Promise<UserDto | null> {
     const user = await User.findOne({ email });
     if (!user) return null;
     return this.toUserDto(user);
@@ -59,7 +59,7 @@ export class UserService implements IUserService {
     });
   }
 
-  async findByRefreshTokenHash(hash: string): Promise<UserDto | null> {
+  async getByRefreshTokenHash(hash: string): Promise<UserDto | null> {
     const user = await User.findOne({
       tokens: { $elemMatch: { refreshTokenHash: hash, expiresAt: { $gt: new Date() } } },
     });
@@ -77,7 +77,7 @@ export class UserService implements IUserService {
     await User.findByIdAndUpdate(userId, { $set: { tokens: [] } });
   }
 
-  async findByOAuthAccount(provider: string, providerId: string): Promise<UserDto | null> {
+  async getByOAuthAccount(provider: string, providerId: string): Promise<UserDto | null> {
     const user = await User.findOne({
       oauthAccounts: { $elemMatch: { provider, providerId } },
     });

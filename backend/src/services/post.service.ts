@@ -26,7 +26,7 @@ export class PostService implements IPostService {
     private readonly storageProvider: IStorageProvider,
   ) {}
 
-  async getAllPosts(): Promise<PostDto[]> {
+  async getAll(): Promise<PostDto[]> {
     const posts = await Post.find();
     return posts.map(post => this.toPostDto(post));
   }
@@ -59,7 +59,7 @@ export class PostService implements IPostService {
       throw new BadRequestException('File size exceeds the maximum allowed size for this file type');
     }
 
-    const user = await this.userService.findById(userId);
+    const user = await this.userService.getById(userId);
     if (!user) throw new NotFoundException('User not found');
 
     const storageUsed = user.storageUsedBytes ?? 0;
@@ -101,7 +101,7 @@ export class PostService implements IPostService {
     };
   }
 
-  async createPost(userId: string, body: string, objectKey?: string): Promise<CreatePostResponse> {
+  async create(userId: string, body: string, objectKey?: string): Promise<CreatePostResponse> {
     let confirmedKey: string | undefined;
     let mediaContentLength = 0;
 
@@ -129,7 +129,7 @@ export class PostService implements IPostService {
       await withRetry(() => this.storageProvider.moveFile(objectKey, confirmedKey!));
     }
 
-    const user = await this.userService.findById(userId);
+    const user = await this.userService.getById(userId);
     if (!user) throw new NotFoundException('User not found');
 
     const createdAt = new Date().toISOString();
@@ -176,7 +176,7 @@ export class PostService implements IPostService {
     };
   }
 
-  async deletePost(userId: string, postId: string): Promise<DeletePostResponse> {
+  async delete(userId: string, postId: string): Promise<DeletePostResponse> {
     const post = await Post.findById(postId);
     if (!post) throw new NotFoundException('Post not found');
 
@@ -199,7 +199,7 @@ export class PostService implements IPostService {
     return { code: 200, success: true, message: 'Post deleted successfully' };
   }
 
-  async getPostById(postId: string): Promise<PostDto | null> {
+  async getById(postId: string): Promise<PostDto | null> {
     const post = await Post.findById(postId);
     if (!post) return null;
     return this.toPostDto(post);
@@ -236,7 +236,7 @@ export class PostService implements IPostService {
     };
   }
 
-  async getUserPosts(userId: string, first = 10, after?: string): Promise<PostConnectionDto> {
+  async getByUserId(userId: string, first = 10, after?: string): Promise<PostConnectionDto> {
     const limit = first;
     const query: Record<string, unknown> = { user: userId };
 
@@ -267,8 +267,8 @@ export class PostService implements IPostService {
     };
   }
 
-  async likePost(userId: string, postId: string): Promise<LikePostResponse> {
-    const user = await this.userService.findById(userId);
+  async toggleLike(userId: string, postId: string): Promise<LikePostResponse> {
+    const user = await this.userService.getById(userId);
     if (!user) throw new NotFoundException('User not found');
 
     const existing = await Post.findById(postId);
