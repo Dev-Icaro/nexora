@@ -1,5 +1,5 @@
 import secrets from '@/config/secrets';
-import { AppException } from '@/exceptions';
+import { BadRequestException, InternalServerErrorException } from '@/exceptions';
 
 import type { IOAuthProvider, OAuthUserInfo } from './oauth-provider.interface';
 
@@ -30,7 +30,7 @@ export class GithubOAuthProvider implements IOAuthProvider {
 
     const data = (await response.json()) as { access_token?: string; error?: string };
     if (!data.access_token) {
-      throw new AppException(`GitHub token exchange failed: ${data.error ?? 'unknown error'}`, 502);
+      throw new InternalServerErrorException(`GitHub token exchange failed: ${data.error ?? 'unknown error'}`);
     }
     return data.access_token;
   }
@@ -61,7 +61,7 @@ export class GithubOAuthProvider implements IOAuthProvider {
       }>;
       const primary = emails.find(e => e.primary && e.verified);
       if (!primary) {
-        throw new AppException('Unable to retrieve verified email from GitHub account', 400);
+        throw new BadRequestException('Unable to retrieve verified email from GitHub account');
       }
       email = primary.email;
     }

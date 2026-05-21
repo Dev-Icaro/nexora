@@ -1,6 +1,6 @@
 import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
-import { GraphQLError } from 'graphql/error';
 
+import { UnauthorizedException } from '@/exceptions';
 import { AuthService } from '@/services/auth.service';
 import S3StorageProvider from '@/services/cloud/s3-storage.provider';
 import { CommentService } from '@/services/comment.service';
@@ -86,14 +86,14 @@ export const createSubscriptionContext = async (
     typeof connectionParams['authorization'] === 'string' ? connectionParams['authorization'] : undefined;
 
   if (!authorization?.startsWith('Bearer ')) {
-    throw new GraphQLError('Unauthorized', { extensions: { code: 'UNAUTHORIZED' } });
+    throw new UnauthorizedException();
   }
 
   let currentUser: IUserTokenInfo | null;
   try {
     currentUser = verifyAccessToken(authorization.slice(7));
   } catch {
-    throw new GraphQLError('Unauthorized', { extensions: { code: 'UNAUTHORIZED' } });
+    throw new UnauthorizedException();
   }
 
   setUserId(currentUser.userId);
@@ -121,12 +121,12 @@ export const createContext = async ({
   if (!GRAPHQL_AUTH_WHITELIST.has(operationName ?? '')) {
     const authHeader = req.headers.authorization;
     if (!authHeader?.startsWith('Bearer ')) {
-      throw new GraphQLError('Unauthorized', { extensions: { code: 'UNAUTHORIZED' } });
+      throw new UnauthorizedException();
     }
     try {
       currentUser = verifyAccessToken(authHeader.slice(7));
     } catch {
-      throw new GraphQLError('Unauthorized', { extensions: { code: 'UNAUTHORIZED' } });
+      throw new UnauthorizedException();
     }
     setUserId(currentUser.userId);
   }

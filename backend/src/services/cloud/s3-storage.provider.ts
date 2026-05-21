@@ -10,7 +10,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 import env from '@/config/environment';
 import secrets from '@/config/secrets';
-import { AppException } from '@/exceptions';
+import { InternalServerErrorException } from '@/exceptions';
 import { DocumentDownloadMode } from '@/services/interfaces/storage-provider.interface';
 import logger from '@/utils/logger';
 
@@ -65,7 +65,7 @@ export default class S3StorageProvider implements IStorageProvider {
       };
     } catch (error) {
       logger.error(error);
-      throw new AppException('Failed to generate S3 upload URL', 500);
+      throw new InternalServerErrorException('Failed to generate S3 upload URL');
     }
   }
 
@@ -84,7 +84,7 @@ export default class S3StorageProvider implements IStorageProvider {
       return await getSignedUrl(this.s3Client, command, { expiresIn });
     } catch (error) {
       logger.error(error);
-      throw new AppException('Failed to generate S3 download URL', 500);
+      throw new InternalServerErrorException('Failed to generate S3 download URL');
     }
   }
 
@@ -98,7 +98,7 @@ export default class S3StorageProvider implements IStorageProvider {
       await this.s3Client.send(command);
     } catch (error) {
       logger.error(error);
-      throw new AppException('Failed to delete file from S3', 500);
+      throw new InternalServerErrorException('Failed to delete file from S3');
     }
   }
 
@@ -130,7 +130,7 @@ export default class S3StorageProvider implements IStorageProvider {
       };
     } catch (error) {
       logger.error(error);
-      throw new AppException('Failed to read S3 object range', 500);
+      throw new InternalServerErrorException('Failed to read S3 object range');
     }
   }
 
@@ -145,7 +145,7 @@ export default class S3StorageProvider implements IStorageProvider {
       );
     } catch (error) {
       logger.error(error);
-      throw new AppException('Failed to copy S3 object', 500);
+      throw new InternalServerErrorException('Failed to copy S3 object');
     }
 
     try {

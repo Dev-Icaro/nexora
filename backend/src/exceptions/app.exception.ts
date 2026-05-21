@@ -1,10 +1,7 @@
-export class AppException extends Error {
-  constructor(
-    message: string,
-    public readonly statusCode: number = 400,
-  ) {
-    super(message);
-    this.statusCode = statusCode;
-    this.name = this.constructor.name;
+import { GraphQLError } from 'graphql';
+
+export class AppException extends GraphQLError {
+  constructor(message: string, code: string) {
+    super(message, { extensions: { code } });
   }
 }

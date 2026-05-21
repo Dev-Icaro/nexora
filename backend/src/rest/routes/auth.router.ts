@@ -3,7 +3,7 @@ import { Router } from 'express';
 
 import env from '@/config/environment';
 import settings from '@/config/settings';
-import { AppException } from '@/exceptions';
+import { BadRequestException } from '@/exceptions';
 import { AuthService } from '@/services/auth.service';
 import S3StorageProvider from '@/services/cloud/s3-storage.provider';
 import { ResendEmailService } from '@/services/email/resend-email.service';
@@ -29,7 +29,7 @@ authRouter.get('/:provider/callback', async (req: ExpressRequest<{ provider: str
   const { code } = req.query;
 
   if (typeof code !== 'string' || !code) {
-    throw new AppException('Missing authorization code', 400);
+    throw new BadRequestException('Missing authorization code');
   }
 
   const oauthProvider = OAuthProviderFactory.getProvider(provider);

@@ -1,5 +1,5 @@
 import secrets from '@/config/secrets';
-import { AppException } from '@/exceptions';
+import { BadRequestException, InternalServerErrorException } from '@/exceptions';
 
 import type { IOAuthProvider, OAuthUserInfo } from './oauth-provider.interface';
 
@@ -33,7 +33,7 @@ export class GoogleOAuthProvider implements IOAuthProvider {
 
     const data = (await response.json()) as { access_token?: string; error?: string };
     if (!data.access_token) {
-      throw new AppException(`Google token exchange failed: ${data.error ?? 'unknown error'}`, 502);
+      throw new InternalServerErrorException(`Google token exchange failed: ${data.error ?? 'unknown error'}`);
     }
     return data.access_token;
   }
@@ -51,7 +51,7 @@ export class GoogleOAuthProvider implements IOAuthProvider {
     };
 
     if (!user.email_verified) {
-      throw new AppException('Google account email is not verified', 400);
+      throw new BadRequestException('Google account email is not verified');
     }
 
     return {

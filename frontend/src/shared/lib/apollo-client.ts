@@ -66,7 +66,7 @@ const errorLink = new ErrorLink(({ error, operation, forward }) => {
   if (operation.getContext().__retried) return;
 
   const isUnauthenticated =
-    (CombinedGraphQLErrors.is(error) && error.errors.some(e => e.extensions?.code === 'UNAUTHORIZED')) ||
+    (CombinedGraphQLErrors.is(error) && error.errors.some(e => e.extensions?.code === 'UNAUTHENTICATED')) ||
     (ServerError.is(error) && error.statusCode === 401);
 
   if (!isUnauthenticated) return;
