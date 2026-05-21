@@ -1,8 +1,8 @@
 import mongoose from 'mongoose';
 
 import settings from '@/config/settings';
-import type { CreatePostResponse, DeletePostResponse, LikePostResponse, PostConnectionDto, PostDto } from '@/dtos/post';
-import type { GetUploadUrlResponse } from '@/dtos/shared';
+import type { CreatePostDto, GetPostUploadUrlDto, PostConnectionDto, PostDto } from '@/dtos/post';
+import type { PaginationParams, UploadUrlDto } from '@/dtos/shared';
 import { BadRequestException, ForbiddenException, NotFoundException } from '@/exceptions';
 import { Comment } from '@/models/comment.model';
 import { Like } from '@/models/like.model';
@@ -28,28 +28,24 @@ export class PostService implements IPostService {
 
   async getAll(): Promise<PostDto[]> {
     const posts = await Post.find();
-    return posts.map(post => this.toPostDto(post));
+    return posts.map(post => this.toDto(post));
   }
 
-  private toPostDto(doc: PostDocument): PostDto {
-    return {
-      id: doc._id.toString(),
-      body: doc.body ?? '',
-      mediaUrl: doc.mediaUrl,
-      mediaKey: doc.mediaKey,
-      authorId: String(doc.user),
-      createdAt: doc.createdAt ?? '',
-      likeCount: doc.likeCount ?? 0,
-      commentCount: doc.commentCount ?? 0,
-    };
+  async getById(postId: string): Promise<PostDto | null> {
+    const post = await Post.findById(postId);
+    if (!post) return null;
+    return this.toDto(post);
   }
 
-  async getUploadUrl(
-    userId: string,
-    filename: string,
-    contentType: string,
-    fileSizeBytes: number,
-  ): Promise<GetUploadUrlResponse> {
+  async getFeed({ first = 10, after }: PaginationParams): Promise<PostConnectionDto> {
+    return this.paginatePosts({ first, after });
+  }
+
+  async getByUserId(userId: string, { first = 10, after }: PaginationParams): Promise<PostConnectionDto> {
+    return this.paginatePosts({ first, after }, { user: userId });
+  }
+
+  async getUploadUrl({ userId, filename, contentType, fileSizeBytes }: GetPostUploadUrlDto): Promise<UploadUrlDto> {
     if (!allowedContentTypes.has(contentType)) {
       throw new BadRequestException(`Unsupported content type: ${contentType}`);
     }
@@ -91,17 +87,10 @@ export class PostService implements IPostService {
       createdAt: new Date(),
     });
 
-    return {
-      code: 200,
-      success: true,
-      message: 'Upload URL generated',
-      uploadUrl: url,
-      fields: JSON.stringify(fields),
-      objectKey,
-    };
+    return { uploadUrl: url, fields: JSON.stringify(fields), objectKey };
   }
 
-  async create(userId: string, body: string, objectKey?: string): Promise<CreatePostResponse> {
+  async create({ userId, body, objectKey }: CreatePostDto): Promise<PostDto> {
     let confirmedKey: string | undefined;
     let mediaContentLength = 0;
 
@@ -168,18 +157,12 @@ export class PostService implements IPostService {
       session.endSession();
     }
 
-    return {
-      code: 201,
-      success: true,
-      message: 'Post created successfully',
-      post: this.toPostDto(post),
-    };
+    return this.toDto(post);
   }
 
-  async delete(userId: string, postId: string): Promise<DeletePostResponse> {
+  async delete(userId: string, postId: string): Promise<void> {
     const post = await Post.findById(postId);
     if (!post) throw new NotFoundException('Post not found');
-
     if (post.user?.toString() !== userId) throw new ForbiddenException('Action not allowed');
 
     const mediaUpload = post.mediaKey ? await MediaUpload.findOne({ entityId: postId, status: 'confirmed' }) : null;
@@ -195,79 +178,9 @@ export class PostService implements IPostService {
         User.findByIdAndUpdate(userId, { $inc: { storageUsedBytes: -(mediaUpload.sizeBytes ?? 0) } }),
       ]);
     }
-
-    return { code: 200, success: true, message: 'Post deleted successfully' };
   }
 
-  async getById(postId: string): Promise<PostDto | null> {
-    const post = await Post.findById(postId);
-    if (!post) return null;
-    return this.toPostDto(post);
-  }
-
-  async getFeed(first = 10, after?: string): Promise<PostConnectionDto> {
-    const limit = first;
-    const query: Record<string, unknown> = {};
-
-    if (after) {
-      const cursorId = decodeCursor(after);
-      if (cursorId) query._id = { $lt: cursorId };
-    }
-
-    const docs = await Post.find(query)
-      .sort({ _id: -1 })
-      .limit(limit + 1);
-    const hasNextPage = docs.length > limit;
-    const nodes = hasNextPage ? docs.slice(0, limit) : docs;
-
-    const edges = nodes.map(post => ({
-      node: this.toPostDto(post),
-      cursor: encodeCursor(post._id.toString()),
-    }));
-
-    return {
-      edges,
-      pageInfo: {
-        startCursor: edges[0]?.cursor ?? null,
-        endCursor: edges[edges.length - 1]?.cursor ?? null,
-        hasNextPage,
-        hasPreviousPage: !!after,
-      },
-    };
-  }
-
-  async getByUserId(userId: string, first = 10, after?: string): Promise<PostConnectionDto> {
-    const limit = first;
-    const query: Record<string, unknown> = { user: userId };
-
-    if (after) {
-      const cursorId = decodeCursor(after);
-      if (cursorId) query._id = { $lt: cursorId };
-    }
-
-    const docs = await Post.find(query)
-      .sort({ _id: -1 })
-      .limit(limit + 1);
-    const hasNextPage = docs.length > limit;
-    const nodes = hasNextPage ? docs.slice(0, limit) : docs;
-
-    const edges = nodes.map(post => ({
-      node: this.toPostDto(post),
-      cursor: encodeCursor(post._id.toString()),
-    }));
-
-    return {
-      edges,
-      pageInfo: {
-        startCursor: edges[0]?.cursor ?? null,
-        endCursor: edges[edges.length - 1]?.cursor ?? null,
-        hasNextPage,
-        hasPreviousPage: !!after,
-      },
-    };
-  }
-
-  async toggleLike(userId: string, postId: string): Promise<LikePostResponse> {
+  async toggleLike(userId: string, postId: string): Promise<PostDto> {
     const user = await this.userService.getById(userId);
     if (!user) throw new NotFoundException('User not found');
 
@@ -287,11 +200,52 @@ export class PostService implements IPostService {
 
     if (!post) throw new NotFoundException('Post not found');
 
+    return this.toDto(post);
+  }
+
+  private toDto(doc: PostDocument): PostDto {
     return {
-      code: 200,
-      success: true,
-      message: alreadyLiked ? 'Post unliked successfully' : 'Post liked successfully',
-      post: this.toPostDto(post),
+      id: doc._id.toString(),
+      body: doc.body ?? '',
+      mediaUrl: doc.mediaUrl,
+      mediaKey: doc.mediaKey,
+      authorId: String(doc.user),
+      createdAt: doc.createdAt ?? '',
+      likeCount: doc.likeCount ?? 0,
+      commentCount: doc.commentCount ?? 0,
+    };
+  }
+
+  private async paginatePosts(
+    { first, after }: PaginationParams,
+    filter: Record<string, unknown> = {},
+  ): Promise<PostConnectionDto> {
+    const query = { ...filter };
+
+    if (after) {
+      const cursorId = decodeCursor(after);
+      if (cursorId) query._id = { $lt: cursorId };
+    }
+
+    const docs = await Post.find(query)
+      .sort({ _id: -1 })
+      .limit(first + 1);
+    const hasNextPage = docs.length > first;
+    const nodes = hasNextPage ? docs.slice(0, first) : docs;
+
+    const edges = nodes.map(post => ({
+      node: this.toDto(post),
+      cursor: encodeCursor(post._id.toString()),
+    }));
+
+    return {
+      edges,
+      pageInfo: {
+        startCursor: edges[0]?.cursor ?? null,
+        endCursor: edges[edges.length - 1]?.cursor ?? null,
+        hasNextPage,
+        hasPreviousPage: !!after,
+      },
     };
   }
 }

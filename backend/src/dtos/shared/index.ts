@@ -1,3 +1,3 @@
 export type { ApiResponse } from './api-response';
-export type { default as GetUploadUrlResponse } from './get-upload-url-response.dto';
-export type { Connection, Edge, PageInfo } from './pagination';
+export type { Connection, Edge, PageInfo, PaginationParams } from './pagination';
+export type { default as UploadUrlDto } from './upload-url.dto';

@@ -1,5 +1,5 @@
 import type { CreateUserDto } from '@/dtos/auth';
-import type { GetUploadUrlResponse } from '@/dtos/shared';
+import type { UploadUrlDto } from '@/dtos/shared';
 import type {
   UpdateProfileRequestDto,
   UpdateProfileResponseDto,
@@ -127,5 +127,5 @@ export interface IUserService {
     filename: string,
     contentType: string,
     fileSizeBytes: number,
-  ): Promise<GetUploadUrlResponse>;
+  ): Promise<UploadUrlDto>;
 }

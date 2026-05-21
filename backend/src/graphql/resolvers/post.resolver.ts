@@ -15,34 +15,47 @@ export const postResolver: Resolvers = {
   Query: {
     getPosts: (_, __, { dataSources }) => dataSources.postService.getAll(),
     getPost: (_, { postId }, { dataSources }) => dataSources.postService.getById(postId),
-    feed: (_, { first, after }, { dataSources }) => dataSources.postService.getFeed(first ?? 10, after ?? undefined),
+    feed: (_, { first, after }, { dataSources }) =>
+      dataSources.postService.getFeed({ first: first ?? 10, after: after ?? undefined }),
     getUserPosts: (_, { userId, first, after }, { dataSources }) =>
-      dataSources.postService.getByUserId(userId, first ?? 10, after ?? undefined),
+      dataSources.postService.getByUserId(userId, { first: first ?? 10, after: after ?? undefined }),
   },
   Mutation: {
-    getUploadUrl: (_, { request }, { dataSources, currentUser }) =>
-      dataSources.postService.getUploadUrl(
-        currentUser!.userId,
-        request.filename,
-        request.contentType,
-        request.fileSizeBytes,
-      ),
-
-    createPost: async (_, { body, objectKey }, { dataSources, currentUser }) => {
-      const result = await dataSources.postService.create(currentUser!.userId, body, objectKey ?? undefined);
-      if (result.success && result.post) {
-        pubsub
-          .publish(TOPICS.NEW_POST, { newPost: result.post })
-          .catch(err => logger.error('Failed to publish newPost event', err));
-      }
-      return result;
+    getUploadUrl: async (_, { request }, { dataSources, currentUser }) => {
+      const { uploadUrl, fields, objectKey } = await dataSources.postService.getUploadUrl({
+        userId: currentUser!.userId,
+        ...request,
+      });
+      return { code: 200, success: true, message: 'Upload URL generated', uploadUrl, fields, objectKey };
     },
 
-    deletePost: (_, { postId }, { dataSources, currentUser }) =>
-      dataSources.postService.delete(currentUser!.userId, postId),
+    createPost: async (_, { body, objectKey }, { dataSources, currentUser }) => {
+      const post = await dataSources.postService.create({
+        userId: currentUser!.userId,
+        body,
+        objectKey: objectKey ?? undefined,
+      });
+      pubsub
+        .publish(TOPICS.NEW_POST, { newPost: post })
+        .catch(err => logger.error('Failed to publish newPost event', err));
+      return { code: 201, success: true, message: 'Post created successfully', post };
+    },
 
-    likePost: (_, { postId }, { dataSources, currentUser }) =>
-      dataSources.postService.toggleLike(currentUser!.userId, postId),
+    deletePost: async (_, { postId }, { dataSources, currentUser }) => {
+      await dataSources.postService.delete(currentUser!.userId, postId);
+      return { code: 200, success: true, message: 'Post deleted successfully' };
+    },
+
+    likePost: async (_, { postId }, { dataSources, currentUser }) => {
+      const post = await dataSources.postService.toggleLike(currentUser!.userId, postId);
+      const liked = post.likeCount > 0;
+      return {
+        code: 200,
+        success: true,
+        message: liked ? 'Post liked successfully' : 'Post unliked successfully',
+        post,
+      };
+    },
 
     createComment: (_, { postId, body }, { dataSources, currentUser }) =>
       dataSources.commentService.create(currentUser!.userId, postId, body),

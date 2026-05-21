@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 import settings from '@/config/settings';
 import type { CreateUserDto } from '@/dtos/auth';
-import type { GetUploadUrlResponse } from '@/dtos/shared';
+import type { UploadUrlDto } from '@/dtos/shared';
 import type {
   UpdateProfileRequestDto,
   UpdateProfileResponseDto,
@@ -246,7 +246,7 @@ export class UserService implements IUserService {
     filename: string,
     contentType: string,
     fileSizeBytes: number,
-  ): Promise<GetUploadUrlResponse> {
+  ): Promise<UploadUrlDto> {
     if (!avatarAllowedTypes.has(contentType)) {
       throw new BadRequestException(`Unsupported content type for avatar: ${contentType}`);
     }
@@ -288,13 +288,6 @@ export class UserService implements IUserService {
       createdAt: new Date(),
     });
 
-    return {
-      code: 200,
-      success: true,
-      message: 'Upload URL generated',
-      uploadUrl: url,
-      fields: JSON.stringify(fields),
-      objectKey,
-    };
+    return { uploadUrl: url, fields: JSON.stringify(fields), objectKey };
   }
 }

@@ -1,3 +1,9 @@
+/** Cursor-based pagination input. */
+export type PaginationParams = {
+  first: number;
+  after?: string;
+};
+
 /** Relay Cursor Connections page metadata. */
 export type PageInfo = {
   startCursor: string | null;

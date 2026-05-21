@@ -17,13 +17,15 @@ export const userResolver: Resolvers = {
     updateThemePreference: (_, { theme }, { dataSources, currentUser }) =>
       dataSources.userService.updateThemePreference(currentUser!.userId, { theme }),
 
-    getAvatarUploadUrl: (_, { request }, { dataSources, currentUser }) =>
-      dataSources.userService.getAvatarUploadUrl(
+    getAvatarUploadUrl: async (_, { request }, { dataSources, currentUser }) => {
+      const { uploadUrl, fields, objectKey } = await dataSources.userService.getAvatarUploadUrl(
         currentUser!.userId,
         request.filename,
         request.contentType,
         request.fileSizeBytes,
-      ),
+      );
+      return { code: 200, success: true, message: 'Upload URL generated', uploadUrl, fields, objectKey };
+    },
   },
   User: {
     storageInfo: parent => {
