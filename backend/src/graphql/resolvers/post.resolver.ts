@@ -57,11 +57,15 @@ export const postResolver: Resolvers = {
       };
     },
 
-    createComment: (_, { postId, body }, { dataSources, currentUser }) =>
-      dataSources.commentService.create(currentUser!.userId, postId, body),
+    createComment: async (_, { postId, body }, { dataSources, currentUser }) => {
+      const comment = await dataSources.commentService.create({ userId: currentUser!.userId, postId, body });
+      return { code: 201, success: true, message: 'Comment created successfully', comment };
+    },
 
-    deleteComment: (_, { postId, commentId }, { dataSources, currentUser }) =>
-      dataSources.commentService.delete(currentUser!.userId, postId, commentId),
+    deleteComment: async (_, { postId, commentId }, { dataSources, currentUser }) => {
+      const comment = await dataSources.commentService.delete({ userId: currentUser!.userId, postId, commentId });
+      return { code: 200, success: true, message: 'Comment deleted successfully', comment };
+    },
   },
   Post: {
     author: (parent, _, { loaders }) => loadAuthor(parent.authorId, loaders),

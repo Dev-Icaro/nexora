@@ -1,26 +1,22 @@
-import type { CommentDto, CreateCommentResponse, DeleteCommentResponse } from '@/dtos/comment';
+import type { CommentDto, CreateCommentDto, DeleteCommentDto } from '@/dtos/comment';
 
 /** Defines the contract for comment creation, deletion, and retrieval. */
 export interface ICommentService {
   /**
    * Creates a new comment on a post.
    *
-   * @param userId - The authenticated user's ID.
-   * @param postId - The ID of the post to comment on.
-   * @param body - The text content of the comment.
-   * @returns A promise resolving to a {@link CreateCommentResponse} with the created comment.
+   * @param dto - Comment payload containing userId, postId, and body.
+   * @returns A promise resolving to the created {@link CommentDto}.
    */
-  create(userId: string, postId: string, body: string): Promise<CreateCommentResponse>;
+  create(dto: CreateCommentDto): Promise<CommentDto>;
 
   /**
    * Deletes a comment from a post. Only the comment author may delete their own comment.
    *
-   * @param userId - The authenticated user's ID (must match the comment author).
-   * @param postId - The ID of the post the comment belongs to.
-   * @param commentId - The ID of the comment to delete.
-   * @returns A promise resolving to a {@link DeleteCommentResponse} with the deleted comment.
+   * @param dto - Deletion payload containing userId, postId, and commentId.
+   * @returns A promise resolving to the deleted {@link CommentDto}.
    */
-  delete(userId: string, postId: string, commentId: string): Promise<DeleteCommentResponse>;
+  delete(dto: DeleteCommentDto): Promise<CommentDto>;
 
   /**
    * Retrieves all comments for a given post, ordered by creation time ascending.
