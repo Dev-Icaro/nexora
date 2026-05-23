@@ -12,6 +12,7 @@ on:
       - 'frontend/**'
       - 'backend/src/graphql/schema.graphql'
       - '.github/workflows/frontend.yml'
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
