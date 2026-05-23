@@ -55,6 +55,7 @@ const bootstrap = async (): Promise<void> => {
 
   const server = new ApolloServer<GraphQLContext>({
     schema,
+    introspection: env.NODE_ENV !== 'production',
     formatError: apolloErrorHandler,
     plugins: [
       ApolloServerPluginDrainHttpServer({ httpServer }),

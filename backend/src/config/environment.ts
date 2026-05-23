@@ -11,7 +11,7 @@ const environmentSchema = z.object({
   CORS_ORIGIN: z
     .string()
     // eslint-disable-next-line sonarjs/no-clear-text-protocols
-    .default('http://localhost:5173,https://studio.apollographql.com')
+    .default('http://localhost:5173')
     .transform(v => v.split(',').map(s => s.trim())),
   MONGODB_URI_FILE: z.string().min(1),
   DB_PASSWORD_FILE: z.string().min(1).default('/run/secrets/db-password'),
