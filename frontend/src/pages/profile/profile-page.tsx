@@ -29,9 +29,9 @@ export function ProfilePage() {
     ? {
         name: userData.username,
         username: userData.username,
-        role: userData.position,
-        bio: userData.bio,
-        avatarUrl: userData.avatarUrl,
+        role: userData.position ?? undefined,
+        bio: userData.bio ?? undefined,
+        avatarUrl: userData.avatarUrl ?? undefined,
         stats: { posts: 0, followers: 0, following: 0 },
       }
     : null;

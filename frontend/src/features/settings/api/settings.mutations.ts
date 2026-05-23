@@ -1,7 +1,7 @@
-import { gql } from '@apollo/client';
+import { graphql } from '@/gql';
 
-export const UPDATE_THEME_PREFERENCE_MUTATION = gql`
-  mutation UpdateThemePreference($theme: String!) {
+export const UPDATE_THEME_PREFERENCE_MUTATION = graphql(`
+  mutation UpdateThemePreference($theme: ThemePreference!) {
     updateThemePreference(theme: $theme) {
       code
       message
@@ -12,4 +12,4 @@ export const UPDATE_THEME_PREFERENCE_MUTATION = gql`
       }
     }
   }
-`;
+`);

@@ -2,12 +2,10 @@ import {
   ApolloClient,
   ApolloLink,
   CombinedGraphQLErrors,
-  from,
   HttpLink,
   InMemoryCache,
   Observable,
   ServerError,
-  split,
 } from '@apollo/client';
 import { ErrorLink } from '@apollo/client/link/error';
 import { RetryLink } from '@apollo/client/link/retry';
@@ -16,7 +14,6 @@ import { getMainDefinition } from '@apollo/client/utilities';
 import { createClient } from 'graphql-ws';
 
 import { REFRESH_MUTATION } from '@/features/auth/api/auth.mutations';
-import type { RefreshResponse } from '@/features/auth/api/auth.types';
 
 import { getAccessToken, setAccessToken, triggerUnauthenticated } from './token-store';
 
@@ -46,7 +43,7 @@ const getNewToken = (): Promise<string> => {
 
   isRefreshing = true;
   refreshPromise = client
-    .mutate<RefreshResponse>({ mutation: REFRESH_MUTATION })
+    .mutate({ mutation: REFRESH_MUTATION })
     .then(({ data }) => {
       const refresh = data?.refresh;
       if (refresh?.success && refresh.accessToken) {
@@ -125,13 +122,13 @@ const retryLink = new RetryLink({
   },
 });
 
-const splitLink = split(
+const splitLink = ApolloLink.split(
   ({ query }) => {
     const def = getMainDefinition(query);
     return def.kind === 'OperationDefinition' && def.operation === 'subscription';
   },
   wsLink,
-  from([transactionIdLink, retryLink, errorLink, authLink, httpLink]),
+  ApolloLink.from([transactionIdLink, retryLink, errorLink, authLink, httpLink]),
 );
 
 export const client = new ApolloClient({

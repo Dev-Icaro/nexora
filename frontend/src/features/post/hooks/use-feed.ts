@@ -1,8 +1,8 @@
 import { useQuery } from '@apollo/client/react';
 import { useRef, useState } from 'react';
 
+import type { PostNode } from '../api/post.queries';
 import { GET_FEED } from '../api/post.queries';
-import type { FeedRequest, FeedResponse, PostNode } from '../api/post.types';
 
 const PAGE_SIZE = 10;
 
@@ -31,7 +31,7 @@ export function useFeed(): UseFeedResult {
     error,
     fetchMore,
     refetch: apolloRefetch,
-  } = useQuery<FeedResponse, FeedRequest>(GET_FEED, {
+  } = useQuery(GET_FEED, {
     variables: { first: PAGE_SIZE },
   });
 

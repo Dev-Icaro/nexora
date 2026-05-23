@@ -4,7 +4,6 @@ import { useMemo } from 'react';
 import { getApiErrorMessage } from '@/shared/lib/utils';
 
 import { APPLY_PASSWORD_RESET_MUTATION } from '../api/auth.mutations';
-import type { ApplyPasswordResetResponse } from '../api/auth.types';
 
 type UseApplyPasswordResetResult = {
   applyReset: (token: string, newPassword: string, confirmPassword: string) => Promise<boolean>;
@@ -13,7 +12,7 @@ type UseApplyPasswordResetResult = {
 };
 
 export function useApplyPasswordReset(): UseApplyPasswordResetResult {
-  const [mutate, { loading, error, data }] = useMutation<ApplyPasswordResetResponse>(APPLY_PASSWORD_RESET_MUTATION);
+  const [mutate, { loading, error, data }] = useMutation(APPLY_PASSWORD_RESET_MUTATION);
 
   const errorMessage = useMemo(() => getApiErrorMessage(error, data), [data, error]);
 

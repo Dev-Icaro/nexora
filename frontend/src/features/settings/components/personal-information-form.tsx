@@ -4,7 +4,7 @@ import { type ReactNode, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 
-import type { ProfileUser } from '@/features/profile/api/profile.types';
+import type { ProfileUser } from '@/features/profile/api/profile.queries';
 import { AvatarUploadModal } from '@/features/profile/components/avatar-upload-modal';
 import type { PreparedAvatar } from '@/features/profile/hooks/use-upload-avatar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar';
@@ -94,7 +94,7 @@ export function PersonalInformationForm({
                 <div className="relative">
                   <Avatar className="size-[72px]">
                     {(pendingAvatar?.previewUrl ?? profile.avatarUrl) && (
-                      <AvatarImage src={pendingAvatar?.previewUrl ?? profile.avatarUrl} alt={profile.username} />
+                      <AvatarImage src={pendingAvatar?.previewUrl ?? profile.avatarUrl ?? undefined} alt={profile.username} />
                     )}
                     <AvatarFallback className="bg-primary/20 text-primary font-semibold text-2xl">
                       {getInitials(profile.username)}

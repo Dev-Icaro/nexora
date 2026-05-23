@@ -1,6 +1,6 @@
 import { HardDrive } from 'lucide-react';
 
-import type { StorageInfo } from '@/features/profile/api/profile.types';
+import type { StorageInfo } from '@/features/profile/api/profile.queries';
 import { Progress } from '@/shared/components/ui/progress';
 import { Skeleton } from '@/shared/components/ui/skeleton';
 import { formatBytes } from '@/shared/lib/utils';

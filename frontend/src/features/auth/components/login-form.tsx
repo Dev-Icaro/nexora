@@ -11,8 +11,6 @@ import { PasswordInput } from '@/shared/components/ui/password-input';
 import { Separator } from '@/shared/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/shared/components/ui/tooltip';
 
-import type { LoginRequest } from '../api/auth.types';
-
 const loginSchema = z.object({
   email: z
     .string()
@@ -26,7 +24,7 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 type LoginFormProps = {
-  onSubmit: (values: LoginRequest) => void | Promise<void>;
+  onSubmit: (values: LoginFormValues) => void | Promise<void>;
   onGithubLogin: () => void;
   onGoogleLogin: () => void;
   onForgotPassword?: () => void;

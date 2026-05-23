@@ -1,6 +1,10 @@
-import { gql } from '@apollo/client';
+import { graphql } from '@/gql';
+import type { GetProfileQuery } from '@/gql/graphql';
 
-export const GET_PROFILE = gql`
+export type ProfileUser = NonNullable<GetProfileQuery['getUserById']>;
+export type StorageInfo = ProfileUser['storageInfo'];
+
+export const GET_PROFILE = graphql(`
   query GetProfile($userId: ID!) {
     getUserById(userId: $userId) {
       id
@@ -8,6 +12,7 @@ export const GET_PROFILE = gql`
       bio
       position
       avatarUrl
+      email
       storageInfo {
         usedBytes
         quotaBytes
@@ -16,4 +21,4 @@ export const GET_PROFILE = gql`
       }
     }
   }
-`;
+`);

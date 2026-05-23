@@ -5,7 +5,6 @@ import { uploadToS3 } from '@/shared/lib/s3';
 import { toast } from '@/shared/lib/toast';
 
 import { GET_AVATAR_UPLOAD_URL } from '../api/profile.mutations';
-import type { GetAvatarUploadUrlRequest, GetAvatarUploadUrlResponse } from '../api/profile.types';
 
 export type PreparedAvatar = {
   objectKey: string;
@@ -19,10 +18,7 @@ type UseUploadAvatarResult = {
 
 export function useUploadAvatar(): UseUploadAvatarResult {
   const [loading, setLoading] = useState(false);
-
-  const [getAvatarUploadUrl] = useMutation<GetAvatarUploadUrlResponse, GetAvatarUploadUrlRequest>(
-    GET_AVATAR_UPLOAD_URL,
-  );
+  const [getAvatarUploadUrl] = useMutation(GET_AVATAR_UPLOAD_URL);
 
   const uploadAvatar = async (file: File): Promise<PreparedAvatar | null> => {
     setLoading(true);

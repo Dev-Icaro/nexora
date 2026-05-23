@@ -19,9 +19,8 @@ import { useProfileNavigation } from '@/shared/hooks/use-profile-navigation';
 import { toast } from '@/shared/lib/toast';
 import { cn } from '@/shared/lib/utils';
 
-import type { LikePostMutationResponse, LikePostVariables } from '../api/post.mutations';
 import { LIKE_POST } from '../api/post.mutations';
-import type { PostNode } from '../api/post.types';
+import type { PostNode } from '../api/post.queries';
 
 dayjs.extend(relativeTime);
 
@@ -36,12 +35,12 @@ export function PostCard({ post, onOpenModal }: PostCardProps) {
   const userId = state.user?.id;
   const { navigateToProfile } = useProfileNavigation();
 
-  const baseLiked = !!userId && post.likes.some(l => l.author.id === userId);
+  const baseLiked = !!userId && post.likes.some(l => l?.author.id === userId);
   const [optimisticLike, setOptimisticLike] = useState<{ postId: string; liked: boolean; count: number } | null>(null);
   const liked = optimisticLike?.postId === post.id ? optimisticLike.liked : baseLiked;
   const likeCount = optimisticLike?.postId === post.id ? optimisticLike.count : post.likeCount;
 
-  const [likePost] = useMutation<LikePostMutationResponse, LikePostVariables>(LIKE_POST);
+  const [likePost] = useMutation(LIKE_POST);
 
   const handleLike = async () => {
     const next = !liked;

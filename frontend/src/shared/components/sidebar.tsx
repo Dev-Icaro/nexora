@@ -83,7 +83,7 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
         <>
           <UserProfileSection
             name={user?.username ?? 'Unknown'}
-            avatarUrl={user?.avatarUrl}
+            avatarUrl={user?.avatarUrl ?? undefined}
             isVerified={true}
             role="College Doctor"
             bio="Guiding the next generation through the journey of health and knowledge!"

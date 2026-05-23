@@ -1,6 +1,6 @@
-import { gql } from '@apollo/client';
+import { graphql } from '@/gql';
 
-export const UPDATE_PROFILE_MUTATION = gql`
+export const UPDATE_PROFILE_MUTATION = graphql(`
   mutation UpdateProfile($updateProfileRequest: UpdateProfileRequest!) {
     updateProfile(updateProfileRequest: $updateProfileRequest) {
       code
@@ -16,9 +16,9 @@ export const UPDATE_PROFILE_MUTATION = gql`
       }
     }
   }
-`;
+`);
 
-export const GET_AVATAR_UPLOAD_URL = gql`
+export const GET_AVATAR_UPLOAD_URL = graphql(`
   mutation GetAvatarUploadUrl($request: GetUploadUrlRequest!) {
     getAvatarUploadUrl(request: $request) {
       code
@@ -29,4 +29,4 @@ export const GET_AVATAR_UPLOAD_URL = gql`
       objectKey
     }
   }
-`;
+`);

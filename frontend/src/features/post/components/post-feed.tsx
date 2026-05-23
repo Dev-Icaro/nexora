@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { PostCard } from '@/features/post/components/post-card';
 import { Spinner } from '@/shared/components/ui/spinner';
 
-import type { PostNode } from '../api/post.types';
+import type { PostNode } from '../api/post.queries';
 import { PostFeedEmpty } from './post-feed-empty';
 import { PostFeedError } from './post-feed-error';
 import { PostFeedInlineError } from './post-feed-inline-error';

@@ -1,6 +1,6 @@
-import { gql } from '@apollo/client';
+import { graphql } from '@/gql';
 
-export const GET_UPLOAD_URL = gql`
+export const GET_UPLOAD_URL = graphql(`
   mutation GetUploadUrl($request: GetUploadUrlRequest!) {
     getUploadUrl(request: $request) {
       code
@@ -11,9 +11,9 @@ export const GET_UPLOAD_URL = gql`
       objectKey
     }
   }
-`;
+`);
 
-export const CREATE_POST = gql`
+export const CREATE_POST = graphql(`
   mutation CreatePost($body: String!, $objectKey: String) {
     createPost(body: $body, objectKey: $objectKey) {
       code
@@ -34,14 +34,9 @@ export const CREATE_POST = gql`
       }
     }
   }
-`;
+`);
 
-export type LikePostVariables = { postId: string };
-export type LikePostMutationResponse = {
-  likePost: { code: number; message: string; success: boolean };
-};
-
-export const LIKE_POST = gql`
+export const LIKE_POST = graphql(`
   mutation LikePost($postId: ID!) {
     likePost(postId: $postId) {
       code
@@ -49,24 +44,9 @@ export const LIKE_POST = gql`
       success
     }
   }
-`;
+`);
 
-export type CreateCommentVariables = { postId: string; body: string };
-export type CreateCommentMutationResponse = {
-  createComment: {
-    code: number;
-    message: string;
-    success: boolean;
-    comment?: {
-      id: string;
-      body: string;
-      createdAt: string;
-      author: { id: string; username: string };
-    };
-  };
-};
-
-export const CREATE_COMMENT = gql`
+export const CREATE_COMMENT = graphql(`
   mutation CreateComment($postId: String!, $body: String!) {
     createComment(postId: $postId, body: $body) {
       code
@@ -79,8 +59,9 @@ export const CREATE_COMMENT = gql`
         author {
           id
           username
+          avatarUrl
         }
       }
     }
   }
-`;
+`);

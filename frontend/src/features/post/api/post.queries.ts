@@ -1,30 +1,9 @@
-import { gql } from '@apollo/client';
+import { graphql } from '@/gql';
+import type { GetFeedQuery } from '@/gql/graphql';
 
-export type GetPostByIdVariables = { postId: string };
+export type PostNode = GetFeedQuery['feed']['edges'][number]['node'];
 
-export type GetPostByIdResponse = {
-  getPost: {
-    id: string;
-    body: string;
-    mediaUrl: string | null;
-    createdAt: string;
-    author: { id: string; username: string; avatarUrl?: string };
-    likeCount: number;
-    commentCount: number;
-    comments: Array<{
-      id: string;
-      body: string;
-      createdAt: string;
-      author: { id: string; username: string; avatarUrl?: string };
-    }>;
-    likes: Array<{
-      id: string;
-      author: { id: string; username: string };
-    }>;
-  } | null;
-};
-
-export const GET_POST_BY_ID = gql`
+export const GET_POST_BY_ID = graphql(`
   query GetPost($postId: ID!) {
     getPost(postId: $postId) {
       id
@@ -57,9 +36,9 @@ export const GET_POST_BY_ID = gql`
       }
     }
   }
-`;
+`);
 
-export const GET_USER_POSTS = gql`
+export const GET_USER_POSTS = graphql(`
   query GetUserPosts($userId: ID!, $first: Int, $after: String) {
     getUserPosts(userId: $userId, first: $first, after: $after) {
       edges {
@@ -91,9 +70,9 @@ export const GET_USER_POSTS = gql`
       }
     }
   }
-`;
+`);
 
-export const NEW_POST_SUBSCRIPTION = gql`
+export const NEW_POST_SUBSCRIPTION = graphql(`
   subscription OnNewPost {
     newPost {
       id
@@ -116,9 +95,9 @@ export const NEW_POST_SUBSCRIPTION = gql`
       }
     }
   }
-`;
+`);
 
-export const GET_FEED = gql`
+export const GET_FEED = graphql(`
   query GetFeed($first: Int, $after: String) {
     feed(first: $first, after: $after) {
       edges {
@@ -150,4 +129,4 @@ export const GET_FEED = gql`
       }
     }
   }
-`;
+`);

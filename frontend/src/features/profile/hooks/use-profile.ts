@@ -1,18 +1,12 @@
 import { useMutation, useQuery } from '@apollo/client/react';
 
 import { useAuth } from '@/features/auth/hooks/use-auth';
+import type { UpdateProfileRequest } from '@/gql/graphql';
 import { toast } from '@/shared/lib/toast';
 
 import { UPDATE_PROFILE_MUTATION } from '../api/profile.mutations';
+import type { ProfileUser, StorageInfo } from '../api/profile.queries';
 import { GET_PROFILE } from '../api/profile.queries';
-import type {
-  GetProfileRequest,
-  GetProfileResponse,
-  ProfileUser,
-  StorageInfo,
-  UpdateProfileRequest,
-  UpdateProfileResponse,
-} from '../api/profile.types';
 
 export type UseProfileResult = {
   user: ProfileUser | null;
@@ -25,14 +19,11 @@ export type UseProfileResult = {
 
 export function useProfile(userId: string): UseProfileResult {
   const { updateUser } = useAuth();
-  const { data, loading, error } = useQuery<GetProfileResponse, GetProfileRequest>(GET_PROFILE, {
+  const { data, loading, error } = useQuery(GET_PROFILE, {
     variables: { userId },
   });
 
-  const [updateProfileMutation, { loading: updateLoading }] = useMutation<
-    UpdateProfileResponse,
-    { updateProfileRequest: UpdateProfileRequest }
-  >(UPDATE_PROFILE_MUTATION);
+  const [updateProfileMutation, { loading: updateLoading }] = useMutation(UPDATE_PROFILE_MUTATION);
 
   const updateProfile = async (input: UpdateProfileRequest): Promise<boolean> => {
     try {

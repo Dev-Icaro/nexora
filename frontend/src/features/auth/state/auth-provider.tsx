@@ -3,7 +3,6 @@ import type { ReactNode } from 'react';
 import { useCallback, useEffect, useReducer } from 'react';
 
 import { LOGOUT_MUTATION, REFRESH_MUTATION } from '@/features/auth/api/auth.mutations';
-import type { LogoutResponse, RefreshResponse } from '@/features/auth/api/auth.types';
 import { setAccessToken, setOnUnauthenticated } from '@/shared/lib/token-store';
 
 import { AuthContext } from './auth-context';
@@ -22,9 +21,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const initializeSession = async () => {
       dispatch({ type: 'INITIALIZE_START' });
       try {
-        const { data } = await apolloClient.mutate<RefreshResponse>({
-          mutation: REFRESH_MUTATION,
-        });
+        const { data } = await apolloClient.mutate({ mutation: REFRESH_MUTATION });
 
         const refreshData = data?.refresh;
         if (refreshData?.success && refreshData.accessToken && refreshData.user) {
@@ -53,7 +50,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const logout = useCallback(() => {
     setAccessToken(null);
     dispatch({ type: 'LOGOUT' });
-    apolloClient.mutate<LogoutResponse>({ mutation: LOGOUT_MUTATION }).catch(() => {});
+    apolloClient.mutate({ mutation: LOGOUT_MUTATION }).catch(() => {});
   }, [apolloClient]);
 
   useEffect(() => {

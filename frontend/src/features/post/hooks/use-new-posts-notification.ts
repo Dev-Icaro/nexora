@@ -3,8 +3,8 @@ import { useState } from 'react';
 
 import { useAuth } from '@/features/auth/hooks/use-auth';
 
+import type { PostNode } from '../api/post.queries';
 import { NEW_POST_SUBSCRIPTION } from '../api/post.queries';
-import type { PostNode } from '../api/post.types';
 
 type UseNewPostsNotificationResult = {
   pendingCount: number;
@@ -20,7 +20,7 @@ export function useNewPostsNotification(
   const { state } = useAuth();
   const currentUserId = state.user?.id;
 
-  useSubscription<{ newPost: PostNode }>(NEW_POST_SUBSCRIPTION, {
+  useSubscription(NEW_POST_SUBSCRIPTION, {
     onData: ({ data }) => {
       const newPost = data.data?.newPost;
       if (!newPost) return;

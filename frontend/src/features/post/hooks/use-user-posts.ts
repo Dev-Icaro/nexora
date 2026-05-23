@@ -2,7 +2,7 @@ import { useQuery } from '@apollo/client/react';
 import { useRef, useState } from 'react';
 
 import { GET_USER_POSTS } from '../api/post.queries';
-import type { PostNode, UserPostsRequest, UserPostsResponse } from '../api/post.types';
+import type { PostNode } from '../api/post.queries';
 
 const PAGE_SIZE = 10;
 
@@ -28,7 +28,7 @@ export function useUserPosts(userId: string): UseUserPostsResult {
     error,
     fetchMore,
     refetch: apolloRefetch,
-  } = useQuery<UserPostsResponse, UserPostsRequest>(GET_USER_POSTS, {
+  } = useQuery(GET_USER_POSTS, {
     variables: { userId, first: PAGE_SIZE },
   });
 

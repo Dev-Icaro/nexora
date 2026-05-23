@@ -3,7 +3,7 @@ import { useMutation } from '@apollo/client/react';
 import { toast } from '@/shared/lib/toast';
 
 import { CREATE_POST } from '../api/post.mutations';
-import type { CreatePostRequest, CreatePostResponse, PostNode } from '../api/post.types';
+import type { PostNode } from '../api/post.queries';
 
 type UseCreatePostResult = {
   createPost: (body: string, objectKey?: string) => Promise<PostNode | undefined>;
@@ -11,7 +11,7 @@ type UseCreatePostResult = {
 };
 
 export function useCreatePost(): UseCreatePostResult {
-  const [createPostMutation, { loading }] = useMutation<CreatePostResponse, CreatePostRequest>(CREATE_POST);
+  const [createPostMutation, { loading }] = useMutation(CREATE_POST);
 
   const createPost = async (body: string, objectKey?: string): Promise<PostNode | undefined> => {
     try {

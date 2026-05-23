@@ -6,6 +6,7 @@ import type { CSSProperties, KeyboardEvent } from 'react';
 import { useEffect, useRef, useState } from 'react';
 
 import { useAuth } from '@/features/auth/hooks/use-auth';
+import type { GetPostQuery } from '@/gql/graphql';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar';
 import { Badge } from '@/shared/components/ui/badge';
 import { Button } from '@/shared/components/ui/button';
@@ -17,21 +18,14 @@ import { useProfileNavigation } from '@/shared/hooks/use-profile-navigation';
 import { toast } from '@/shared/lib/toast';
 import { cn } from '@/shared/lib/utils';
 
-import type {
-  CreateCommentMutationResponse,
-  CreateCommentVariables,
-  LikePostMutationResponse,
-  LikePostVariables,
-} from '../api/post.mutations';
 import { CREATE_COMMENT, LIKE_POST } from '../api/post.mutations';
-import type { GetPostByIdResponse } from '../api/post.queries';
 import { GET_POST_BY_ID } from '../api/post.queries';
 import { usePostDetail } from '../hooks/use-post-detail';
 
 dayjs.extend(relativeTime);
 
-type PostDetail = NonNullable<GetPostByIdResponse['getPost']>;
-type CommentDetail = PostDetail['comments'][number];
+type PostDetail = NonNullable<GetPostQuery['getPost']>;
+type CommentDetail = NonNullable<PostDetail['comments'][number]>;
 
 // ── Sub-components ────────────────────────────────────────────────
 
@@ -365,21 +359,21 @@ export function PostDetailModal({ postId, open, onClose }: PostDetailModalProps)
   const [mobileTab, setMobileTab] = useState<'post' | 'comments'>('post');
   const [scrollToBottomTrigger, setScrollToBottomTrigger] = useState(0);
 
-  const [likePost] = useMutation<LikePostMutationResponse, LikePostVariables>(LIKE_POST, {
+  const [likePost] = useMutation(LIKE_POST, {
     refetchQueries: [{ query: GET_POST_BY_ID, variables: { postId } }],
   });
 
-  const [createComment] = useMutation<CreateCommentMutationResponse, CreateCommentVariables>(CREATE_COMMENT, {
+  const [createComment] = useMutation(CREATE_COMMENT, {
     refetchQueries: [{ query: GET_POST_BY_ID, variables: { postId } }],
   });
 
   // Sync state when post data loads
   useEffect(() => {
     if (!post) return;
-    const isLiked = !!userId && post.likes.some(l => l.author.id === userId);
+    const isLiked = !!userId && post.likes.some(l => l?.author.id === userId);
     setLiked(isLiked);
     setLikeCount(post.likeCount);
-    setComments(post.comments.map(c => ({ ...c, localLiked: false })));
+    setComments(post.comments.filter(c => c !== null).map(c => ({ ...c, localLiked: false })));
   }, [post, userId]);
 
   // Reset tab on open

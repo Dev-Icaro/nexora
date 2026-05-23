@@ -1,6 +1,6 @@
-import { gql } from '@apollo/client';
+import { graphql } from '@/gql';
 
-export const REGISTER_MUTATION = gql`
+export const REGISTER_MUTATION = graphql(`
   mutation Register($registerRequest: RegisterRequest!) {
     register(registerRequest: $registerRequest) {
       code
@@ -8,9 +8,9 @@ export const REGISTER_MUTATION = gql`
       success
     }
   }
-`;
+`);
 
-export const LOGIN_MUTATION = gql`
+export const LOGIN_MUTATION = graphql(`
   mutation Login($loginRequest: LoginRequest!) {
     login(loginRequest: $loginRequest) {
       code
@@ -25,9 +25,9 @@ export const LOGIN_MUTATION = gql`
       }
     }
   }
-`;
+`);
 
-export const REFRESH_MUTATION = gql`
+export const REFRESH_MUTATION = graphql(`
   mutation Refresh {
     refresh {
       code
@@ -42,9 +42,9 @@ export const REFRESH_MUTATION = gql`
       }
     }
   }
-`;
+`);
 
-export const LOGOUT_MUTATION = gql`
+export const LOGOUT_MUTATION = graphql(`
   mutation Logout {
     logout {
       code
@@ -52,9 +52,9 @@ export const LOGOUT_MUTATION = gql`
       success
     }
   }
-`;
+`);
 
-export const REQUEST_PASSWORD_RESET_MUTATION = gql`
+export const REQUEST_PASSWORD_RESET_MUTATION = graphql(`
   mutation RequestPasswordReset($requestPasswordResetRequest: RequestPasswordResetRequest!) {
     requestPasswordReset(requestPasswordResetRequest: $requestPasswordResetRequest) {
       code
@@ -62,9 +62,9 @@ export const REQUEST_PASSWORD_RESET_MUTATION = gql`
       success
     }
   }
-`;
+`);
 
-export const APPLY_PASSWORD_RESET_MUTATION = gql`
+export const APPLY_PASSWORD_RESET_MUTATION = graphql(`
   mutation ApplyPasswordReset($applyPasswordResetRequest: ApplyPasswordResetRequest!) {
     applyPasswordReset(applyPasswordResetRequest: $applyPasswordResetRequest) {
       code
@@ -72,4 +72,4 @@ export const APPLY_PASSWORD_RESET_MUTATION = gql`
       success
     }
   }
-`;
+`);

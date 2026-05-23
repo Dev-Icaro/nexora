@@ -4,7 +4,6 @@ import { uploadToS3 } from '@/shared/lib/s3';
 import { toast } from '@/shared/lib/toast';
 
 import { GET_UPLOAD_URL } from '../api/post.mutations';
-import type { GetUploadUrlRequest, GetUploadUrlResponse } from '../api/post.types';
 
 type UseUploadPostMediaResult = {
   uploadPostMedia: (file: File) => Promise<string | undefined>;
@@ -12,7 +11,7 @@ type UseUploadPostMediaResult = {
 };
 
 export function useUploadPostMedia(): UseUploadPostMediaResult {
-  const [getUploadUrlMutation, { loading }] = useMutation<GetUploadUrlResponse, GetUploadUrlRequest>(GET_UPLOAD_URL);
+  const [getUploadUrlMutation, { loading }] = useMutation(GET_UPLOAD_URL);
 
   const uploadPostMedia = async (file: File): Promise<string | undefined> => {
     try {
