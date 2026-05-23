@@ -3,10 +3,10 @@ FROM node:22 AS builder
 WORKDIR /app
 
 COPY package.json yarn.lock ./
-RUN yarn install
+RUN yarn install --ignore-scripts
 
 COPY . .
-RUN yarn build
+RUN yarn codegen && yarn build
 
 FROM node:22-alpine
 
