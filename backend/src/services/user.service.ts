@@ -101,7 +101,11 @@ export class UserService implements IUserService {
   }
 
   async updateThemePreference({ userId, theme }: UpdateThemePreferenceDto): Promise<UserDto> {
-    const user = await User.findByIdAndUpdate(userId, { $set: { themePreference: theme } }, { returnDocument: 'after' });
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { $set: { themePreference: theme } },
+      { returnDocument: 'after' },
+    );
     if (!user) throw new NotFoundException('User not found');
     return this.toUserDto(user);
   }
