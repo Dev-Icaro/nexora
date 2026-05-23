@@ -86,8 +86,6 @@ export function PostComposer({ username, loading, onSubmit }: PostComposerProps)
 
   const initials = username.slice(0, 2).toUpperCase();
 
-  console.log(state.user?.avatarUrl);
-
   return (
     <Card className="bg-card border border-border">
       <CardContent className="p-4 space-y-3">

@@ -1,8 +1,8 @@
 import { useQuery } from '@apollo/client/react';
 import { useRef, useState } from 'react';
 
-import { GET_USER_POSTS } from '../api/post.queries';
 import type { PostNode } from '../api/post.queries';
+import { GET_USER_POSTS } from '../api/post.queries';
 
 const PAGE_SIZE = 10;
 

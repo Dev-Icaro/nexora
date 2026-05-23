@@ -94,7 +94,10 @@ export function PersonalInformationForm({
                 <div className="relative">
                   <Avatar className="size-[72px]">
                     {(pendingAvatar?.previewUrl ?? profile.avatarUrl) && (
-                      <AvatarImage src={pendingAvatar?.previewUrl ?? profile.avatarUrl ?? undefined} alt={profile.username} />
+                      <AvatarImage
+                        src={pendingAvatar?.previewUrl ?? profile.avatarUrl ?? undefined}
+                        alt={profile.username}
+                      />
                     )}
                     <AvatarFallback className="bg-primary/20 text-primary font-semibold text-2xl">
                       {getInitials(profile.username)}
