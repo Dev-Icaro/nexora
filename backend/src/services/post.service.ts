@@ -192,10 +192,10 @@ export class PostService implements IPostService {
     let post;
     if (alreadyLiked) {
       await Like.deleteOne({ _id: alreadyLiked._id });
-      post = await Post.findByIdAndUpdate(postId, { $inc: { likeCount: -1 } }, { new: true });
+      post = await Post.findByIdAndUpdate(postId, { $inc: { likeCount: -1 } }, { returnDocument: 'after' });
     } else {
       await Like.create({ postId, userId, username: user.username, createdAt: new Date().toISOString() });
-      post = await Post.findByIdAndUpdate(postId, { $inc: { likeCount: 1 } }, { new: true });
+      post = await Post.findByIdAndUpdate(postId, { $inc: { likeCount: 1 } }, { returnDocument: 'after' });
     }
 
     if (!post) throw new NotFoundException('Post not found');

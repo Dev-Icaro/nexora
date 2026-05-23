@@ -101,7 +101,7 @@ export class UserService implements IUserService {
   }
 
   async updateThemePreference({ userId, theme }: UpdateThemePreferenceDto): Promise<UserDto> {
-    const user = await User.findByIdAndUpdate(userId, { $set: { themePreference: theme } }, { new: true });
+    const user = await User.findByIdAndUpdate(userId, { $set: { themePreference: theme } }, { returnDocument: 'after' });
     if (!user) throw new NotFoundException('User not found');
     return this.toUserDto(user);
   }
@@ -130,7 +130,7 @@ export class UserService implements IUserService {
             $set: { ...profileUpdates, avatarKey: avatar.confirmedKey },
             $inc: { storageUsedBytes: avatar.contentLength - avatar.oldSizeBytes, uploadCount: 1 },
           },
-          { new: true, session },
+          { returnDocument: 'after', session },
         ))!;
 
         await MediaUpload.create(
@@ -164,7 +164,7 @@ export class UserService implements IUserService {
         });
       }
     } else {
-      const user = await User.findByIdAndUpdate(userId, { $set: profileUpdates }, { new: true });
+      const user = await User.findByIdAndUpdate(userId, { $set: profileUpdates }, { returnDocument: 'after' });
       if (!user) throw new NotFoundException('User not found');
       updatedUser = user;
     }
