@@ -5,6 +5,7 @@
   "main": "dist/server.js",
   "license": "MIT",
   "scripts": {
+    "prebuild": "yarn codegen",
     "build": "tsc && tsc-alias && cp src/graphql/schema.graphql dist/graphql/schema.graphql",
     "dev": "tsx watch --inspect --env-file=.env.development src/server.ts",
     "start": "node --env-file=.env.production dist/server.js",

@@ -6,7 +6,7 @@ COPY package.json yarn.lock ./
 RUN yarn install --ignore-scripts
 
 COPY . .
-RUN yarn codegen && yarn build
+RUN yarn build
 
 FROM node:22-alpine
 
