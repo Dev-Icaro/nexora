@@ -12,6 +12,7 @@
     "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
     "test:unit": "vitest run",
     "typecheck": "tsc -b",
+    "postinstall": "yarn codegen",
     "codegen": "graphql-codegen --config codegen.ts"
   },
   "dependencies": {

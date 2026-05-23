@@ -38,6 +38,9 @@ dist/
 build/
 out/
 output/
+
+# GraphQL generated types
+src/graphql/__generated__/
 .vuepress/dist
 .next
 .nuxt
