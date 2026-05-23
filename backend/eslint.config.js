@@ -10,7 +10,7 @@ const n = require('eslint-plugin-n');
 const simpleImportSort = require('eslint-plugin-simple-import-sort');
 
 module.exports = [
-  { ignores: ['eslint.config.js'] },
+  { ignores: ['eslint.config.js', 'src/graphql/__generated__/**'] },
   js.configs.recommended,
   {
     files: ['**/*.{ts,tsx}'],
@@ -40,9 +40,10 @@ module.exports = [
   },
   {
     // eslint-plugin-n uses Node.js resolution which doesn't understand TypeScript
-    // path aliases (@/*). tsc/tsx handle these correctly via tsconfig paths,
-    // so we delegate import resolution to `typecheck` for TypeScript files.
-    files: ['src/**/*.{ts,tsx}'],
+    // path aliases (@/*) or devDependencies used only in tests. tsc/tsx handle
+    // these correctly via tsconfig paths, so we delegate import resolution to
+    // `typecheck` for TypeScript files.
+    files: ['src/**/*.{ts,tsx}', 'tests/**/*.{ts,tsx}'],
     rules: {
       'n/no-missing-import': 'off',
       'n/no-unpublished-import': 'off',
