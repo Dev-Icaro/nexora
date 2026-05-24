@@ -116,5 +116,10 @@
     "ignoreDeprecations": "6.0" /* Required to keep baseUrl support (deprecated in TS 6, still needed for tsc-alias path resolution). */
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "exclude": ["node_modules", "dist"],
+  "tsc-alias": {
+    "replacers": {
+      "base-url": { "enabled": false }
+    }
+  }
 }
