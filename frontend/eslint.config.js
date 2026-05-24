@@ -13,6 +13,7 @@ import sonarjs from 'eslint-plugin-sonarjs';
 import unicorn from 'eslint-plugin-unicorn';
 
 export default [
+  { ignores: ['src/gql/**'] },
   js.configs.recommended,
   {
     languageOptions: {
