@@ -2,7 +2,7 @@ import type { CreateUserDto } from '@/dtos/auth';
 import type { UploadUrlDto } from '@/dtos/shared';
 import type { GetAvatarUploadUrlDto, UpdateProfileDto, UpdateThemePreferenceDto, UserDto } from '@/dtos/user';
 
-/** Defines the contract for user data access and refresh-token hash lifecycle management. */
+/** Defines the contract for user data access and profile management. */
 export interface IUserService {
   /**
    * Finds a user by their unique identifier.
@@ -19,31 +19,6 @@ export interface IUserService {
    * @returns A promise resolving to the matching {@link UserDto}, or `null` if not found.
    */
   getByEmail(email: string): Promise<UserDto | null>;
-
-  /**
-   * Persists a hashed refresh token for a user with an expiry date.
-   *
-   * @param userId - The unique identifier of the user.
-   * @param hash - The SHA-512 HMAC hash of the refresh token (see `createHashForRefreshToken`).
-   * @param expiresAt - The UTC date/time at which the token hash expires.
-   */
-  saveRefreshTokenHash(userId: string, hash: string, expiresAt: Date): Promise<void>;
-
-  /**
-   * Finds a user by a stored refresh token hash.
-   *
-   * @param hash - The SHA-512 HMAC hash of the refresh token to look up.
-   * @returns A promise resolving to the matching {@link UserDto}, or `null` if not found or expired.
-   */
-  getByRefreshTokenHash(hash: string): Promise<UserDto | null>;
-
-  /**
-   * Removes a specific refresh token hash from a user's stored tokens.
-   *
-   * @param userId - The unique identifier of the user.
-   * @param hash - The SHA-512 HMAC hash of the refresh token to remove.
-   */
-  removeRefreshTokenHash(userId: string, hash: string): Promise<void>;
 
   /**
    * Finds a user who has a linked OAuth account matching the given provider and provider-specific ID.
@@ -63,13 +38,6 @@ export interface IUserService {
    * @returns A promise resolving to the newly created {@link UserDto}.
    */
   create(data: CreateUserDto): Promise<UserDto>;
-
-  /**
-   * Removes all stored refresh token hashes for a user, forcing a global logout.
-   *
-   * @param userId - The unique identifier of the user.
-   */
-  clearAllRefreshTokens(userId: string): Promise<void>;
 
   /**
    * Links an OAuth account to an existing user, enabling future logins via that provider.

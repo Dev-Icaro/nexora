@@ -4,6 +4,7 @@ import type { ApplyPasswordResetDto, LoginDto, RegisterDto, TokenInfoDto } from 
 import type UserDto from '@/dtos/user/user.dto';
 import { BadRequestException, ConflictException, UnauthorizedException } from '@/exceptions';
 import { PasswordResetToken } from '@/models/password-reset-token.model';
+import { Session } from '@/models/session.model';
 import { User } from '@/models/user.model';
 import type { OAuthUserInfo } from '@/services/oauth/oauth-provider.interface';
 import { createAccessToken, createHashForRefreshToken, createRefreshToken } from '@/utils/auth';
@@ -52,7 +53,7 @@ export class AuthService implements IAuthService {
     const refreshTokenHash = createHashForRefreshToken(refreshToken);
     const expiresAt = new Date(Date.now() + settings.REFRESH_TOKEN_DURATION_MINUTES * 60 * 1000);
 
-    await this.userService.saveRefreshTokenHash(userId, refreshTokenHash, expiresAt);
+    await Session.create({ userId, refreshTokenHash, expiresAt });
 
     return {
       accessToken,
@@ -69,10 +70,13 @@ export class AuthService implements IAuthService {
 
   async refresh(incomingRefreshToken: string): Promise<TokenInfoDto> {
     const hash = createHashForRefreshToken(incomingRefreshToken);
-    const user = await this.userService.getByRefreshTokenHash(hash);
-    if (!user) throw new UnauthorizedException('Unauthorized');
+    const session = await Session.findOne({ refreshTokenHash: hash, expiresAt: { $gt: new Date() } });
+    if (!session) throw new UnauthorizedException('Unauthorized');
 
-    await this.userService.removeRefreshTokenHash(user.id, hash);
+    await Session.deleteOne({ refreshTokenHash: hash });
+
+    const user = await this.userService.getById(session.userId.toString());
+    if (!user) throw new UnauthorizedException('Unauthorized');
 
     const tokenInfo = { userId: user.id };
     const accessToken = createAccessToken(tokenInfo);
@@ -80,7 +84,7 @@ export class AuthService implements IAuthService {
     const refreshTokenHash = createHashForRefreshToken(refreshToken);
     const expiresAt = new Date(Date.now() + settings.REFRESH_TOKEN_DURATION_MINUTES * 60 * 1000);
 
-    await this.userService.saveRefreshTokenHash(user.id, refreshTokenHash, expiresAt);
+    await Session.create({ userId: user.id, refreshTokenHash, expiresAt });
 
     return {
       accessToken,
@@ -97,10 +101,7 @@ export class AuthService implements IAuthService {
 
   async logout(refreshToken: string): Promise<void> {
     const hash = createHashForRefreshToken(refreshToken);
-    const user = await this.userService.getByRefreshTokenHash(hash);
-    if (user) {
-      await this.userService.removeRefreshTokenHash(user.id, hash);
-    }
+    await Session.deleteOne({ refreshTokenHash: hash });
   }
 
   async requestPasswordReset(email: string): Promise<void> {
@@ -142,7 +143,7 @@ export class AuthService implements IAuthService {
 
     await User.findByIdAndUpdate(record!.userId, { $set: { password: hashedPassword } });
     await PasswordResetToken.findOneAndUpdate({ tokenHash }, { $set: { usedAt: new Date() } });
-    await this.userService.clearAllRefreshTokens(record!.userId.toString());
+    await Session.deleteMany({ userId: record!.userId });
   }
 
   async validatePasswordResetToken(token: string): Promise<void> {
@@ -178,7 +179,7 @@ export class AuthService implements IAuthService {
     const refreshTokenHash = createHashForRefreshToken(refreshToken);
     const expiresAt = new Date(Date.now() + settings.REFRESH_TOKEN_DURATION_MINUTES * 60 * 1000);
 
-    await this.userService.saveRefreshTokenHash(user.id, refreshTokenHash, expiresAt);
+    await Session.create({ userId: user.id, refreshTokenHash, expiresAt });
 
     return { refreshToken };
   }

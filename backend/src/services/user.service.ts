@@ -47,30 +47,6 @@ export class UserService implements IUserService {
     return this.toUserDto(user);
   }
 
-  async saveRefreshTokenHash(userId: string, hash: string, expiresAt: Date): Promise<void> {
-    await User.findByIdAndUpdate(userId, {
-      $push: { tokens: { refreshTokenHash: hash, expiresAt } },
-    });
-  }
-
-  async getByRefreshTokenHash(hash: string): Promise<UserDto | null> {
-    const user = await User.findOne({
-      tokens: { $elemMatch: { refreshTokenHash: hash, expiresAt: { $gt: new Date() } } },
-    });
-    if (!user) return null;
-    return this.toUserDto(user);
-  }
-
-  async removeRefreshTokenHash(userId: string, hash: string): Promise<void> {
-    await User.findByIdAndUpdate(userId, {
-      $pull: { tokens: { refreshTokenHash: hash } },
-    });
-  }
-
-  async clearAllRefreshTokens(userId: string): Promise<void> {
-    await User.findByIdAndUpdate(userId, { $set: { tokens: [] } });
-  }
-
   async getByOAuthAccount(provider: string, providerId: string): Promise<UserDto | null> {
     const user = await User.findOne({
       oauthAccounts: { $elemMatch: { provider, providerId } },

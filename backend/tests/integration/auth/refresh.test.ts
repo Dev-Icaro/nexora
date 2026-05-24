@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import settings from '@/config/settings';
-import { User } from '@/models/user.model';
+import { Session } from '@/models/session.model';
 import { createAccessToken, createHashForRefreshToken, createRefreshToken } from '@/utils/auth';
 import { clearDb } from '../../setup/db';
 import { createTestUser } from '../../setup/factories/user.factory';
@@ -31,7 +31,7 @@ async function seedRefreshToken(userId: string) {
   const refreshToken = createRefreshToken({ userId });
   const hash = createHashForRefreshToken(refreshToken);
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-  await User.findByIdAndUpdate(userId, { $push: { tokens: { refreshTokenHash: hash, expiresAt } } });
+  await Session.create({ userId, refreshTokenHash: hash, expiresAt });
   return refreshToken;
 }
 
@@ -96,8 +96,8 @@ describe('logout', () => {
     const clearCookieMock = ctx.res.clearCookie as ReturnType<typeof import('vitest').vi.fn>;
     expect(clearCookieMock).toHaveBeenCalledWith(settings.REFRESH_TOKEN_COOKIE_NAME);
 
-    const updatedUser = await User.findById(user.id);
-    expect(updatedUser!.tokens).toHaveLength(0);
+    const remainingSessions = await Session.countDocuments({ userId: user.id });
+    expect(remainingSessions).toBe(0);
   });
 
   it('succeeds silently when no cookie is present', async () => {
