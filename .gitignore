@@ -3,3 +3,5 @@
 .vscode
 .codex
 docs/*
+!docs/assets/
+!docs/assets/**
