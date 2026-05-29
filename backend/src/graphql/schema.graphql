@@ -49,6 +49,7 @@ type User {
   followersCount: Int!
   followingCount: Int!
   postCount: Int!
+  isFollowing: Boolean
 }
 
 input RegisterRequest {

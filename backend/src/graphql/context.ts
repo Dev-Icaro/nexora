@@ -101,7 +101,7 @@ export const createSubscriptionContext = async (
   }
 
   setUserId(currentUser.userId);
-  return { currentUser, loaders: createLoaders(), dataSources: createDataSources() };
+  return { currentUser, loaders: createLoaders(currentUser.userId), dataSources: createDataSources() };
 };
 
 /**
@@ -135,5 +135,11 @@ export const createContext = async ({
     setUserId(currentUser.userId);
   }
 
-  return { req, res, currentUser, loaders: createLoaders(), dataSources: createDataSources() };
+  return {
+    req,
+    res,
+    currentUser,
+    loaders: createLoaders(currentUser?.userId ?? null),
+    dataSources: createDataSources(),
+  };
 };

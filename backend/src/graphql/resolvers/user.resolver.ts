@@ -61,5 +61,6 @@ export const userResolver: Resolvers = {
     followersCount: parent => parent.followersCount ?? 0,
     followingCount: parent => parent.followingCount ?? 0,
     postCount: parent => parent.postCount ?? 0,
+    isFollowing: (parent, _, { loaders }) => loaders.isFollowingLoader.load(parent.id),
   },
 };

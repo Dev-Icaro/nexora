@@ -75,7 +75,7 @@ export function createTestServer(overrides: TestServerOverrides = {}) {
       req,
       res,
       currentUser: options.userId ? { userId: options.userId } : null,
-      loaders: createLoaders(),
+      loaders: createLoaders(options.userId ?? null),
       dataSources: {
         authService: new AuthService(userService, emailService),
         userService,
