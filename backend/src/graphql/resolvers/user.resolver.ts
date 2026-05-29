@@ -32,6 +32,16 @@ export const userResolver: Resolvers = {
       });
       return { code: 200, success: true, message: 'Upload URL generated', uploadUrl, fields, objectKey };
     },
+
+    followUser: async (_, { userId }, { dataSources, currentUser }) => {
+      await dataSources.followService.follow(currentUser!.userId, userId);
+      return { code: 200, success: true, message: 'User followed successfully' };
+    },
+
+    unfollowUser: async (_, { userId }, { dataSources, currentUser }) => {
+      await dataSources.followService.unfollow(currentUser!.userId, userId);
+      return { code: 200, success: true, message: 'User unfollowed successfully' };
+    },
   },
   User: {
     storageInfo: parent => {
@@ -48,5 +58,8 @@ export const userResolver: Resolvers = {
       if (parent.avatarKey) return signMediaUrl(parent.avatarKey);
       return null;
     },
+    followersCount: parent => parent.followersCount ?? 0,
+    followingCount: parent => parent.followingCount ?? 0,
+    postCount: parent => parent.postCount ?? 0,
   },
 };

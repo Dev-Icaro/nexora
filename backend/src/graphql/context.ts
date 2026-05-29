@@ -5,8 +5,10 @@ import { AuthService } from '@/services/auth.service';
 import S3StorageProvider from '@/services/cloud/s3-storage.provider';
 import { CommentService } from '@/services/comment.service';
 import { ResendEmailService } from '@/services/email/resend-email.service';
+import { FollowService } from '@/services/follow.service';
 import type { IAuthService } from '@/services/interfaces/auth.service.interface';
 import type { ICommentService } from '@/services/interfaces/comment.service.interface';
+import type { IFollowService } from '@/services/interfaces/follow.service.interface';
 import type { IPostService } from '@/services/interfaces/post.service.interface';
 import type { IStorageProvider } from '@/services/interfaces/storage-provider.interface';
 import type { IUserService } from '@/services/interfaces/user.service.interface';
@@ -23,6 +25,7 @@ type DataSources = {
   userService: IUserService;
   postService: IPostService;
   commentService: ICommentService;
+  followService: IFollowService;
   storageProvider: IStorageProvider;
 };
 
@@ -68,6 +71,7 @@ function createDataSources(): DataSources {
     userService,
     postService: new PostService(userService, storageProvider),
     commentService: new CommentService(userService),
+    followService: new FollowService(userService),
     storageProvider,
   };
 }
