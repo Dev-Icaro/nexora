@@ -58,3 +58,22 @@ export function generatePasswordResetToken(): string {
 export function hashPasswordResetToken(token: string): string {
   return createHash('sha256').update(token).digest('hex');
 }
+
+/**
+ * Generates a cryptographically secure random email verification token.
+ *
+ * @returns A 64-character lowercase hex string (32 random bytes).
+ */
+export function generateEmailVerificationToken(): string {
+  return randomBytes(32).toString('hex');
+}
+
+/**
+ * Hashes an email verification token using SHA-256 for safe storage.
+ *
+ * @param token - The raw token produced by {@link generateEmailVerificationToken}.
+ * @returns A 64-character lowercase hex string (SHA-256 digest).
+ */
+export function hashEmailVerificationToken(token: string): string {
+  return createHash('sha256').update(token).digest('hex');
+}

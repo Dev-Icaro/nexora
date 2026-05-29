@@ -1,5 +1,4 @@
 import type { ApplyPasswordResetDto, LoginDto, RegisterDto, TokenInfoDto } from '@/dtos/auth';
-import type UserDto from '@/dtos/user/user.dto';
 import type { OAuthUserInfo } from '@/services/oauth/oauth-provider.interface';
 
 /** Defines the contract for authentication operations: registration, login, and token refresh. */
@@ -7,10 +6,14 @@ export interface IAuthService {
   /**
    * Registers a new user account.
    *
+   * Creates the user with `emailVerified: false`, stores a hashed verification token, and sends
+   * a verification email. If the email already exists as unverified, replaces the token and
+   * resends the email. Throws {@link ConflictException} when the email is already verified.
+   *
    * @param credentials - Registration payload containing username, email, password, and confirmPassword.
-   * @returns A promise resolving to the created {@link UserDto}.
+   * @returns A promise resolving to `true` on success.
    */
-  register(credentials: RegisterDto): Promise<UserDto>;
+  register(credentials: RegisterDto): Promise<boolean>;
 
   /**
    * Authenticates a user with email and password credentials.

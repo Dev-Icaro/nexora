@@ -108,12 +108,6 @@ type Query {
   validatePasswordResetToken(token: String!): ValidatePasswordResetTokenResponse!
 }
 
-type RegisterResponse {
-  code: Int!
-  message: String!
-  success: Boolean!
-  user: User
-}
 
 type CreatePostResponse {
   code: Int!
@@ -213,7 +207,7 @@ type ApplyPasswordResetResponse {
 }
 
 type Mutation {
-  register(registerRequest: RegisterRequest!): RegisterResponse!
+  register(registerRequest: RegisterRequest!): Boolean!
   login(loginRequest: LoginRequest!): LoginResponse!
   refresh: RefreshResponse!
   logout: LogoutResponse!

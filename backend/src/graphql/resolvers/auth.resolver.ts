@@ -12,8 +12,7 @@ export const authResolver: Resolvers = {
   },
   Mutation: {
     register: async (_, { registerRequest }, { dataSources }) => {
-      const user = await dataSources.authService.register(registerRequest);
-      return { code: 201, success: true, message: 'Account created successfully', user };
+      return dataSources.authService.register(registerRequest);
     },
 
     login: async (_, { loginRequest }, { dataSources, res }) => {
