@@ -54,7 +54,7 @@ export function createLoaders() {
             avatarKey: u.avatarKey,
             createdAt: u.createdAt,
             storageUsedBytes: u.storageUsedBytes ?? 0,
-            storageQuotaBytes: u.storageQuotaBytes ?? settings.STORAGE_QUOTA_FREE_BYTES,
+            storageQuotaBytes: settings.STORAGE_QUOTA_FREE_BYTES,
           },
         ]),
       );

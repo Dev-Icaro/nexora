@@ -43,7 +43,7 @@ const settings: AppSettings = {
   IMAGE_FILE_SIZE_LIMIT_BYTES: 10 * 1024 * 1024, // 10 MB
   VIDEO_FILE_SIZE_LIMIT_BYTES: 200 * 1024 * 1024, // 200 MB
   PRESIGNED_UPLOAD_URL_EXPIRY_SECONDS: 900, // 15 minutes
-  STORAGE_QUOTA_FREE_BYTES: 524_288_000, // 500 MB
+  STORAGE_QUOTA_FREE_BYTES: 20 * 1024 * 1024, // 20 MB
   POST_ALLOWED_CONTENT_TYPES: ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/webm'],
   AVATAR_POST_ALLOWED_CONTENT_TYPES: ['image/jpeg', 'image/png', 'image/webp'],
 };

@@ -31,7 +31,7 @@ export class UserService implements IUserService {
       themePreference: doc.themePreference,
       avatarKey: doc.avatarKey,
       storageUsedBytes: doc.storageUsedBytes ?? 0,
-      storageQuotaBytes: doc.storageQuotaBytes ?? settings.STORAGE_QUOTA_FREE_BYTES,
+      storageQuotaBytes: settings.STORAGE_QUOTA_FREE_BYTES,
     };
   }
 
@@ -217,7 +217,7 @@ export class UserService implements IUserService {
     if (!user) throw new NotFoundException('User not found');
 
     const storageUsed = user.storageUsedBytes ?? 0;
-    const storageQuota = user.storageQuotaBytes ?? settings.STORAGE_QUOTA_FREE_BYTES;
+    const storageQuota = settings.STORAGE_QUOTA_FREE_BYTES;
 
     if (storageUsed + fileSizeBytes > storageQuota) {
       throw new BadRequestException('Storage quota exceeded');

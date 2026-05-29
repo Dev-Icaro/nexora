@@ -36,7 +36,7 @@ export const userResolver: Resolvers = {
   User: {
     storageInfo: parent => {
       const used = parent.storageUsedBytes ?? 0;
-      const quota = parent.storageQuotaBytes ?? settings.STORAGE_QUOTA_FREE_BYTES;
+      const quota = settings.STORAGE_QUOTA_FREE_BYTES;
       return {
         usedBytes: used,
         quotaBytes: quota,
