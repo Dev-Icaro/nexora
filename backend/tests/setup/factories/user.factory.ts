@@ -15,6 +15,7 @@ export async function createTestUser(
     username?: string;
     email?: string;
     plainPassword?: string;
+    emailVerified?: boolean;
   } = {},
 ): Promise<TestUser> {
   // eslint-disable-next-line sonarjs/no-hardcoded-passwords
@@ -25,6 +26,7 @@ export async function createTestUser(
     username: overrides.username ?? faker.internet.username().slice(0, 20),
     email: overrides.email ?? faker.internet.email(),
     password: hashedPassword,
+    emailVerified: overrides.emailVerified ?? true,
     createdAt: new Date().toISOString(),
   });
 
