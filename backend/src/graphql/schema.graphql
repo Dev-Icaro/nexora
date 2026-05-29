@@ -206,6 +206,14 @@ type ApplyPasswordResetResponse {
   success: Boolean!
 }
 
+type VerifyEmailResponse {
+  code: Int!
+  message: String!
+  success: Boolean!
+  accessToken: String
+  user: User
+}
+
 type Mutation {
   register(registerRequest: RegisterRequest!): Boolean!
   login(loginRequest: LoginRequest!): LoginResponse!
@@ -213,6 +221,7 @@ type Mutation {
   logout: LogoutResponse!
   requestPasswordReset(requestPasswordResetRequest: RequestPasswordResetRequest!): RequestPasswordResetResponse!
   applyPasswordReset(applyPasswordResetRequest: ApplyPasswordResetRequest!): ApplyPasswordResetResponse!
+  verifyEmail(token: String!): VerifyEmailResponse!
 
   getUploadUrl(request: GetUploadUrlRequest!): GetUploadUrlResponse!
   createPost(body: String!, objectKey: String): CreatePostResponse!

@@ -70,6 +70,17 @@ export interface IAuthService {
   validatePasswordResetToken(token: string): Promise<void>;
 
   /**
+   * Verifies an email address using the token from the verification link.
+   *
+   * Hashes the raw token, looks up the corresponding record, rejects expired or unknown tokens,
+   * marks the account as verified, deletes the token document, and creates a new session.
+   *
+   * @param token - The raw verification token from the URL query parameter.
+   * @returns A promise resolving to a {@link TokenInfoDto} so the user is automatically logged in.
+   */
+  verifyEmail(token: string): Promise<TokenInfoDto>;
+
+  /**
    * Authenticates or provisions a user via an OAuth provider.
    *
    * Looks up the user by their OAuth account first; if not found, falls back to email matching

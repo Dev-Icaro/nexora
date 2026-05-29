@@ -103,6 +103,41 @@ export class AuthService implements IAuthService {
     };
   }
 
+  async verifyEmail(token: string): Promise<TokenInfoDto> {
+    const tokenHash = hashEmailVerificationToken(token);
+    const record = await EmailVerificationToken.findOne({ tokenHash });
+
+    if (!record || record.expiresAt <= new Date()) {
+      throw new BadRequestException('Invalid or expired verification link');
+    }
+
+    await User.findByIdAndUpdate(record.userId, { $set: { emailVerified: true } });
+    await EmailVerificationToken.deleteOne({ tokenHash });
+
+    const userId = record.userId.toString();
+    const tokenInfo = { userId };
+    const accessToken = createAccessToken(tokenInfo);
+    const refreshToken = createRefreshToken(tokenInfo);
+    const refreshTokenHash = createHashForRefreshToken(refreshToken);
+    const expiresAt = new Date(Date.now() + settings.REFRESH_TOKEN_DURATION_MINUTES * 60 * 1000);
+
+    await Session.create({ userId, refreshTokenHash, expiresAt });
+
+    const doc = await User.findById(userId);
+
+    return {
+      accessToken,
+      refreshToken,
+      user: {
+        id: userId,
+        email: doc!.email,
+        username: doc!.username,
+        createdAt: doc!.createdAt,
+        avatarKey: doc!.avatarKey,
+      },
+    };
+  }
+
   async refresh(incomingRefreshToken: string): Promise<TokenInfoDto> {
     const hash = createHashForRefreshToken(incomingRefreshToken);
     const session = await Session.findOne({ refreshTokenHash: hash, expiresAt: { $gt: new Date() } });
@@ -203,6 +238,7 @@ export class AuthService implements IAuthService {
           email: oauthUser.email,
           provider,
           providerId: oauthUser.providerId,
+          emailVerified: true,
         });
       }
     }

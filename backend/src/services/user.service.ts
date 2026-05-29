@@ -61,6 +61,7 @@ export class UserService implements IUserService {
       username: userData.username,
       email: userData.email,
       password: userData.password,
+      emailVerified: userData.emailVerified ?? false,
       createdAt,
       storageQuotaBytes: settings.STORAGE_QUOTA_FREE_BYTES,
       ...(userData.provider && userData.providerId
@@ -72,6 +73,7 @@ export class UserService implements IUserService {
 
   async linkOAuthAccount(userId: string, provider: string, providerId: string): Promise<void> {
     await User.findByIdAndUpdate(userId, {
+      $set: { emailVerified: true },
       $addToSet: { oauthAccounts: { provider, providerId } },
     });
   }
