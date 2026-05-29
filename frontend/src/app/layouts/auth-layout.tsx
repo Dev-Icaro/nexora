@@ -28,7 +28,7 @@ export function AuthLayout() {
         {/* Brand content */}
         <div className="relative z-10 flex flex-col items-center gap-5 text-center">
           <div className="flex flex-col gap-2">
-            <h2 className="text-3xl font-bold text-secondary">Welcome to Nexora</h2>
+            <h2 className="text-3xl font-bold text-secondary dark:text-amber-50">Welcome to Nexora</h2>
             <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
               Connect with people, share your thoughts, and discover what&rsquo;s happening in your world &mdash; all in
               real time.

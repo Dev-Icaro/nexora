@@ -13,6 +13,7 @@ import connectDatabase from '@/config/database';
 import env from '@/config/environment';
 import { apolloErrorHandler } from '@/graphql/apollo-error-handler';
 import { createContext, createSubscriptionContext, type GraphQLContext } from '@/graphql/context';
+import { operationLoggerPlugin } from '@/graphql/plugins/operation-logger.plugin';
 import { rateLimiterPlugin } from '@/graphql/plugins/rate-limiter.plugin';
 import { authResolver } from '@/graphql/resolvers/auth.resolver';
 import { postResolver } from '@/graphql/resolvers/post.resolver';
@@ -55,6 +56,7 @@ const bootstrap = async (): Promise<void> => {
 
   const server = new ApolloServer<GraphQLContext>({
     schema,
+    logger,
     introspection: env.NODE_ENV !== 'production',
     formatError: apolloErrorHandler,
     plugins: [
@@ -68,6 +70,7 @@ const bootstrap = async (): Promise<void> => {
           };
         },
       },
+      operationLoggerPlugin,
       rateLimiterPlugin,
     ],
   });

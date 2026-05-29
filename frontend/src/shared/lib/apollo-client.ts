@@ -68,7 +68,11 @@ const errorLink = new ErrorLink(({ error, operation, forward }) => {
 
   if (!isUnauthenticated) return;
 
-  if (operation.operationName === 'Refresh' || operation.operationName === 'Logout') {
+  if (
+    operation.operationName === 'Refresh' ||
+    operation.operationName === 'Logout' ||
+    operation.operationName === 'Login'
+  ) {
     if (operation.operationName === 'Refresh') triggerUnauthenticated();
     return;
   }
@@ -114,8 +118,14 @@ const retryLink = new RetryLink({
   delay: { initial: 300, max: 3000, jitter: true },
   attempts: {
     max: 3,
-    retryIf: error => {
+    retryIf: (error, operation) => {
       if (!error) return false;
+      if (
+        operation.operationName === 'Refresh' ||
+        operation.operationName === 'Logout' ||
+        operation.operationName === 'Login'
+      )
+        return false;
       const status = (error as { statusCode?: number }).statusCode;
       return status !== undefined ? status >= 500 : true;
     },
