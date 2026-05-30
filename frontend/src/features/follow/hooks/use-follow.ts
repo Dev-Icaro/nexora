@@ -1,5 +1,6 @@
 import { useMutation } from '@apollo/client/react';
 
+import { useAuth } from '@/features/auth/hooks/use-auth';
 import { toast } from '@/shared/lib/toast';
 
 import { FOLLOW_USER, UNFOLLOW_USER } from '../api/follow.mutations';
@@ -12,6 +13,8 @@ type UseFollowResult = {
 };
 
 export function useFollow(): UseFollowResult {
+  const { state } = useAuth();
+  const viewerId = state.user?.id;
   const [followMutation, { loading: followLoading }] = useMutation(FOLLOW_USER);
   const [unfollowMutation, { loading: unfollowLoading }] = useMutation(UNFOLLOW_USER);
 
@@ -37,6 +40,14 @@ export function useFollow(): UseFollowResult {
               followersCount: (existing: number) => serverUser?.followersCount ?? existing + 1,
             },
           });
+          if (viewerId) {
+            cache.modify({
+              id: cache.identify({ __typename: 'User', id: viewerId }),
+              fields: {
+                followingCount: (existing: number) => existing + 1,
+              },
+            });
+          }
         },
       });
 
@@ -70,6 +81,14 @@ export function useFollow(): UseFollowResult {
               followersCount: (existing: number) => serverUser?.followersCount ?? Math.max(0, existing - 1),
             },
           });
+          if (viewerId) {
+            cache.modify({
+              id: cache.identify({ __typename: 'User', id: viewerId }),
+              fields: {
+                followingCount: (existing: number) => Math.max(0, existing - 1),
+              },
+            });
+          }
         },
       });
 
