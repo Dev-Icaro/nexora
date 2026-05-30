@@ -1,21 +1,18 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { GraphQLError } from 'graphql';
+import { describe, expect, it } from 'vitest';
 
-import { LOGIN_MUTATION, REGISTER_MUTATION } from '@/features/auth/api/auth.mutations';
+import { REGISTER_MUTATION } from '@/features/auth/api/auth.mutations';
 import { useRegister } from '@/features/auth/hooks/use-register';
 
-import { makeAuthContext, createWrapper } from '../../utils';
-import { makeUser } from '../../mocks/data';
+import { createWrapper } from '../../utils';
 
-const { mockNavigate } = vi.hoisted(() => ({ mockNavigate: vi.fn() }));
-
-vi.mock('react-router-dom', async importActual => {
-  const mod = await importActual<typeof import('react-router-dom')>();
-  return { ...mod, useNavigate: () => mockNavigate };
-});
-
-const user = makeUser();
-const registerInput = { username: 'newuser', email: 'new@example.com', password: 'StrongPass1!' };
+const registerInput = {
+  username: 'newuser',
+  email: 'new@example.com',
+  password: 'StrongPass1!',
+  confirmPassword: 'StrongPass1!',
+};
 
 const registerSuccessMock = {
   request: {
@@ -23,7 +20,7 @@ const registerSuccessMock = {
     variables: { registerRequest: registerInput },
   },
   result: {
-    data: { register: { code: 201, message: 'Created', success: true } },
+    data: { register: true },
   },
 };
 
@@ -33,35 +30,23 @@ const registerFailureMock = {
     variables: { registerRequest: registerInput },
   },
   result: {
-    data: { register: { code: 409, message: 'Email already in use', success: false } },
-  },
-};
-
-const loginSuccessMock = {
-  request: {
-    query: LOGIN_MUTATION,
-    variables: { loginRequest: { email: registerInput.email, password: registerInput.password } },
-  },
-  result: {
-    data: {
-      login: { code: 200, message: 'OK', success: true, accessToken: 'access-token', user },
-    },
+    errors: [new GraphQLError('Email already in use', { extensions: { code: 'CONFLICT' } })],
   },
 };
 
 describe('useRegister', () => {
-  it('starts with loading=false and no error', () => {
+  it('starts with loading=false, no error, and no submittedEmail', () => {
     const { result } = renderHook(() => useRegister(), {
-      wrapper: createWrapper({ mocks: [registerSuccessMock, loginSuccessMock] }),
+      wrapper: createWrapper({ mocks: [registerSuccessMock] }),
     });
     expect(result.current.loading).toBe(false);
     expect(result.current.error).toBeUndefined();
+    expect(result.current.submittedEmail).toBeNull();
   });
 
-  it('auto-logs in and navigates after successful registration', async () => {
-    const authContext = makeAuthContext();
+  it('sets submittedEmail after successful registration', async () => {
     const { result } = renderHook(() => useRegister(), {
-      wrapper: createWrapper({ mocks: [registerSuccessMock, loginSuccessMock], authContext }),
+      wrapper: createWrapper({ mocks: [registerSuccessMock] }),
     });
 
     await act(async () => {
@@ -69,8 +54,7 @@ describe('useRegister', () => {
     });
 
     await waitFor(() => {
-      expect(authContext.login).toHaveBeenCalledWith(user, 'access-token');
-      expect(mockNavigate).toHaveBeenCalledWith('/');
+      expect(result.current.submittedEmail).toBe(registerInput.email);
     });
   });
 
@@ -84,15 +68,13 @@ describe('useRegister', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.error).toBe('Email already in use');
+      expect(result.current.error).toBeDefined();
     });
   });
 
-  it('does not attempt login when registration fails', async () => {
-    mockNavigate.mockClear();
-    const authContext = makeAuthContext();
+  it('does not set submittedEmail when registration fails', async () => {
     const { result } = renderHook(() => useRegister(), {
-      wrapper: createWrapper({ mocks: [registerFailureMock], authContext }),
+      wrapper: createWrapper({ mocks: [registerFailureMock] }),
     });
 
     await act(async () => {
@@ -102,7 +84,6 @@ describe('useRegister', () => {
     await waitFor(() => {
       expect(result.current.error).toBeDefined();
     });
-    expect(authContext.login).not.toHaveBeenCalled();
-    expect(mockNavigate).not.toHaveBeenCalled();
+    expect(result.current.submittedEmail).toBeNull();
   });
 });

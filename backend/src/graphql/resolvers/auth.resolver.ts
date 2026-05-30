@@ -59,7 +59,8 @@ export const authResolver: Resolvers = {
     },
 
     resendVerificationEmail: async (_, { email }, { dataSources }) => {
-      return dataSources.authService.resendVerificationEmail(email);
+      await dataSources.authService.resendVerificationEmail(email);
+      return true;
     },
 
     verifyEmail: async (_, { token }, { dataSources, res }) => {

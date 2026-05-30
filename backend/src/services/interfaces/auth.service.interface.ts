@@ -77,9 +77,9 @@ export interface IAuthService {
    * generates a new one, and sends a fresh verification email.
    *
    * @param email - The email address that should receive a fresh verification link.
-   * @returns A promise always resolving to `true`.
+   * @returns A promise resolving when the operation completes.
    */
-  resendVerificationEmail(email: string): Promise<boolean>;
+  resendVerificationEmail(email: string): Promise<void>;
 
   /**
    * Verifies an email address using the token from the verification link.

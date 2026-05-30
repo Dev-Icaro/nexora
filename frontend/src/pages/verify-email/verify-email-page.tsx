@@ -37,7 +37,8 @@ export function VerifyEmailPage() {
     if (!token || hasVerified.current) return;
     hasVerified.current = true;
 
-    verify(token).then(result => {
+    const run = async () => {
+      const result = await verify(token);
       if (result) {
         setSession(result);
         redirectTimerRef.current = setTimeout(() => {
@@ -47,12 +48,14 @@ export function VerifyEmailPage() {
       } else {
         setFailed(true);
       }
-    });
+    };
+
+    void run();
 
     return () => {
       if (redirectTimerRef.current) clearTimeout(redirectTimerRef.current);
     };
-  }, [token]);
+  }, [token, verify, auth, navigate]);
 
   if (!token || loading) {
     return (

@@ -17,9 +17,13 @@ export function useRegister(): UseRegisterResult {
   const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);
 
   const register = async (input: RegisterRequest) => {
-    const { data } = await registerMutation({ variables: { registerRequest: input } });
-    if (data?.register) {
-      setSubmittedEmail(input.email);
+    try {
+      const { data } = await registerMutation({ variables: { registerRequest: input } });
+      if (data?.register) {
+        setSubmittedEmail(input.email);
+      }
+    } catch {
+      // error is captured in useMutation's error state
     }
   };
 
