@@ -21,6 +21,9 @@ export interface IUserDocument {
   storageUsedBytes?: number;
   storageQuotaBytes?: number;
   uploadCount?: number;
+  followersCount?: number;
+  followingCount?: number;
+  postCount?: number;
 }
 
 const oauthAccountSchema = new Schema<IOAuthAccount>(
@@ -43,8 +46,11 @@ const userSchema = new Schema<IUserDocument>({
   oauthAccounts: { type: [oauthAccountSchema], default: [] },
   avatarKey: { type: String, required: false },
   storageUsedBytes: { type: Number, default: 0 },
-  storageQuotaBytes: { type: Number, default: 524_288_000 },
+  storageQuotaBytes: { type: Number, default: 20 * 1024 * 1024 },
   uploadCount: { type: Number, default: 0 },
+  followersCount: { type: Number, default: 0 },
+  followingCount: { type: Number, default: 0 },
+  postCount: { type: Number, default: 0 },
 });
 
 export const User = mongoose.model<IUserDocument>('users', userSchema);

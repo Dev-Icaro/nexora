@@ -1,7 +1,7 @@
 import { useMutation } from '@apollo/client/react';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import { Bookmark, Heart, MessageCircle, MoreHorizontal, Send } from 'lucide-react';
+import { Bookmark, Heart, MessageCircle, MoreHorizontal, Send, UserPlus } from 'lucide-react';
 import { useState } from 'react';
 
 import { useAuth } from '@/features/auth/hooks/use-auth';
@@ -15,6 +15,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/shared/components/ui/dropdown-menu';
+import { Skeleton } from '@/shared/components/ui/skeleton';
 import { useProfileNavigation } from '@/shared/hooks/use-profile-navigation';
 import { toast } from '@/shared/lib/toast';
 import { cn } from '@/shared/lib/utils';
@@ -27,10 +28,13 @@ dayjs.extend(relativeTime);
 interface PostCardProps {
   post: PostNode;
   onOpenModal?: (postId: string) => void;
+  onFollow?: () => void;
 }
 
-export function PostCard({ post, onOpenModal }: PostCardProps) {
+export function PostCard({ post, onOpenModal, onFollow }: PostCardProps) {
   const [expanded, setExpanded] = useState(false);
+  const [avatarLoading, setAvatarLoading] = useState(!!post.author.avatarUrl);
+  const [mediaLoaded, setMediaLoaded] = useState(false);
   const { state } = useAuth();
   const userId = state.user?.id;
   const { navigateToProfile } = useProfileNavigation();
@@ -39,6 +43,8 @@ export function PostCard({ post, onOpenModal }: PostCardProps) {
   const [optimisticLike, setOptimisticLike] = useState<{ postId: string; liked: boolean; count: number } | null>(null);
   const liked = optimisticLike?.postId === post.id ? optimisticLike.liked : baseLiked;
   const likeCount = optimisticLike?.postId === post.id ? optimisticLike.count : post.likeCount;
+
+  const showFollowButton = post.author.isFollowing === false && post.author.id !== userId;
 
   const [likePost] = useMutation(LIKE_POST);
 
@@ -75,8 +81,18 @@ export function PostCard({ post, onOpenModal }: PostCardProps) {
               aria-label={`View ${post.author.username}'s profile`}
             >
               <Avatar className="size-12">
-                {post.author.avatarUrl && <AvatarImage src={post.author.avatarUrl} alt={post.author.username} />}
-                <AvatarFallback className="bg-primary/20 text-primary font-semibold">{initials}</AvatarFallback>
+                {post.author.avatarUrl && (
+                  <AvatarImage
+                    src={post.author.avatarUrl}
+                    alt={post.author.username}
+                    onLoadingStatusChange={status => {
+                      if (status === 'loaded' || status === 'error') setAvatarLoading(false);
+                    }}
+                  />
+                )}
+                <AvatarFallback className="bg-primary/20 text-primary font-semibold">
+                  {avatarLoading ? <Skeleton className="size-full rounded-full" /> : initials}
+                </AvatarFallback>
               </Avatar>
             </button>
             <div>
@@ -91,6 +107,20 @@ export function PostCard({ post, onOpenModal }: PostCardProps) {
               </p>
               <p className="text-xs text-muted-foreground">{timestamp}</p>
             </div>
+            {showFollowButton && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 px-2 text-xs text-primary hover:text-primary hover:bg-primary/10"
+                onClick={e => {
+                  e.stopPropagation();
+                  onFollow?.();
+                }}
+              >
+                <UserPlus className="size-3 mr-1" />
+                Follow
+              </Button>
+            )}
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -107,7 +137,16 @@ export function PostCard({ post, onOpenModal }: PostCardProps) {
 
         {/* Optional media */}
         {post.mediaUrl && (
-          <img src={post.mediaUrl} alt="Post media" className="w-full rounded-xl object-cover max-h-80" />
+          <div className="relative w-full rounded-xl overflow-hidden">
+            {!mediaLoaded && <Skeleton className="w-full h-64 rounded-xl" />}
+            <img
+              src={post.mediaUrl}
+              alt="Post media"
+              className={cn('w-full rounded-xl object-cover max-h-80', !mediaLoaded && 'hidden')}
+              onLoad={() => setMediaLoaded(true)}
+              onError={() => setMediaLoaded(true)}
+            />
+          </div>
         )}
 
         {/* Body text */}

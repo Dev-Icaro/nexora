@@ -32,11 +32,23 @@ export const userResolver: Resolvers = {
       });
       return { code: 200, success: true, message: 'Upload URL generated', uploadUrl, fields, objectKey };
     },
+
+    followUser: async (_, { userId }, { dataSources, currentUser }) => {
+      await dataSources.followService.follow(currentUser!.userId, userId);
+      const user = await dataSources.userService.getById(userId);
+      return { code: 200, success: true, message: 'User followed successfully', user };
+    },
+
+    unfollowUser: async (_, { userId }, { dataSources, currentUser }) => {
+      await dataSources.followService.unfollow(currentUser!.userId, userId);
+      const user = await dataSources.userService.getById(userId);
+      return { code: 200, success: true, message: 'User unfollowed successfully', user };
+    },
   },
   User: {
     storageInfo: parent => {
       const used = parent.storageUsedBytes ?? 0;
-      const quota = parent.storageQuotaBytes ?? settings.STORAGE_QUOTA_FREE_BYTES;
+      const quota = settings.STORAGE_QUOTA_FREE_BYTES;
       return {
         usedBytes: used,
         quotaBytes: quota,
@@ -48,5 +60,9 @@ export const userResolver: Resolvers = {
       if (parent.avatarKey) return signMediaUrl(parent.avatarKey);
       return null;
     },
+    followersCount: parent => parent.followersCount ?? 0,
+    followingCount: parent => parent.followingCount ?? 0,
+    postCount: parent => parent.postCount ?? 0,
+    isFollowing: (parent, _, { loaders }) => loaders.isFollowingLoader.load(parent.id),
   },
 };

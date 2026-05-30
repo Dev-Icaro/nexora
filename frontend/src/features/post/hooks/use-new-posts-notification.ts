@@ -29,7 +29,7 @@ export function useNewPostsNotification(
       setPendingPosts(prev => {
         const existingIds = new Set([...feedPosts.map(p => p.id), ...prev.map(p => p.id)]);
         if (existingIds.has(newPost.id)) return prev;
-        return [...prev, newPost];
+        return [...prev, { ...newPost, author: { ...newPost.author, isFollowing: null } }];
       });
     },
   });

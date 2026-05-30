@@ -46,6 +46,10 @@ type User {
   themePreference: ThemePreference
   avatarUrl: String
   storageInfo: StorageInfo!
+  followersCount: Int!
+  followingCount: Int!
+  postCount: Int!
+  isFollowing: Boolean
 }
 
 input RegisterRequest {
@@ -178,6 +182,20 @@ type UpdateThemePreferenceResponse {
   user: User
 }
 
+type FollowUserResponse {
+  code: Int!
+  success: Boolean!
+  message: String!
+  user: User
+}
+
+type UnfollowUserResponse {
+  code: Int!
+  success: Boolean!
+  message: String!
+  user: User
+}
+
 input RequestPasswordResetRequest {
   email: String!
 }
@@ -237,6 +255,9 @@ type Mutation {
   updateThemePreference(theme: ThemePreference!): UpdateThemePreferenceResponse!
 
   getAvatarUploadUrl(request: GetUploadUrlRequest!): GetUploadUrlResponse!
+
+  followUser(userId: ID!): FollowUserResponse!
+  unfollowUser(userId: ID!): UnfollowUserResponse!
 }
 
 type Subscription {

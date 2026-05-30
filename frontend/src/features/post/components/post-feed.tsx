@@ -21,6 +21,7 @@ type PostFeedProps = {
   onRetry: () => void;
   onLoadMore: () => Promise<void>;
   onOpenPost?: (postId: string) => void;
+  onFollow?: (authorId: string) => void;
 };
 
 export function PostFeed({
@@ -34,6 +35,7 @@ export function PostFeed({
   onRetry,
   onLoadMore,
   onOpenPost,
+  onFollow,
 }: PostFeedProps) {
   const [observedElement, setObservedElement] = useState<HTMLDivElement | null>(null);
   const hasPosts = posts.length > 0;
@@ -78,7 +80,11 @@ export function PostFeed({
 
         return (
           <div key={post.id} ref={isObservedPost ? setObservedElement : null}>
-            <PostCard post={post} onOpenModal={onOpenPost} />
+            <PostCard
+              post={post}
+              onOpenModal={onOpenPost}
+              onFollow={onFollow ? () => onFollow(post.author.id) : undefined}
+            />
           </div>
         );
       })}

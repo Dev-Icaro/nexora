@@ -13,6 +13,10 @@ export const GET_PROFILE = graphql(`
       position
       avatarUrl
       email
+      followersCount
+      followingCount
+      postCount
+      isFollowing
       storageInfo {
         usedBytes
         quotaBytes
