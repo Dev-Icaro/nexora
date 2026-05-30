@@ -21,6 +21,7 @@ import { subscriptionResolver } from '@/graphql/resolvers/subscription.resolver'
 import { userResolver } from '@/graphql/resolvers/user.resolver';
 import { typeDefs } from '@/graphql/typeDefs';
 import { startCleanupPendingUploadsJob } from '@/jobs/cleanup-pending-uploads.job';
+import { startReconcileFollowCountersJob } from '@/jobs/reconcile-follow-counters.job';
 import { startReconcileStorageCountersJob } from '@/jobs/reconcile-storage-counters.job';
 import httpErrorHandler from '@/rest/middlewares/error-handler';
 import { transactionIdMiddleware } from '@/rest/middlewares/transaction-id.middleware';
@@ -36,6 +37,7 @@ const bootstrap = async (): Promise<void> => {
   await connectDatabase();
   startCleanupPendingUploadsJob();
   startReconcileStorageCountersJob();
+  startReconcileFollowCountersJob();
 
   const app = express();
   app.use(cors<cors.CorsRequest>({ origin: env.CORS_ORIGIN, credentials: true }));

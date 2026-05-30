@@ -14,6 +14,7 @@ import type { IEmailService } from '@/services/email/email.service.interface';
 import type { IStorageProvider } from '@/services/interfaces/storage-provider.interface';
 import { AuthService } from '@/services/auth.service';
 import { CommentService } from '@/services/comment.service';
+import { FollowService } from '@/services/follow.service';
 import { PostService } from '@/services/post.service';
 import { UserService } from '@/services/user.service';
 
@@ -74,12 +75,13 @@ export function createTestServer(overrides: TestServerOverrides = {}) {
       req,
       res,
       currentUser: options.userId ? { userId: options.userId } : null,
-      loaders: createLoaders(),
+      loaders: createLoaders(options.userId ?? null),
       dataSources: {
         authService: new AuthService(userService, emailService),
         userService,
         postService: new PostService(userService, storageProvider),
         commentService: new CommentService(userService),
+        followService: new FollowService(userService),
         storageProvider,
       },
     };

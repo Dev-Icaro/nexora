@@ -1,6 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { useAuth } from '@/features/auth/hooks/use-auth';
+import { useFollow } from '@/features/follow/hooks/use-follow';
 import { PostFeed } from '@/features/post/components/post-feed';
 import { useUserPosts } from '@/features/post/hooks/use-user-posts';
 import { ProfileHeader } from '@/features/profile/components/profile-header';
@@ -16,6 +17,7 @@ export function ProfilePage() {
 
   const { user: userData, updateProfile } = useProfile(userId);
   const { uploadAvatar, loading: avatarLoading } = useUploadAvatar();
+  const { follow, unfollow, followLoading, unfollowLoading } = useFollow();
   const { posts, loading, isFetchingNextPage, error, paginationError, refetch, fetchNextPage, hasNextPage } =
     useUserPosts(userId);
 
@@ -32,7 +34,12 @@ export function ProfilePage() {
         role: userData.position ?? undefined,
         bio: userData.bio ?? undefined,
         avatarUrl: userData.avatarUrl ?? undefined,
-        stats: { posts: 0, followers: 0, following: 0 },
+        isFollowing: userData.isFollowing ?? false,
+        stats: {
+          posts: userData.postCount,
+          followers: userData.followersCount,
+          following: userData.followingCount,
+        },
       }
     : null;
 
@@ -44,6 +51,9 @@ export function ProfilePage() {
           user={user}
           onAvatarUpload={handleAvatarUpload}
           avatarUploading={avatarLoading}
+          onFollow={() => follow(userId)}
+          onUnfollow={() => unfollow(userId)}
+          followLoading={followLoading || unfollowLoading}
         />
       )}
 
@@ -80,6 +90,7 @@ export function ProfilePage() {
             onRetry={refetch}
             onLoadMore={fetchNextPage}
             onOpenPost={postId => navigate(`/posts/${postId}`)}
+            onFollow={follow}
           />
         </TabsContent>
 

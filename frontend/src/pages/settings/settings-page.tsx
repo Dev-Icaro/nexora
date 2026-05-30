@@ -25,6 +25,10 @@ export function SettingsPage() {
     bio: user.bio,
     position: user.position,
     avatarUrl: user.avatarUrl,
+    followersCount: user.followersCount,
+    followingCount: user.followingCount,
+    postCount: user.postCount,
+    isFollowing: user.isFollowing,
     storageInfo: user.storageInfo,
   };
 

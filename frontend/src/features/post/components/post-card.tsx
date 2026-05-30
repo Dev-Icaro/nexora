@@ -1,7 +1,7 @@
 import { useMutation } from '@apollo/client/react';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import { Bookmark, Heart, MessageCircle, MoreHorizontal, Send } from 'lucide-react';
+import { Bookmark, Heart, MessageCircle, MoreHorizontal, Send, UserPlus } from 'lucide-react';
 import { useState } from 'react';
 
 import { useAuth } from '@/features/auth/hooks/use-auth';
@@ -28,9 +28,10 @@ dayjs.extend(relativeTime);
 interface PostCardProps {
   post: PostNode;
   onOpenModal?: (postId: string) => void;
+  onFollow?: () => void;
 }
 
-export function PostCard({ post, onOpenModal }: PostCardProps) {
+export function PostCard({ post, onOpenModal, onFollow }: PostCardProps) {
   const [expanded, setExpanded] = useState(false);
   const [avatarLoading, setAvatarLoading] = useState(!!post.author.avatarUrl);
   const [mediaLoaded, setMediaLoaded] = useState(false);
@@ -42,6 +43,8 @@ export function PostCard({ post, onOpenModal }: PostCardProps) {
   const [optimisticLike, setOptimisticLike] = useState<{ postId: string; liked: boolean; count: number } | null>(null);
   const liked = optimisticLike?.postId === post.id ? optimisticLike.liked : baseLiked;
   const likeCount = optimisticLike?.postId === post.id ? optimisticLike.count : post.likeCount;
+
+  const showFollowButton = post.author.isFollowing === false && post.author.id !== userId;
 
   const [likePost] = useMutation(LIKE_POST);
 
@@ -104,6 +107,20 @@ export function PostCard({ post, onOpenModal }: PostCardProps) {
               </p>
               <p className="text-xs text-muted-foreground">{timestamp}</p>
             </div>
+            {showFollowButton && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 px-2 text-xs text-primary hover:text-primary hover:bg-primary/10"
+                onClick={e => {
+                  e.stopPropagation();
+                  onFollow?.();
+                }}
+              >
+                <UserPlus className="size-3 mr-1" />
+                Follow
+              </Button>
+            )}
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

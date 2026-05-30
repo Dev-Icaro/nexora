@@ -9,6 +9,9 @@ export type UserDto = {
   avatarKey?: string;
   storageUsedBytes?: number;
   storageQuotaBytes?: number;
+  followersCount?: number;
+  followingCount?: number;
+  postCount?: number;
 };
 
 export default UserDto;

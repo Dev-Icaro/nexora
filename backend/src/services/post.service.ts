@@ -130,6 +130,8 @@ export class PostService implements IPostService {
       post = new Post({ body, mediaKey: confirmedKey, username: user.username, user: userId, createdAt });
       await post.save({ session });
 
+      await User.findByIdAndUpdate(userId, { $inc: { postCount: 1 } }, { session });
+
       if (confirmedKey && objectKey) {
         await MediaUpload.findOneAndUpdate(
           { objectKey, status: 'pending', userId },
@@ -168,7 +170,11 @@ export class PostService implements IPostService {
     const mediaUpload = post.mediaKey ? await MediaUpload.findOne({ entityId: postId, status: 'confirmed' }) : null;
 
     await Post.deleteOne({ _id: postId });
-    await Promise.all([Comment.deleteMany({ postId }), Like.deleteMany({ postId })]);
+    await Promise.all([
+      Comment.deleteMany({ postId }),
+      Like.deleteMany({ postId }),
+      User.findByIdAndUpdate(userId, { $inc: { postCount: -1 } }),
+    ]);
 
     if (mediaUpload) {
       const fileKey = mediaUpload.confirmedUrl ?? mediaUpload.objectKey;

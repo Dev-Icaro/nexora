@@ -40,6 +40,10 @@ export function makeProfileUser(overrides?: Partial<ProfileUser>): ProfileUser {
     bio: null,
     position: null,
     avatarUrl: null,
+    followersCount: 0,
+    followingCount: 0,
+    postCount: 0,
+    isFollowing: null,
     storageInfo: {
       usedBytes: 0,
       quotaBytes: 104_857_600,

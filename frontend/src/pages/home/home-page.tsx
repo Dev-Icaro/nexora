@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { useAuth } from '@/features/auth/hooks/use-auth';
+import { useFollow } from '@/features/follow/hooks/use-follow';
 import { NewPostsAnchor } from '@/features/post/components/new-posts-anchor';
 import { PostComposer } from '@/features/post/components/post-composer';
 import { PostDetailModal } from '@/features/post/components/post-detail-modal';
@@ -17,6 +18,7 @@ export function HomePage() {
   const { id: selectedPostId } = useParams<{ id?: string }>();
   const navigate = useNavigate();
 
+  const { follow } = useFollow();
   const { createPost } = useCreatePost();
   const { uploadPostMedia } = useUploadPostMedia();
   const [isUploadingPost, setIsUploadingPost] = useState(false);
@@ -70,6 +72,7 @@ export function HomePage() {
           onRetry={refetch}
           onLoadMore={fetchNextPage}
           onOpenPost={postId => navigate(`/posts/${postId}`)}
+          onFollow={follow}
         />
       </div>
       <PostDetailModal postId={selectedPostId ?? null} open={!!selectedPostId} onClose={() => navigate(-1)} />

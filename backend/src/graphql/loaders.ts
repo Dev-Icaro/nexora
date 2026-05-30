@@ -5,10 +5,11 @@ import type { CommentDto } from '@/dtos/comment/comment.dto';
 import type { LikeDto } from '@/dtos/post/like.dto';
 import type { UserDto } from '@/dtos/user/user.dto';
 import { Comment } from '@/models/comment.model';
+import { Follow } from '@/models/follow.model';
 import { Like } from '@/models/like.model';
 import { User } from '@/models/user.model';
 
-export function createLoaders() {
+export function createLoaders(viewerId: string | null = null) {
   return {
     commentsLoader: new DataLoader(async (postIds: readonly string[]) => {
       const comments = await Comment.find({ postId: { $in: postIds } }).sort({ _id: 1 });
@@ -59,6 +60,15 @@ export function createLoaders() {
         ]),
       );
       return userIds.map(id => map.get(id) ?? null);
+    }),
+
+    isFollowingLoader: new DataLoader(async (followingIds: readonly string[]) => {
+      if (!viewerId) {
+        return followingIds.map(() => null);
+      }
+      const follows = await Follow.find({ followerId: viewerId, followingId: { $in: followingIds } });
+      const followingSet = new Set(follows.map(f => String(f.followingId)));
+      return followingIds.map(id => followingSet.has(id));
     }),
   };
 }

@@ -52,6 +52,7 @@ export const GET_USER_POSTS = graphql(`
             id
             username
             avatarUrl
+            isFollowing
           }
           likeCount
           commentCount
@@ -111,6 +112,7 @@ export const GET_FEED = graphql(`
             id
             username
             avatarUrl
+            isFollowing
           }
           likeCount
           commentCount

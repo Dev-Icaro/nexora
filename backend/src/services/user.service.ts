@@ -31,7 +31,10 @@ export class UserService implements IUserService {
       themePreference: doc.themePreference,
       avatarKey: doc.avatarKey,
       storageUsedBytes: doc.storageUsedBytes ?? 0,
-      storageQuotaBytes: settings.STORAGE_QUOTA_FREE_BYTES,
+      storageQuotaBytes: doc.storageQuotaBytes ?? settings.STORAGE_QUOTA_FREE_BYTES,
+      followersCount: doc.followersCount ?? 0,
+      followingCount: doc.followingCount ?? 0,
+      postCount: doc.postCount ?? 0,
     };
   }
 
