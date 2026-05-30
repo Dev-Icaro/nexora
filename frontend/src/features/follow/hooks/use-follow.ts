@@ -1,6 +1,5 @@
 import { useMutation } from '@apollo/client/react';
 
-import { GET_PROFILE } from '@/features/profile/api/profile.queries';
 import { toast } from '@/shared/lib/toast';
 
 import { FOLLOW_USER, UNFOLLOW_USER } from '../api/follow.mutations';
@@ -29,19 +28,13 @@ export function useFollow(): UseFollowResult {
           },
         },
         update(cache, { data }) {
-          const cached = cache.readQuery({ query: GET_PROFILE, variables: { userId } });
-          if (!cached?.getUserById) return;
-
+          const id = cache.identify({ __typename: 'User', id: userId });
           const serverUser = data?.followUser.user;
-          cache.writeQuery({
-            query: GET_PROFILE,
-            variables: { userId },
-            data: {
-              getUserById: {
-                ...cached.getUserById,
-                isFollowing: serverUser?.isFollowing ?? true,
-                followersCount: serverUser?.followersCount ?? cached.getUserById.followersCount + 1,
-              },
+          cache.modify({
+            id,
+            fields: {
+              isFollowing: () => serverUser?.isFollowing ?? true,
+              followersCount: (existing: number) => serverUser?.followersCount ?? existing + 1,
             },
           });
         },
@@ -68,19 +61,13 @@ export function useFollow(): UseFollowResult {
           },
         },
         update(cache, { data }) {
-          const cached = cache.readQuery({ query: GET_PROFILE, variables: { userId } });
-          if (!cached?.getUserById) return;
-
+          const id = cache.identify({ __typename: 'User', id: userId });
           const serverUser = data?.unfollowUser.user;
-          cache.writeQuery({
-            query: GET_PROFILE,
-            variables: { userId },
-            data: {
-              getUserById: {
-                ...cached.getUserById,
-                isFollowing: serverUser?.isFollowing ?? false,
-                followersCount: serverUser?.followersCount ?? Math.max(0, cached.getUserById.followersCount - 1),
-              },
+          cache.modify({
+            id,
+            fields: {
+              isFollowing: () => serverUser?.isFollowing ?? false,
+              followersCount: (existing: number) => serverUser?.followersCount ?? Math.max(0, existing - 1),
             },
           });
         },

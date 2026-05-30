@@ -90,6 +90,7 @@ export function ProfilePage() {
             onRetry={refetch}
             onLoadMore={fetchNextPage}
             onOpenPost={postId => navigate(`/posts/${postId}`)}
+            onFollow={follow}
           />
         </TabsContent>
 
