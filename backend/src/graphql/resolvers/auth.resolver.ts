@@ -58,6 +58,10 @@ export const authResolver: Resolvers = {
       return { code: 200, success: true, message: 'Password reset successfully' };
     },
 
+    resendVerificationEmail: async (_, { email }, { dataSources }) => {
+      return dataSources.authService.resendVerificationEmail(email);
+    },
+
     verifyEmail: async (_, { token }, { dataSources, res }) => {
       const { user, accessToken, refreshToken } = await dataSources.authService.verifyEmail(token);
       res.cookie(settings.REFRESH_TOKEN_COOKIE_NAME, refreshToken, {

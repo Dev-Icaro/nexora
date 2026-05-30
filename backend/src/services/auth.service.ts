@@ -103,6 +103,15 @@ export class AuthService implements IAuthService {
     };
   }
 
+  async resendVerificationEmail(email: string): Promise<boolean> {
+    const user = await User.findOne({ email });
+    if (!user || user.emailVerified) return true;
+
+    await EmailVerificationToken.deleteMany({ userId: user._id });
+    await this.sendVerificationEmail(user._id.toString(), user.username, email);
+    return true;
+  }
+
   async verifyEmail(token: string): Promise<TokenInfoDto> {
     const tokenHash = hashEmailVerificationToken(token);
     const record = await EmailVerificationToken.findOne({ tokenHash });

@@ -70,6 +70,18 @@ export interface IAuthService {
   validatePasswordResetToken(token: string): Promise<void>;
 
   /**
+   * Resends the email verification link for an unverified account.
+   *
+   * Returns `true` silently when the email is unknown or already verified to prevent
+   * email enumeration. For a valid unverified account, invalidates any existing token,
+   * generates a new one, and sends a fresh verification email.
+   *
+   * @param email - The email address that should receive a fresh verification link.
+   * @returns A promise always resolving to `true`.
+   */
+  resendVerificationEmail(email: string): Promise<boolean>;
+
+  /**
    * Verifies an email address using the token from the verification link.
    *
    * Hashes the raw token, looks up the corresponding record, rejects expired or unknown tokens,

@@ -222,6 +222,7 @@ type Mutation {
   requestPasswordReset(requestPasswordResetRequest: RequestPasswordResetRequest!): RequestPasswordResetResponse!
   applyPasswordReset(applyPasswordResetRequest: ApplyPasswordResetRequest!): ApplyPasswordResetResponse!
   verifyEmail(token: String!): VerifyEmailResponse!
+  resendVerificationEmail(email: String!): Boolean!
 
   getUploadUrl(request: GetUploadUrlRequest!): GetUploadUrlResponse!
   createPost(body: String!, objectKey: String): CreatePostResponse!
