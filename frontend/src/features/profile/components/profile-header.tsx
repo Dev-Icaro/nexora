@@ -1,4 +1,4 @@
-import { BadgeCheck, Camera, MessageCircle, UserPlus } from 'lucide-react';
+import { BadgeCheck, Camera, MessageCircle, UserMinus, UserPlus } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -15,6 +15,7 @@ type ProfileUser = {
   isVerified?: boolean;
   role?: string;
   bio?: string;
+  isFollowing: boolean;
   stats: { posts: number; followers: number; following: number };
 };
 
@@ -23,10 +24,20 @@ type ProfileHeaderProps = {
   user: ProfileUser;
   onAvatarUpload: (file: File) => Promise<void>;
   avatarUploading?: boolean;
+  onFollow: () => void;
+  onUnfollow: () => void;
+  followLoading?: boolean;
 };
 
-export function ProfileHeader({ isOwnProfile, user, onAvatarUpload, avatarUploading }: ProfileHeaderProps) {
-  const [isFollowing, setIsFollowing] = useState(false);
+export function ProfileHeader({
+  isOwnProfile,
+  user,
+  onAvatarUpload,
+  avatarUploading,
+  onFollow,
+  onUnfollow,
+  followLoading,
+}: ProfileHeaderProps) {
   const [uploadOpen, setUploadOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -65,10 +76,17 @@ export function ProfileHeader({ isOwnProfile, user, onAvatarUpload, avatarUpload
               </Button>
             ) : (
               <>
-                <Button size="sm" variant={isFollowing ? 'outline' : 'default'} onClick={() => setIsFollowing(f => !f)}>
-                  <UserPlus className="size-4 mr-1.5" />
-                  {isFollowing ? 'Following' : 'Follow'}
-                </Button>
+                {user.isFollowing ? (
+                  <Button size="sm" variant="outline" onClick={onUnfollow} disabled={followLoading}>
+                    <UserMinus className="size-4 mr-1.5" />
+                    Unfollow
+                  </Button>
+                ) : (
+                  <Button size="sm" variant="default" onClick={onFollow} disabled={followLoading}>
+                    <UserPlus className="size-4 mr-1.5" />
+                    Follow
+                  </Button>
+                )}
                 <Button variant="outline" size="sm">
                   <MessageCircle className="size-4 mr-1.5" />
                   Message

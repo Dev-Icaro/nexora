@@ -35,12 +35,14 @@ export const userResolver: Resolvers = {
 
     followUser: async (_, { userId }, { dataSources, currentUser }) => {
       await dataSources.followService.follow(currentUser!.userId, userId);
-      return { code: 200, success: true, message: 'User followed successfully' };
+      const user = await dataSources.userService.getById(userId);
+      return { code: 200, success: true, message: 'User followed successfully', user };
     },
 
     unfollowUser: async (_, { userId }, { dataSources, currentUser }) => {
       await dataSources.followService.unfollow(currentUser!.userId, userId);
-      return { code: 200, success: true, message: 'User unfollowed successfully' };
+      const user = await dataSources.userService.getById(userId);
+      return { code: 200, success: true, message: 'User unfollowed successfully', user };
     },
   },
   User: {

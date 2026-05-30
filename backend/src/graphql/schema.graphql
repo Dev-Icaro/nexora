@@ -192,12 +192,14 @@ type FollowUserResponse {
   code: Int!
   success: Boolean!
   message: String!
+  user: User
 }
 
 type UnfollowUserResponse {
   code: Int!
   success: Boolean!
   message: String!
+  user: User
 }
 
 input RequestPasswordResetRequest {
