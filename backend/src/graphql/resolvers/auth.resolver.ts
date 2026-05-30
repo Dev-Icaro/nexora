@@ -12,8 +12,7 @@ export const authResolver: Resolvers = {
   },
   Mutation: {
     register: async (_, { registerRequest }, { dataSources }) => {
-      const user = await dataSources.authService.register(registerRequest);
-      return { code: 201, success: true, message: 'Account created successfully', user };
+      return dataSources.authService.register(registerRequest);
     },
 
     login: async (_, { loginRequest }, { dataSources, res }) => {
@@ -57,6 +56,22 @@ export const authResolver: Resolvers = {
       await dataSources.authService.applyPasswordReset(applyPasswordResetRequest);
       res.clearCookie(settings.REFRESH_TOKEN_COOKIE_NAME);
       return { code: 200, success: true, message: 'Password reset successfully' };
+    },
+
+    resendVerificationEmail: async (_, { email }, { dataSources }) => {
+      await dataSources.authService.resendVerificationEmail(email);
+      return true;
+    },
+
+    verifyEmail: async (_, { token }, { dataSources, res }) => {
+      const { user, accessToken, refreshToken } = await dataSources.authService.verifyEmail(token);
+      res.cookie(settings.REFRESH_TOKEN_COOKIE_NAME, refreshToken, {
+        httpOnly: true,
+        secure: env.NODE_ENV === 'production',
+        sameSite: settings.REFRESH_TOKEN_COOKIE_SAME_SITE,
+        maxAge: settings.REFRESH_TOKEN_DURATION_MINUTES * 60 * 1000,
+      });
+      return { code: 200, success: true, message: 'Email verified successfully', accessToken, user };
     },
   },
 };

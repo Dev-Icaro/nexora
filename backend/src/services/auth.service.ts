@@ -1,16 +1,24 @@
 import env from '@/config/environment';
 import settings from '@/config/settings';
 import type { ApplyPasswordResetDto, LoginDto, RegisterDto, TokenInfoDto } from '@/dtos/auth';
-import type UserDto from '@/dtos/user/user.dto';
-import { BadRequestException, ConflictException, UnauthorizedException } from '@/exceptions';
+import { AppException, BadRequestException, ConflictException, UnauthorizedException } from '@/exceptions';
+import { EmailVerificationToken } from '@/models/email-verification-token.model';
 import { PasswordResetToken } from '@/models/password-reset-token.model';
 import { Session } from '@/models/session.model';
 import { User } from '@/models/user.model';
 import type { OAuthUserInfo } from '@/services/oauth/oauth-provider.interface';
 import { createAccessToken, createHashForRefreshToken, createRefreshToken } from '@/utils/auth';
-import { comparePassword, generatePasswordResetToken, hashPassword, hashPasswordResetToken } from '@/utils/crypto';
+import {
+  comparePassword,
+  generateEmailVerificationToken,
+  generatePasswordResetToken,
+  hashEmailVerificationToken,
+  hashPassword,
+  hashPasswordResetToken,
+} from '@/utils/crypto';
 
 import type { IEmailService } from './email/email.service.interface';
+import { buildEmailVerificationHtml } from './email/templates/email-verification.template';
 import { buildPasswordResetEmailHtml } from './email/templates/password-reset.template';
 import type { IAuthService } from './interfaces/auth.service.interface';
 import type { IUserService } from './interfaces/user.service.interface';
@@ -21,22 +29,47 @@ export class AuthService implements IAuthService {
     private readonly emailService: IEmailService,
   ) {}
 
-  async register({ username, email, password, confirmPassword }: RegisterDto): Promise<UserDto> {
+  async register({ username, email, password, confirmPassword }: RegisterDto): Promise<boolean> {
     if (password !== confirmPassword) throw new BadRequestException('Passwords do not match');
 
     const existing = await User.findOne({ email });
-    if (existing) throw new ConflictException('Email is already registered');
+    if (existing) {
+      if (existing.emailVerified) throw new ConflictException('Email is already registered');
+
+      await EmailVerificationToken.deleteMany({ userId: existing._id });
+      await this.sendVerificationEmail(existing._id.toString(), existing.username, email);
+      return true;
+    }
 
     const hashedPassword = await hashPassword(password);
     const createdAt = new Date().toISOString();
-    const newUser = await User.create({ username, email, password: hashedPassword, createdAt });
+    const newUser = await User.create({ username, email, password: hashedPassword, emailVerified: false, createdAt });
 
-    return {
-      id: newUser._id.toString(),
-      email: newUser.email,
-      username: newUser.username,
-      createdAt,
-    };
+    await this.sendVerificationEmail(newUser._id.toString(), username, email);
+    return true;
+  }
+
+  private async sendVerificationEmail(userId: string, userName: string, email: string): Promise<void> {
+    const rawToken = generateEmailVerificationToken();
+    const tokenHash = hashEmailVerificationToken(rawToken);
+    const expiresAt = new Date(Date.now() + settings.EMAIL_VERIFICATION_TOKEN_DURATION_MINUTES * 60 * 1000);
+
+    await EmailVerificationToken.create({ userId, tokenHash, expiresAt });
+
+    const verificationLink = `${env.FRONTEND_URL}/verify-email?token=${rawToken}&email=${encodeURIComponent(email)}`;
+    const html = buildEmailVerificationHtml({
+      userName,
+      verificationLink,
+      expiresIn: `${settings.EMAIL_VERIFICATION_TOKEN_DURATION_MINUTES} minutes`,
+      year: new Date().getFullYear().toString(),
+      baseUrl: env.FRONTEND_URL,
+    });
+
+    await this.emailService.sendEmail({
+      to: email,
+      subject: 'Verify your Nexora email address',
+      html,
+    });
   }
 
   async login({ email, password }: LoginDto): Promise<TokenInfoDto> {
@@ -45,6 +78,8 @@ export class AuthService implements IAuthService {
 
     const passwordMatch = await comparePassword(password, doc.password ?? '');
     if (!passwordMatch) throw new UnauthorizedException('Invalid credentials');
+
+    if (!doc.emailVerified) throw new AppException('Please verify your email before logging in.', 'EMAIL_NOT_VERIFIED');
 
     const userId = doc._id.toString();
     const tokenInfo = { userId };
@@ -64,6 +99,49 @@ export class AuthService implements IAuthService {
         username: doc.username,
         createdAt: doc.createdAt,
         avatarKey: doc.avatarKey,
+      },
+    };
+  }
+
+  async resendVerificationEmail(email: string): Promise<void> {
+    const user = await User.findOne({ email });
+    if (!user || user.emailVerified) return;
+
+    await EmailVerificationToken.deleteMany({ userId: user._id });
+    await this.sendVerificationEmail(user._id.toString(), user.username, email);
+  }
+
+  async verifyEmail(token: string): Promise<TokenInfoDto> {
+    const tokenHash = hashEmailVerificationToken(token);
+    const record = await EmailVerificationToken.findOne({ tokenHash });
+
+    if (!record || record.expiresAt <= new Date()) {
+      throw new BadRequestException('Invalid or expired verification link');
+    }
+
+    await User.findByIdAndUpdate(record.userId, { $set: { emailVerified: true } });
+    await EmailVerificationToken.deleteOne({ tokenHash });
+
+    const userId = record.userId.toString();
+    const tokenInfo = { userId };
+    const accessToken = createAccessToken(tokenInfo);
+    const refreshToken = createRefreshToken(tokenInfo);
+    const refreshTokenHash = createHashForRefreshToken(refreshToken);
+    const expiresAt = new Date(Date.now() + settings.REFRESH_TOKEN_DURATION_MINUTES * 60 * 1000);
+
+    await Session.create({ userId, refreshTokenHash, expiresAt });
+
+    const doc = await User.findById(userId);
+
+    return {
+      accessToken,
+      refreshToken,
+      user: {
+        id: userId,
+        email: doc!.email,
+        username: doc!.username,
+        createdAt: doc!.createdAt,
+        avatarKey: doc!.avatarKey,
       },
     };
   }
@@ -168,6 +246,7 @@ export class AuthService implements IAuthService {
           email: oauthUser.email,
           provider,
           providerId: oauthUser.providerId,
+          emailVerified: true,
         });
       }
     }

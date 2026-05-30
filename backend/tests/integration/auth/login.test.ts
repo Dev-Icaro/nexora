@@ -69,4 +69,22 @@ describe('login', () => {
     expect(errors).toBeDefined();
     expect(errors![0].extensions?.code).toBe('UNAUTHENTICATED');
   });
+
+  it('returns UNAUTHENTICATED with "verify your email" message for unverified users', async () => {
+    const user = await createTestUser({
+      email: 'unverified@nexora.test',
+      emailVerified: false,
+      plainPassword: 'Password123!',
+    });
+
+    const { errors } = singleResult(
+      await server.executeOperation(
+        { query: LOGIN, variables: { input: { email: user.email, password: user.plainPassword } } },
+        { contextValue: buildContext() },
+      ),
+    );
+
+    expect(errors).toBeDefined();
+    expect(errors![0].extensions?.code).toBe('EMAIL_NOT_VERIFIED');
+  });
 });

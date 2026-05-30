@@ -1,8 +1,22 @@
+import { SignupCheckInbox } from '@/features/auth/components/signup-check-inbox';
 import { SignupForm } from '@/features/auth/components/signup-form';
 import { useRegister } from '@/features/auth/hooks/use-register';
+import { useResendVerificationEmail } from '@/features/auth/hooks/use-resend-verification-email';
 
 export function SignupPage() {
-  const { register, loading, error } = useRegister();
+  const { register, loading, error, submittedEmail } = useRegister();
+  const { resend, loading: resendLoading, cooldownRemaining } = useResendVerificationEmail();
+
+  if (submittedEmail) {
+    return (
+      <SignupCheckInbox
+        email={submittedEmail}
+        onResend={() => resend(submittedEmail)}
+        resendLoading={resendLoading}
+        cooldownRemaining={cooldownRemaining}
+      />
+    );
+  }
 
   return (
     <>

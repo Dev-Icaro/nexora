@@ -1,5 +1,4 @@
 import type { ApplyPasswordResetDto, LoginDto, RegisterDto, TokenInfoDto } from '@/dtos/auth';
-import type UserDto from '@/dtos/user/user.dto';
 import type { OAuthUserInfo } from '@/services/oauth/oauth-provider.interface';
 
 /** Defines the contract for authentication operations: registration, login, and token refresh. */
@@ -7,10 +6,14 @@ export interface IAuthService {
   /**
    * Registers a new user account.
    *
+   * Creates the user with `emailVerified: false`, stores a hashed verification token, and sends
+   * a verification email. If the email already exists as unverified, replaces the token and
+   * resends the email. Throws {@link ConflictException} when the email is already verified.
+   *
    * @param credentials - Registration payload containing username, email, password, and confirmPassword.
-   * @returns A promise resolving to the created {@link UserDto}.
+   * @returns A promise resolving to `true` on success.
    */
-  register(credentials: RegisterDto): Promise<UserDto>;
+  register(credentials: RegisterDto): Promise<boolean>;
 
   /**
    * Authenticates a user with email and password credentials.
@@ -65,6 +68,29 @@ export interface IAuthService {
    * @param token - The raw reset token from the URL query parameter.
    */
   validatePasswordResetToken(token: string): Promise<void>;
+
+  /**
+   * Resends the email verification link for an unverified account.
+   *
+   * Returns `true` silently when the email is unknown or already verified to prevent
+   * email enumeration. For a valid unverified account, invalidates any existing token,
+   * generates a new one, and sends a fresh verification email.
+   *
+   * @param email - The email address that should receive a fresh verification link.
+   * @returns A promise resolving when the operation completes.
+   */
+  resendVerificationEmail(email: string): Promise<void>;
+
+  /**
+   * Verifies an email address using the token from the verification link.
+   *
+   * Hashes the raw token, looks up the corresponding record, rejects expired or unknown tokens,
+   * marks the account as verified, deletes the token document, and creates a new session.
+   *
+   * @param token - The raw verification token from the URL query parameter.
+   * @returns A promise resolving to a {@link TokenInfoDto} so the user is automatically logged in.
+   */
+  verifyEmail(token: string): Promise<TokenInfoDto>;
 
   /**
    * Authenticates or provisions a user via an OAuth provider.

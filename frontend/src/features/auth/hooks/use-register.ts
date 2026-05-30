@@ -1,31 +1,31 @@
 import { useMutation } from '@apollo/client/react';
-import { useMemo } from 'react';
+import { useState } from 'react';
 
 import type { RegisterRequest } from '@/gql/graphql';
-import { getApiErrorMessage } from '@/shared/lib/utils';
 
 import { REGISTER_MUTATION } from '../api/auth.mutations';
-import { useLogin } from './use-login';
 
 type UseRegisterResult = {
   register: (input: RegisterRequest) => Promise<void>;
   loading: boolean;
   error: string | undefined;
+  submittedEmail: string | null;
 };
 
 export function useRegister(): UseRegisterResult {
-  const [registerMutation, { loading, error, data }] = useMutation(REGISTER_MUTATION);
-  const { login } = useLogin();
-
-  const errorMessage = useMemo(() => getApiErrorMessage(error, data), [data, error]);
+  const [registerMutation, { loading, error }] = useMutation(REGISTER_MUTATION);
+  const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);
 
   const register = async (input: RegisterRequest) => {
-    const { data: response } = await registerMutation({ variables: { registerRequest: input } });
-
-    if (response?.register.success) {
-      await login({ email: input.email, password: input.password });
+    try {
+      const { data } = await registerMutation({ variables: { registerRequest: input } });
+      if (data?.register) {
+        setSubmittedEmail(input.email);
+      }
+    } catch {
+      // error is captured in useMutation's error state
     }
   };
 
-  return { register, loading, error: errorMessage };
+  return { register, loading, error: error?.message, submittedEmail };
 }

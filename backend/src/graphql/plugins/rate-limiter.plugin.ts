@@ -28,7 +28,7 @@ const uploadRateLimiter = new RateLimiterMemory({
   duration: settings.UPLOAD_RATE_LIMIT_WINDOW_MS / 1000,
 });
 
-const EMAIL_OPERATIONS = new Set(['RequestPasswordReset']);
+const EMAIL_OPERATIONS = new Set(['RequestPasswordReset', 'ResendVerificationEmail', 'Register']);
 const AUTH_OPERATIONS = new Set(['Login', 'Register', 'Refresh', 'Logout']);
 const UPLOAD_OPERATIONS = new Set(['GetUploadUrl']);
 

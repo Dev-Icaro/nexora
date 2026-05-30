@@ -2,11 +2,7 @@ import { graphql } from '@/gql';
 
 export const REGISTER_MUTATION = graphql(`
   mutation Register($registerRequest: RegisterRequest!) {
-    register(registerRequest: $registerRequest) {
-      code
-      message
-      success
-    }
+    register(registerRequest: $registerRequest)
   }
 `);
 
@@ -71,5 +67,28 @@ export const APPLY_PASSWORD_RESET_MUTATION = graphql(`
       message
       success
     }
+  }
+`);
+
+export const VERIFY_EMAIL_MUTATION = graphql(`
+  mutation VerifyEmail($token: String!) {
+    verifyEmail(token: $token) {
+      code
+      message
+      success
+      accessToken
+      user {
+        id
+        email
+        username
+        avatarUrl
+      }
+    }
+  }
+`);
+
+export const RESEND_VERIFICATION_EMAIL_MUTATION = graphql(`
+  mutation ResendVerificationEmail($email: String!) {
+    resendVerificationEmail(email: $email)
   }
 `);

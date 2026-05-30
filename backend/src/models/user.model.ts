@@ -11,6 +11,7 @@ export interface IUserDocument {
   username: string;
   password?: string;
   email: string;
+  emailVerified: boolean;
   createdAt: string;
   bio?: string;
   position?: string;
@@ -37,6 +38,7 @@ const userSchema = new Schema<IUserDocument>({
   username: { type: String, required: true },
   password: { type: String, required: false },
   email: { type: String, required: true },
+  emailVerified: { type: Boolean, default: false, required: true },
   createdAt: { type: String, required: true },
   bio: { type: String, required: false },
   position: { type: String, required: false },
