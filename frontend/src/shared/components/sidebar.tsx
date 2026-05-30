@@ -3,6 +3,7 @@ import { Home, LogOut, Settings2 } from 'lucide-react';
 import { Link, NavLink } from 'react-router-dom';
 
 import { useAuth } from '@/features/auth/hooks/use-auth';
+import { useProfile } from '@/features/profile/hooks/use-profile';
 import { useProfileNavigation } from '@/shared/hooks/use-profile-navigation';
 import { cn } from '@/shared/lib/utils';
 
@@ -50,6 +51,7 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
   } = useAuth();
   const initials = user?.username.slice(0, 2).toUpperCase() ?? 'ME';
   const { navigateToProfile } = useProfileNavigation();
+  const { user: profileUser } = useProfile(user?.id ?? '');
 
   return (
     <aside
@@ -85,9 +87,13 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
             name={user?.username ?? 'Unknown'}
             avatarUrl={user?.avatarUrl ?? undefined}
             isVerified={true}
-            role="College Doctor"
-            bio="Guiding the next generation through the journey of health and knowledge!"
-            stats={{ posts: 368, followers: 184300, following: 1040000 }}
+            role={profileUser?.position ?? undefined}
+            bio={profileUser?.bio ?? undefined}
+            stats={{
+              posts: profileUser?.postCount ?? 0,
+              followers: profileUser?.followersCount ?? 0,
+              following: profileUser?.followingCount ?? 0,
+            }}
             onProfileClick={user?.id ? () => navigateToProfile(user.id) : undefined}
           />
           <Separator />

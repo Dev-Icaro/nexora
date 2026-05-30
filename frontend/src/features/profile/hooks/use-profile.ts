@@ -21,6 +21,7 @@ export function useProfile(userId: string): UseProfileResult {
   const { updateUser } = useAuth();
   const { data, loading, error } = useQuery(GET_PROFILE, {
     variables: { userId },
+    skip: !userId,
   });
 
   const [updateProfileMutation, { loading: updateLoading }] = useMutation(UPDATE_PROFILE_MUTATION);
