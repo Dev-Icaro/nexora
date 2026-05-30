@@ -30,6 +30,10 @@ type LoginFormProps = {
   onForgotPassword?: () => void;
   error?: string | null;
   isLoading?: boolean;
+  isUnverified?: boolean;
+  onResendVerification?: () => Promise<void>;
+  resendLoading?: boolean;
+  resendCooldown?: number;
 };
 
 export function LoginForm({
@@ -39,6 +43,10 @@ export function LoginForm({
   onForgotPassword,
   error,
   isLoading,
+  isUnverified,
+  onResendVerification,
+  resendLoading,
+  resendCooldown = 0,
 }: LoginFormProps) {
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -83,6 +91,19 @@ export function LoginForm({
         />
 
         {error && <FormError message={error} />}
+
+        {isUnverified && onResendVerification && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="w-full text-xs"
+            onClick={onResendVerification}
+            disabled={resendLoading || resendCooldown > 0}
+          >
+            {resendCooldown > 0 ? `Resend available in ${resendCooldown}s` : 'Resend verification email'}
+          </Button>
+        )}
 
         <Button type="submit" className="w-full" disabled={!inputsFilled || !isValid || isLoading}>
           Sign in

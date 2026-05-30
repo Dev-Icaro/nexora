@@ -85,7 +85,6 @@ describe('login', () => {
     );
 
     expect(errors).toBeDefined();
-    expect(errors![0].extensions?.code).toBe('UNAUTHENTICATED');
-    expect(errors![0].message).toBe('Please verify your email before logging in.');
+    expect(errors![0].extensions?.code).toBe('EMAIL_NOT_VERIFIED');
   });
 });

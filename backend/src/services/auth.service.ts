@@ -1,7 +1,7 @@
 import env from '@/config/environment';
 import settings from '@/config/settings';
 import type { ApplyPasswordResetDto, LoginDto, RegisterDto, TokenInfoDto } from '@/dtos/auth';
-import { BadRequestException, ConflictException, UnauthorizedException } from '@/exceptions';
+import { AppException, BadRequestException, ConflictException, UnauthorizedException } from '@/exceptions';
 import { EmailVerificationToken } from '@/models/email-verification-token.model';
 import { PasswordResetToken } from '@/models/password-reset-token.model';
 import { Session } from '@/models/session.model';
@@ -56,7 +56,7 @@ export class AuthService implements IAuthService {
 
     await EmailVerificationToken.create({ userId, tokenHash, expiresAt });
 
-    const verificationLink = `${env.FRONTEND_URL}/verify-email?token=${rawToken}`;
+    const verificationLink = `${env.FRONTEND_URL}/verify-email?token=${rawToken}&email=${encodeURIComponent(email)}`;
     const html = buildEmailVerificationHtml({
       userName,
       verificationLink,
@@ -79,7 +79,7 @@ export class AuthService implements IAuthService {
     const passwordMatch = await comparePassword(password, doc.password ?? '');
     if (!passwordMatch) throw new UnauthorizedException('Invalid credentials');
 
-    if (!doc.emailVerified) throw new UnauthorizedException('Please verify your email before logging in.');
+    if (!doc.emailVerified) throw new AppException('Please verify your email before logging in.', 'EMAIL_NOT_VERIFIED');
 
     const userId = doc._id.toString();
     const tokenInfo = { userId };

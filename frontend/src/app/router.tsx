@@ -7,6 +7,7 @@ import { ProfilePage } from '@/pages/profile/profile-page';
 import { ResetPasswordPage } from '@/pages/reset-password/reset-password-page';
 import { SettingsPage } from '@/pages/settings/settings-page';
 import { SignupPage } from '@/pages/signup/signup-page';
+import { VerifyEmailPage } from '@/pages/verify-email/verify-email-page';
 
 import { AppLayout } from './layouts/app-layout';
 import { AuthLayout } from './layouts/auth-layout';
@@ -42,6 +43,7 @@ export const router = createBrowserRouter([
               { path: 'login', element: <LoginPage /> },
               { path: 'signup', element: <SignupPage /> },
               { path: 'reset-password', element: <ResetPasswordPage /> },
+              { path: 'verify-email', element: <VerifyEmailPage /> },
             ],
           },
         ],
