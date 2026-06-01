@@ -24,7 +24,7 @@ jobs:
       packages: write
 
     outputs:
-      image-tag: ${{ steps.sha.outputs.value }}
+      image: ${{ steps.meta.outputs.value }}
 
     steps:
       - name: Resolve commit SHA
@@ -36,12 +36,16 @@ jobs:
             echo "value=${{ github.sha }}" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Lowercase image owner
+        run: echo "IMAGE_OWNER=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_ENV"
+
+      - name: Set image reference
+        id: meta
+        run: echo "value=ghcr.io/${IMAGE_OWNER}/nexora-backend:${{ steps.sha.outputs.value }}" >> "$GITHUB_OUTPUT"
+
       - uses: actions/checkout@v4
         with:
           ref: ${{ steps.sha.outputs.value }}
-
-      - name: Lowercase image owner
-        run: echo "IMAGE_OWNER=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_ENV"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -61,7 +65,7 @@ jobs:
           push: true
           tags: |
             ghcr.io/${{ env.IMAGE_OWNER }}/nexora-backend:latest
-            ghcr.io/${{ env.IMAGE_OWNER }}/nexora-backend:${{ steps.sha.outputs.value }}
+            ${{ steps.meta.outputs.value }}
 
       - name: Log out from GHCR
         if: always()
@@ -73,19 +77,14 @@ jobs:
     needs: publish
 
     steps:
-      - name: Lowercase repo owner
-        run: echo "REPO_OWNER=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_ENV"
-
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          envs: REPO_OWNER,IMAGE_TAG
+          envs: IMAGE
           script: |
-            IMAGE="ghcr.io/${REPO_OWNER}/nexora-backend:${IMAGE_TAG}"
-
             docker pull "${IMAGE}"
 
             docker stop nexora-backend 2>/dev/null || true
@@ -99,5 +98,4 @@ jobs:
               --restart unless-stopped \
               "${IMAGE}"
         env:
-          REPO_OWNER: ${{ github.repository_owner }}
-          IMAGE_TAG: ${{ needs.publish.outputs.image-tag }}
+          IMAGE: ${{ needs.publish.outputs.image }}
