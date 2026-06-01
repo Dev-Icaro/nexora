@@ -1,17 +1,15 @@
-name: Frontend CI
+name: Backend CI
 
 on:
   push:
     branches: [master]
     paths:
-      - 'frontend/**'
-      - 'backend/src/graphql/schema.graphql'
-      - '.github/workflows/frontend.yml'
+      - 'backend/**'
+      - '.github/workflows/backend-ci.yml'
   pull_request:
     paths:
-      - 'frontend/**'
-      - 'backend/src/graphql/schema.graphql'
-      - '.github/workflows/frontend.yml'
+      - 'backend/**'
+      - '.github/workflows/backend-ci.yml'
   workflow_dispatch:
 
 concurrency:
@@ -25,7 +23,10 @@ jobs:
 
     defaults:
       run:
-        working-directory: frontend
+        working-directory: backend
+
+    env:
+      MONGOMS_DOWNLOAD_DIR: ~/.cache/mongodb-binaries
 
     steps:
       - uses: actions/checkout@v4
@@ -35,7 +36,13 @@ jobs:
         with:
           node-version: '22.x'
           cache: 'yarn'
-          cache-dependency-path: frontend/yarn.lock
+          cache-dependency-path: backend/yarn.lock
+
+      - name: Cache MongoDB binaries
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/mongodb-binaries
+          key: mongodb-binaries-${{ runner.os }}-11.1.0
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
@@ -53,4 +60,4 @@ jobs:
         run: yarn build
 
       - name: Test
-        run: yarn test:unit
+        run: yarn test
