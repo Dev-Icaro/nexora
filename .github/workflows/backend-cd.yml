@@ -90,11 +90,13 @@ jobs:
             docker stop nexora-backend 2>/dev/null || true
             docker rm nexora-backend 2>/dev/null || true
 
+            docker network create proxy 2>/dev/null || true
+
             docker run -d \
               --name nexora-backend \
               --env-file /home/deployer/apps/nexora-backend/.env.production \
               -v /home/deployer/apps/nexora-backend/secrets:/run/secrets:ro \
-              -p 4000:4000 \
+              --network proxy \
               --restart unless-stopped \
               "${IMAGE}"
         env:
