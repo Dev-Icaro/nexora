@@ -42,8 +42,7 @@ export class AuthService implements IAuthService {
     }
 
     const hashedPassword = await hashPassword(password);
-    const createdAt = new Date().toISOString();
-    const newUser = await User.create({ username, email, password: hashedPassword, emailVerified: false, createdAt });
+    const newUser = await User.create({ username, email, password: hashedPassword, emailVerified: false });
 
     await this.sendVerificationEmail(newUser._id.toString(), username, email);
     return true;
@@ -97,7 +96,7 @@ export class AuthService implements IAuthService {
         id: userId,
         email: doc.email,
         username: doc.username,
-        createdAt: doc.createdAt,
+        createdAt: doc.createdAt.toISOString(),
         avatarKey: doc.avatarKey,
       },
     };
@@ -140,7 +139,7 @@ export class AuthService implements IAuthService {
         id: userId,
         email: doc!.email,
         username: doc!.username,
-        createdAt: doc!.createdAt,
+        createdAt: doc!.createdAt.toISOString(),
         avatarKey: doc!.avatarKey,
       },
     };

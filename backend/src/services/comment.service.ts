@@ -16,8 +16,7 @@ export class CommentService implements ICommentService {
     const user = await this.userService.getById(userId);
     if (!user) throw new NotFoundException('User not found');
 
-    const createdAt = new Date().toISOString();
-    const comment = await Comment.create({ postId, userId, username: user.username, body, createdAt });
+    const comment = await Comment.create({ postId, userId, username: user.username, body });
 
     await Post.findByIdAndUpdate(postId, { $inc: { commentCount: 1 } });
 
@@ -46,7 +45,7 @@ export class CommentService implements ICommentService {
       postId: doc.postId.toString(),
       body: doc.body,
       authorId: doc.userId.toString(),
-      createdAt: doc.createdAt,
+      createdAt: doc.createdAt.toISOString(),
     };
   }
 }

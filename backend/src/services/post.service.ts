@@ -84,7 +84,6 @@ export class PostService implements IPostService {
       confirmedUrl: null,
       mimeType: contentType,
       sizeBytes: 0,
-      createdAt: new Date(),
     });
 
     return { uploadUrl: url, fields: JSON.stringify(fields), objectKey };
@@ -121,13 +120,12 @@ export class PostService implements IPostService {
     const user = await this.userService.getById(userId);
     if (!user) throw new NotFoundException('User not found');
 
-    const createdAt = new Date().toISOString();
     const session = await mongoose.connection.startSession();
     let post: PostDocument;
     try {
       session.startTransaction();
 
-      post = new Post({ body, mediaKey: confirmedKey, username: user.username, user: userId, createdAt });
+      post = new Post({ body, mediaKey: confirmedKey, username: user.username, user: userId });
       await post.save({ session });
 
       await User.findByIdAndUpdate(userId, { $inc: { postCount: 1 } }, { session });
@@ -200,7 +198,7 @@ export class PostService implements IPostService {
       await Like.deleteOne({ _id: alreadyLiked._id });
       post = await Post.findByIdAndUpdate(postId, { $inc: { likeCount: -1 } }, { returnDocument: 'after' });
     } else {
-      await Like.create({ postId, userId, username: user.username, createdAt: new Date().toISOString() });
+      await Like.create({ postId, userId, username: user.username });
       post = await Post.findByIdAndUpdate(postId, { $inc: { likeCount: 1 } }, { returnDocument: 'after' });
     }
 
@@ -216,7 +214,7 @@ export class PostService implements IPostService {
       mediaUrl: doc.mediaUrl,
       mediaKey: doc.mediaKey,
       authorId: String(doc.user),
-      createdAt: doc.createdAt ?? '',
+      createdAt: doc.createdAt.toISOString(),
       likeCount: doc.likeCount ?? 0,
       commentCount: doc.commentCount ?? 0,
     };

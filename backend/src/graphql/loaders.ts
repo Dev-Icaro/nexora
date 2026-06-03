@@ -20,7 +20,7 @@ export function createLoaders(viewerId: string | null = null) {
           postId: c.postId.toString(),
           body: c.body,
           authorId: c.userId.toString(),
-          createdAt: c.createdAt,
+          createdAt: c.createdAt.toISOString(),
         });
       }
       return postIds.map(id => map.get(id) ?? []);
@@ -34,7 +34,7 @@ export function createLoaders(viewerId: string | null = null) {
           id: l._id.toString(),
           postId: l.postId.toString(),
           authorId: l.userId.toString(),
-          createdAt: l.createdAt,
+          createdAt: l.createdAt.toISOString(),
         });
       }
       return postIds.map(id => map.get(id) ?? []);
@@ -53,7 +53,7 @@ export function createLoaders(viewerId: string | null = null) {
             position: u.position,
             themePreference: u.themePreference,
             avatarKey: u.avatarKey,
-            createdAt: u.createdAt,
+            createdAt: u.createdAt.toISOString(),
             storageUsedBytes: u.storageUsedBytes ?? 0,
             storageQuotaBytes: settings.STORAGE_QUOTA_FREE_BYTES,
           },

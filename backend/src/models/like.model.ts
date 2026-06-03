@@ -6,15 +6,18 @@ export interface ILikeDocument {
   postId: Types.ObjectId;
   userId: Types.ObjectId;
   username: string;
-  createdAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-const likeSchema = new Schema<ILikeDocument>({
-  postId: { type: Schema.Types.ObjectId, ref: 'posts', required: true },
-  userId: { type: Schema.Types.ObjectId, ref: 'users', required: true },
-  username: { type: String, required: true },
-  createdAt: { type: String, required: true },
-});
+const likeSchema = new Schema<ILikeDocument>(
+  {
+    postId: { type: Schema.Types.ObjectId, ref: 'posts', required: true },
+    userId: { type: Schema.Types.ObjectId, ref: 'users', required: true },
+    username: { type: String, required: true },
+  },
+  { timestamps: true },
+);
 
 likeSchema.index({ postId: 1, userId: 1 }, { unique: true });
 

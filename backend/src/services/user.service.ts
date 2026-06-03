@@ -25,7 +25,7 @@ export class UserService implements IUserService {
       id: doc._id.toString(),
       email: doc.email,
       username: doc.username,
-      createdAt: doc.createdAt,
+      createdAt: doc.createdAt.toISOString(),
       bio: doc.bio,
       position: doc.position,
       themePreference: doc.themePreference,
@@ -129,7 +129,6 @@ export class UserService implements IUserService {
               confirmedUrl: avatar.confirmedKey,
               mimeType: avatar.contentType,
               sizeBytes: avatar.contentLength,
-              createdAt: new Date(),
             },
           ],
           { session },
@@ -247,7 +246,6 @@ export class UserService implements IUserService {
       confirmedUrl: null,
       mimeType: contentType,
       sizeBytes: 0,
-      createdAt: new Date(),
     });
 
     return { uploadUrl: url, fields: JSON.stringify(fields), objectKey };

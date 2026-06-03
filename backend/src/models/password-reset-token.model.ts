@@ -7,14 +7,19 @@ export interface IPasswordResetTokenDocument {
   tokenHash: string;
   expiresAt: Date;
   usedAt?: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-const passwordResetTokenSchema = new Schema<IPasswordResetTokenDocument>({
-  userId: { type: Schema.Types.ObjectId, ref: 'users', required: true },
-  tokenHash: { type: String, required: true },
-  expiresAt: { type: Date, required: true },
-  usedAt: { type: Date, default: null },
-});
+const passwordResetTokenSchema = new Schema<IPasswordResetTokenDocument>(
+  {
+    userId: { type: Schema.Types.ObjectId, ref: 'users', required: true },
+    tokenHash: { type: String, required: true },
+    expiresAt: { type: Date, required: true },
+    usedAt: { type: Date, default: null },
+  },
+  { timestamps: true },
+);
 
 passwordResetTokenSchema.index({ tokenHash: 1 }, { unique: true });
 passwordResetTokenSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });

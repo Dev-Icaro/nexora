@@ -24,7 +24,7 @@ export class FollowService implements IFollowService {
     const session = await mongoose.connection.startSession();
     try {
       session.startTransaction();
-      await Follow.create([{ followerId, followingId, createdAt: new Date() }], { session });
+      await Follow.create([{ followerId, followingId }], { session });
       await User.findByIdAndUpdate(followerId, { $inc: { followingCount: 1 } }, { session });
       await User.findByIdAndUpdate(followingId, { $inc: { followersCount: 1 } }, { session });
       await session.commitTransaction();

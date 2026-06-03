@@ -7,16 +7,19 @@ export interface ICommentDocument {
   userId: Types.ObjectId;
   username: string;
   body: string;
-  createdAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-const commentSchema = new Schema<ICommentDocument>({
-  postId: { type: Schema.Types.ObjectId, ref: 'posts', required: true },
-  userId: { type: Schema.Types.ObjectId, ref: 'users', required: true },
-  username: { type: String, required: true },
-  body: { type: String, required: true },
-  createdAt: { type: String, required: true },
-});
+const commentSchema = new Schema<ICommentDocument>(
+  {
+    postId: { type: Schema.Types.ObjectId, ref: 'posts', required: true },
+    userId: { type: Schema.Types.ObjectId, ref: 'users', required: true },
+    username: { type: String, required: true },
+    body: { type: String, required: true },
+  },
+  { timestamps: true },
+);
 
 commentSchema.index({ postId: 1, _id: -1 });
 
