@@ -57,24 +57,18 @@ export interface SubscriptionContext {
   dataSources: DataSources;
 }
 
-/**
- * Instantiates all data sources for a single request. Shared between HTTP and WS contexts.
- *
- * @returns A fully initialised {@link DataSources} object.
- */
-function createDataSources(): DataSources {
-  const emailService = new ResendEmailService();
-  const storageProvider = new S3StorageProvider();
-  const userService = new UserService(storageProvider);
-  return {
-    authService: new AuthService(userService, emailService),
-    userService,
-    postService: new PostService(userService, storageProvider),
-    commentService: new CommentService(userService),
-    followService: new FollowService(userService),
-    storageProvider,
-  };
-}
+const emailService = new ResendEmailService();
+const storageProvider = new S3StorageProvider();
+const userService = new UserService(storageProvider);
+
+const dataSources: DataSources = {
+  authService: new AuthService(userService, emailService),
+  userService,
+  postService: new PostService(userService, storageProvider),
+  commentService: new CommentService(userService),
+  followService: new FollowService(userService),
+  storageProvider,
+};
 
 /**
  * Builds a {@link SubscriptionContext} for an incoming WebSocket connection.
@@ -101,7 +95,7 @@ export const createSubscriptionContext = async (
   }
 
   setUserId(currentUser.userId);
-  return { currentUser, loaders: createLoaders(currentUser.userId), dataSources: createDataSources() };
+  return { currentUser, loaders: createLoaders(currentUser.userId), dataSources };
 };
 
 /**
@@ -140,6 +134,6 @@ export const createContext = async ({
     res,
     currentUser,
     loaders: createLoaders(currentUser?.userId ?? null),
-    dataSources: createDataSources(),
+    dataSources,
   };
 };
