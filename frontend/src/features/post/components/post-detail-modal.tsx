@@ -297,26 +297,26 @@ function CommentsPanel({
       {!loading && (
         <>
           <Separator />
-          <div className="flex items-end gap-2.5 p-3 shrink-0">
+          <div className="flex items-center gap-2.5 p-3 shrink-0">
             <Avatar className="size-8 shrink-0">
               {state.user?.avatarUrl && <AvatarImage src={state.user.avatarUrl} alt={state.user.username} />}
               <AvatarFallback className="bg-primary/20 text-primary font-semibold text-xs">{initials}</AvatarFallback>
             </Avatar>
-            <div className="flex-1 relative">
+            <div className="flex-1 flex items-center bg-muted border border-transparent rounded-full px-3.5 py-2 gap-2 transition-colors focus-within:border-ring">
               <textarea
                 value={commentInput}
                 onChange={e => onCommentChange(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Add a comment…"
                 rows={1}
-                className="w-full bg-muted border border-transparent rounded-full px-3.5 py-2 pr-10 text-[13px] text-foreground placeholder:text-muted-foreground resize-none outline-none leading-normal transition-colors focus:border-ring"
+                className="flex-1 bg-transparent border-none outline-none text-[13px] text-foreground placeholder:text-muted-foreground resize-none leading-normal"
                 style={{ fieldSizing: 'content' } as CSSProperties}
               />
               <button
                 onClick={onSend}
                 disabled={!commentInput.trim() || sending}
                 className={cn(
-                  'absolute right-2 bottom-1.5 size-7 rounded-full flex items-center justify-center transition-colors border-none cursor-pointer',
+                  'shrink-0 size-7 rounded-full flex items-center justify-center transition-colors border-none cursor-pointer',
                   commentInput.trim()
                     ? 'bg-primary text-primary-foreground hover:bg-primary/90'
                     : 'bg-transparent text-muted-foreground cursor-default',

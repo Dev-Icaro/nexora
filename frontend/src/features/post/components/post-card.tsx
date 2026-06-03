@@ -153,7 +153,10 @@ export function PostCard({ post, onOpenModal, onFollow }: PostCardProps) {
         <div>
           <p className={cn('text-sm leading-relaxed', !expanded && 'line-clamp-3')}>{bodyText}</p>
           {isLong && (
-            <button onClick={() => setExpanded(v => !v)} className="text-xs text-primary hover:underline mt-0.5">
+            <button
+              onClick={() => setExpanded(v => !v)}
+              className="text-xs text-primary hover:underline mt-0.5 cursor-pointer"
+            >
               {expanded ? 'show less' : 'read more'}
             </button>
           )}
@@ -185,16 +188,19 @@ export function PostCard({ post, onOpenModal, onFollow }: PostCardProps) {
             </button>
             <button
               onClick={() => onOpenModal?.(post.id)}
-              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors"
+              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors cursor-pointer"
             >
               <MessageCircle className="size-4" />
               {post.commentCount}
             </button>
-            <button className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors">
+            <button className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors cursor-pointer">
               <Send className="size-4" />0
             </button>
           </div>
-          <button className="text-muted-foreground hover:text-primary transition-colors" aria-label="Bookmark">
+          <button
+            className="text-muted-foreground hover:text-primary transition-colors cursor-pointer"
+            aria-label="Bookmark"
+          >
             <Bookmark className="size-4" />
           </button>
         </div>
