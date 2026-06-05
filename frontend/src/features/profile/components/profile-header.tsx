@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar';
 import { Button } from '@/shared/components/ui/button';
-import { formatCompactNumber, getInitials } from '@/shared/lib/utils';
+import { cn, formatCompactNumber, getInitials } from '@/shared/lib/utils';
 
 import { AvatarUploadModal } from './avatar-upload-modal';
 
@@ -27,6 +27,8 @@ type ProfileHeaderProps = {
   onFollow: () => void;
   onUnfollow: () => void;
   followLoading?: boolean;
+  onFollowersClick?: () => void;
+  onFollowingClick?: () => void;
 };
 
 export function ProfileHeader({
@@ -37,6 +39,8 @@ export function ProfileHeader({
   onFollow,
   onUnfollow,
   followLoading,
+  onFollowersClick,
+  onFollowingClick,
 }: ProfileHeaderProps) {
   const [uploadOpen, setUploadOpen] = useState(false);
   const navigate = useNavigate();
@@ -110,8 +114,8 @@ export function ProfileHeader({
         {/* Stats bar */}
         <div className="flex items-center divide-x divide-border rounded-lg border border-border overflow-hidden">
           <StatItem label="Posts" value={user.stats.posts} />
-          <StatItem label="Followers" value={user.stats.followers} />
-          <StatItem label="Following" value={user.stats.following} />
+          <StatItem label="Followers" value={user.stats.followers} onClick={onFollowersClick} />
+          <StatItem label="Following" value={user.stats.following} onClick={onFollowingClick} />
         </div>
       </div>
 
@@ -125,9 +129,16 @@ export function ProfileHeader({
   );
 }
 
-function StatItem({ label, value }: { label: string; value: number }) {
+function StatItem({ label, value, onClick }: { label: string; value: number; onClick?: () => void }) {
   return (
-    <button className="flex flex-1 flex-col items-center gap-0.5 py-3 hover:bg-muted/50 transition-colors">
+    <button
+      className={cn(
+        'flex flex-1 flex-col items-center gap-0.5 py-3 hover:bg-muted/50 transition-colors disabled:cursor-default disabled:hover:bg-transparent',
+        { 'cursor-pointer': !!onClick },
+      )}
+      onClick={onClick}
+      disabled={!onClick}
+    >
       <span className="text-sm font-bold">{formatCompactNumber(value)}</span>
       <span className="text-xs text-muted-foreground">{label}</span>
     </button>

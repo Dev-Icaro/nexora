@@ -1,7 +1,11 @@
+import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { useAuth } from '@/features/auth/hooks/use-auth';
+import { FollowersFollowingModal } from '@/features/follow/components/followers-following-modal';
 import { useFollow } from '@/features/follow/hooks/use-follow';
+import { useFollowers } from '@/features/follow/hooks/use-followers';
+import { useFollowings } from '@/features/follow/hooks/use-followings';
 import { PostFeed } from '@/features/post/components/post-feed';
 import { useUserPosts } from '@/features/post/hooks/use-user-posts';
 import { ProfileHeader } from '@/features/profile/components/profile-header';
@@ -14,6 +18,11 @@ export function ProfilePage() {
   const { state } = useAuth();
   const navigate = useNavigate();
   const isOwnProfile = userId === state.user?.id;
+
+  const [followModal, setFollowModal] = useState<'followers' | 'following' | null>(null);
+
+  const followers = useFollowers();
+  const followings = useFollowings();
 
   const { user: userData, updateProfile } = useProfile(userId);
   const { uploadAvatar, loading: avatarLoading } = useUploadAvatar();
@@ -45,6 +54,27 @@ export function ProfilePage() {
 
   return (
     <main className="max-w-2xl w-full mx-auto px-4 py-6 space-y-3">
+      <FollowersFollowingModal
+        open={followModal !== null}
+        type={followModal ?? 'followers'}
+        users={followModal === 'followers' ? followers.users : followings.users}
+        loading={followModal === 'followers' ? followers.loading : followings.loading}
+        isFetchingNextPage={followModal === 'followers' ? followers.isFetchingNextPage : followings.isFetchingNextPage}
+        hasNextPage={followModal === 'followers' ? followers.hasNextPage : followings.hasNextPage}
+        onLoadMore={followModal === 'followers' ? followers.fetchNextPage : followings.fetchNextPage}
+        onClose={() => setFollowModal(null)}
+        onFollowBack={follow}
+        onToggleFollow={targetId => {
+          const activeUsers = followModal === 'followers' ? followers.users : followings.users;
+          const target = activeUsers.find(u => u.id === targetId);
+          if (target?.isFollowedByCurrentUser) {
+            unfollow(targetId);
+          } else {
+            follow(targetId);
+          }
+        }}
+      />
+
       {user && (
         <ProfileHeader
           isOwnProfile={isOwnProfile}
@@ -54,6 +84,14 @@ export function ProfilePage() {
           onFollow={() => follow(userId)}
           onUnfollow={() => unfollow(userId)}
           followLoading={followLoading || unfollowLoading}
+          onFollowersClick={() => {
+            setFollowModal('followers');
+            followers.fetch(userId);
+          }}
+          onFollowingClick={() => {
+            setFollowModal('following');
+            followings.fetch(userId);
+          }}
         />
       )}
 
