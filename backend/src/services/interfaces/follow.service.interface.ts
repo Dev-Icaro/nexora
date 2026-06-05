@@ -1,3 +1,6 @@
+import type { PaginationParams } from '@/dtos/shared/pagination';
+import type { UserConnectionDto } from '@/dtos/user';
+
 /** Defines the contract for the social follow/unfollow system. */
 export interface IFollowService {
   /**
@@ -18,4 +21,22 @@ export interface IFollowService {
    * @throws {BadRequestException} If the follow relationship does not exist.
    */
   unfollow(followerId: string, followingId: string): Promise<void>;
+
+  /**
+   * Returns a cursor-paginated list of users who follow the given user.
+   *
+   * @param userId - The ID of the user whose followers are being listed.
+   * @param params - Pagination parameters (`first` and optional `after` cursor).
+   * @returns A paginated connection of follower `UserDto` objects.
+   */
+  getFollowers(userId: string, params: PaginationParams): Promise<UserConnectionDto>;
+
+  /**
+   * Returns a cursor-paginated list of users that the given user is following.
+   *
+   * @param userId - The ID of the user whose followings are being listed.
+   * @param params - Pagination parameters (`first` and optional `after` cursor).
+   * @returns A paginated connection of following `UserDto` objects.
+   */
+  getFollowings(userId: string, params: PaginationParams): Promise<UserConnectionDto>;
 }

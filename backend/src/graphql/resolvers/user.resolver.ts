@@ -5,6 +5,10 @@ import { signMediaUrl } from '@/services/cloud/cloud-front';
 export const userResolver: Resolvers = {
   Query: {
     getUserById: (_, { userId }, { dataSources }) => dataSources.userService.getById(userId),
+    getUserFollowers: (_, { userId, first, after }, { dataSources }) =>
+      dataSources.followService.getFollowers(userId, { first: first ?? 10, after: after ?? undefined }),
+    getUserFollowings: (_, { userId, first, after }, { dataSources }) =>
+      dataSources.followService.getFollowings(userId, { first: first ?? 10, after: after ?? undefined }),
   },
   Mutation: {
     updateProfile: async (_, { updateProfileRequest }, { dataSources, currentUser }) => {

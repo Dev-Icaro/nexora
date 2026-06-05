@@ -103,12 +103,24 @@ type PostConnection {
   pageInfo: PageInfo!
 }
 
+type UserEdge {
+  node: User!
+  cursor: String!
+}
+
+type UserConnection {
+  edges: [UserEdge!]!
+  pageInfo: PageInfo!
+}
+
 type Query {
   getPosts: [Post]
   getPost(postId: ID!): Post
   feed(first: Int, after: String): PostConnection!
   getUserPosts(userId: ID!, first: Int, after: String): PostConnection!
   getUserById(userId: ID!): User
+  getUserFollowers(userId: ID!, first: Int, after: String): UserConnection!
+  getUserFollowings(userId: ID!, first: Int, after: String): UserConnection!
   validatePasswordResetToken(token: String!): ValidatePasswordResetTokenResponse!
 }
 
