@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avat
 import { Button } from '@/shared/components/ui/button';
 import { Dialog, DialogClose, DialogContent, DialogTitle } from '@/shared/components/ui/dialog';
 import { Spinner } from '@/shared/components/ui/spinner';
+import { useProfileNavigation } from '@/shared/hooks/use-profile-navigation';
 import { cn, getInitials } from '@/shared/lib/utils';
 
 import { FollowListSkeleton } from './follow-list-skeleton';
@@ -48,6 +49,12 @@ export function FollowersFollowingModal({
   const [search, setSearch] = useState('');
   const [sentinelEl, setSentinelEl] = useState<HTMLDivElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const { navigateToProfile } = useProfileNavigation();
+
+  function handleUserClick(userId: string) {
+    onClose();
+    navigateToProfile(userId);
+  }
 
   const filtered = users.filter(u => {
     const q = search.trim().toLowerCase();
@@ -153,16 +160,23 @@ export function FollowersFollowingModal({
                         !isLast && 'border-b border-border',
                       )}
                     >
-                      <Avatar className="size-11 shrink-0">
-                        {user.avatarUrl && <AvatarImage src={user.avatarUrl} alt={user.name} />}
-                        <AvatarFallback className="bg-primary/20 text-primary font-semibold text-sm">
-                          {getInitials(user.name)}
-                        </AvatarFallback>
-                      </Avatar>
+                      <button className="cursor-pointer shrink-0" onClick={() => handleUserClick(user.id)}>
+                        <Avatar className="size-11">
+                          {user.avatarUrl && <AvatarImage src={user.avatarUrl} alt={user.name} />}
+                          <AvatarFallback className="bg-primary/20 text-primary font-semibold text-sm">
+                            {getInitials(user.name)}
+                          </AvatarFallback>
+                        </Avatar>
+                      </button>
 
                       <div className="flex flex-col gap-0.5 flex-1 min-w-0">
                         <div className="flex items-center gap-1.5">
-                          <span className="text-sm font-semibold text-foreground truncate">{user.username}</span>
+                          <button
+                            className="text-sm font-semibold text-foreground truncate cursor-pointer hover:underline"
+                            onClick={() => handleUserClick(user.id)}
+                          >
+                            {user.username}
+                          </button>
                           {type === 'followers' && !user.isFollowedByCurrentUser && (
                             <button
                               className="text-[13px] text-primary font-medium whitespace-nowrap shrink-0 hover:underline cursor-pointer"
