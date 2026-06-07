@@ -5,7 +5,7 @@
 
   A full-stack social media platform built with a GraphQL API, React 19, and Node.js 22.
 
-  [**Live Demo →**](https://nexora-khaki-theta.vercel.app/)
+  [**Live Demo →**](https://nexora.kiiler.com/)
 
   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
