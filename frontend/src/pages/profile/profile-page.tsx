@@ -55,23 +55,34 @@ export function ProfilePage() {
   return (
     <main className="max-w-2xl w-full mx-auto px-4 py-6 space-y-3">
       <FollowersFollowingModal
-        open={followModal !== null}
-        type={followModal ?? 'followers'}
-        users={followModal === 'followers' ? followers.users : followings.users}
-        loading={followModal === 'followers' ? followers.loading : followings.loading}
-        isFetchingNextPage={followModal === 'followers' ? followers.isFetchingNextPage : followings.isFetchingNextPage}
-        hasNextPage={followModal === 'followers' ? followers.hasNextPage : followings.hasNextPage}
-        onLoadMore={followModal === 'followers' ? followers.fetchNextPage : followings.fetchNextPage}
+        open={followModal === 'followers'}
+        type="followers"
+        users={followers.users}
+        loading={followers.loading}
+        isFetchingNextPage={followers.isFetchingNextPage}
+        hasNextPage={followers.hasNextPage}
+        onLoadMore={followers.fetchNextPage}
         onClose={() => setFollowModal(null)}
         onFollowBack={follow}
         onToggleFollow={targetId => {
-          const activeUsers = followModal === 'followers' ? followers.users : followings.users;
-          const target = activeUsers.find(u => u.id === targetId);
-          if (target?.isFollowedByCurrentUser) {
-            unfollow(targetId);
-          } else {
-            follow(targetId);
-          }
+          const target = followers.users.find(u => u.id === targetId);
+          if (target?.isFollowedByCurrentUser) unfollow(targetId);
+          else follow(targetId);
+        }}
+      />
+      <FollowersFollowingModal
+        open={followModal === 'following'}
+        type="following"
+        users={followings.users}
+        loading={followings.loading}
+        isFetchingNextPage={followings.isFetchingNextPage}
+        hasNextPage={followings.hasNextPage}
+        onLoadMore={followings.fetchNextPage}
+        onClose={() => setFollowModal(null)}
+        onToggleFollow={targetId => {
+          const target = followings.users.find(u => u.id === targetId);
+          if (target?.isFollowedByCurrentUser) unfollow(targetId);
+          else follow(targetId);
         }}
       />
 
