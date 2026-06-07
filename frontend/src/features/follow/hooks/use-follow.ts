@@ -1,13 +1,15 @@
+import type { Reference } from '@apollo/client';
 import { useMutation } from '@apollo/client/react';
 
 import { useAuth } from '@/features/auth/hooks/use-auth';
 import { toast } from '@/shared/lib/toast';
 
-import { FOLLOW_USER, UNFOLLOW_USER } from '../api/follow.mutations';
+import { FOLLOW_USER, REMOVE_FOLLOWER, UNFOLLOW_USER } from '../api/follow.mutations';
 
 type UseFollowResult = {
   follow: (userId: string) => Promise<void>;
   unfollow: (userId: string) => Promise<void>;
+  removeFollower: (userId: string) => Promise<void>;
   followLoading: boolean;
   unfollowLoading: boolean;
 };
@@ -17,6 +19,7 @@ export function useFollow(): UseFollowResult {
   const viewerId = state.user?.id;
   const [followMutation, { loading: followLoading }] = useMutation(FOLLOW_USER);
   const [unfollowMutation, { loading: unfollowLoading }] = useMutation(UNFOLLOW_USER);
+  const [removeFollowerMutation] = useMutation(REMOVE_FOLLOWER);
 
   const follow = async (userId: string): Promise<void> => {
     try {
@@ -100,5 +103,51 @@ export function useFollow(): UseFollowResult {
     }
   };
 
-  return { follow, unfollow, followLoading, unfollowLoading };
+  const removeFollower = async (userId: string): Promise<void> => {
+    try {
+      const result = await removeFollowerMutation({
+        variables: { userId },
+        optimisticResponse: {
+          removeFollower: {
+            code: 200,
+            success: true,
+            message: 'Follower removed successfully',
+            user: null,
+          },
+        },
+        update(cache, { data }) {
+          cache.modify({
+            fields: {
+              getUserFollowers(existing, { readField }) {
+                if (!existing?.edges) return existing;
+                return {
+                  ...existing,
+                  edges: existing.edges.filter(
+                    (edge: Reference) => readField('id', readField('node', edge)) !== userId,
+                  ),
+                };
+              },
+            },
+          });
+          if (viewerId) {
+            const serverUser = data?.removeFollower.user;
+            cache.modify({
+              id: cache.identify({ __typename: 'User', id: viewerId }),
+              fields: {
+                followersCount: (existing: number) => serverUser?.followersCount ?? Math.max(0, existing - 1),
+              },
+            });
+          }
+        },
+      });
+
+      if (!result.data?.removeFollower.success) {
+        toast.error(result.data?.removeFollower.message ?? 'Failed to remove follower');
+      }
+    } catch {
+      toast.error('Failed to remove follower');
+    }
+  };
+
+  return { follow, unfollow, removeFollower, followLoading, unfollowLoading };
 }

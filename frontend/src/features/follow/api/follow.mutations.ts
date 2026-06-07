@@ -29,3 +29,17 @@ export const UNFOLLOW_USER = graphql(`
     }
   }
 `);
+
+export const REMOVE_FOLLOWER = graphql(`
+  mutation RemoveFollower($userId: ID!) {
+    removeFollower(userId: $userId) {
+      code
+      success
+      message
+      user {
+        id
+        followersCount
+      }
+    }
+  }
+`);

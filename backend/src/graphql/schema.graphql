@@ -208,6 +208,13 @@ type UnfollowUserResponse {
   user: User
 }
 
+type RemoveFollowerResponse {
+  code: Int!
+  success: Boolean!
+  message: String!
+  user: User
+}
+
 input RequestPasswordResetRequest {
   email: String!
 }
@@ -270,6 +277,7 @@ type Mutation {
 
   followUser(userId: ID!): FollowUserResponse!
   unfollowUser(userId: ID!): UnfollowUserResponse!
+  removeFollower(userId: ID!): RemoveFollowerResponse!
 }
 
 type Subscription {

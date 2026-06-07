@@ -23,6 +23,14 @@ export interface IFollowService {
   unfollow(followerId: string, followingId: string): Promise<void>;
 
   /**
+   * Removes a user from the current user's followers list, atomically decrementing both counters.
+   *
+   * @param currentUserId - The ID of the authenticated user removing a follower.
+   * @param followerId - The ID of the user being removed from followers.
+   */
+  removeFollower(currentUserId: string, followerId: string): Promise<void>;
+
+  /**
    * Returns a cursor-paginated list of users who follow the given user.
    *
    * @param userId - The ID of the user whose followers are being listed.

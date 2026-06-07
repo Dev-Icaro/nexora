@@ -48,6 +48,12 @@ export const userResolver: Resolvers = {
       const user = await dataSources.userService.getById(userId);
       return { code: 200, success: true, message: 'User unfollowed successfully', user };
     },
+
+    removeFollower: async (_, { userId }, { dataSources, currentUser }) => {
+      await dataSources.followService.removeFollower(currentUser!.userId, userId);
+      const user = await dataSources.userService.getById(currentUser!.userId);
+      return { code: 200, success: true, message: 'Follower removed successfully', user };
+    },
   },
   User: {
     storageInfo: parent => {

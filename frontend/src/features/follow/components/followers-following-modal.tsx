@@ -189,25 +189,27 @@ export function FollowersFollowingModal({
                         <span className="text-[13px] text-muted-foreground truncate">{user.name}</span>
                       </div>
 
-                      {type === 'followers' ? (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="rounded-full shrink-0"
-                          onClick={() => onRemoveFollower?.(user.id)}
-                        >
-                          Remove
-                        </Button>
-                      ) : (
-                        <Button
-                          variant={user.isFollowedByCurrentUser ? 'outline' : 'default'}
-                          size="sm"
-                          className="rounded-full shrink-0"
-                          onClick={() => onToggleFollow?.(user.id)}
-                        >
-                          {user.isFollowedByCurrentUser ? 'Following' : 'Follow'}
-                        </Button>
-                      )}
+                      {type === 'followers'
+                        ? onRemoveFollower && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="rounded-full shrink-0"
+                              onClick={() => onRemoveFollower(user.id)}
+                            >
+                              Remove
+                            </Button>
+                          )
+                        : onToggleFollow && (
+                            <Button
+                              variant={user.isFollowedByCurrentUser ? 'outline' : 'default'}
+                              size="sm"
+                              className="rounded-full shrink-0"
+                              onClick={() => onToggleFollow(user.id)}
+                            >
+                              {user.isFollowedByCurrentUser ? 'Following' : 'Follow'}
+                            </Button>
+                          )}
                     </div>
                   );
                 })}

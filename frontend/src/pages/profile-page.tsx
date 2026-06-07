@@ -26,7 +26,7 @@ export function ProfilePage() {
 
   const { user: userData, updateProfile } = useProfile(userId);
   const { uploadAvatar, loading: avatarLoading } = useUploadAvatar();
-  const { follow, unfollow, followLoading, unfollowLoading } = useFollow();
+  const { follow, unfollow, removeFollower, followLoading, unfollowLoading } = useFollow();
   const { posts, loading, isFetchingNextPage, error, paginationError, refetch, fetchNextPage, hasNextPage } =
     useUserPosts(userId);
 
@@ -64,6 +64,7 @@ export function ProfilePage() {
         onLoadMore={followers.fetchNextPage}
         onClose={() => setFollowModal(null)}
         onFollowBack={follow}
+        onRemoveFollower={isOwnProfile ? removeFollower : undefined}
         onToggleFollow={targetId => {
           const target = followers.users.find(u => u.id === targetId);
           if (target?.isFollowedByCurrentUser) unfollow(targetId);

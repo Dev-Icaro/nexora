@@ -68,6 +68,25 @@ export class FollowService implements IFollowService {
     };
   }
 
+  async removeFollower(currentUserId: string, followerId: string): Promise<void> {
+    const existing = await Follow.findOne({ followerId, followingId: currentUserId });
+    if (!existing) return;
+
+    const session = await mongoose.connection.startSession();
+    try {
+      session.startTransaction();
+      await Follow.deleteOne({ _id: existing._id }, { session });
+      await User.findByIdAndUpdate(followerId, { $inc: { followingCount: -1 } }, { session });
+      await User.findByIdAndUpdate(currentUserId, { $inc: { followersCount: -1 } }, { session });
+      await session.commitTransaction();
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      await session.endSession();
+    }
+  }
+
   async getFollowers(userId: string, params: PaginationParams): Promise<UserConnectionDto> {
     return this.paginateFollows({ followingId: userId }, 'followerId', params);
   }
