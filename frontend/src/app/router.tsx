@@ -1,13 +1,13 @@
 import { createBrowserRouter } from 'react-router-dom';
 
-import { HomePage } from '@/pages/home/home-page';
-import { LoginPage } from '@/pages/login/login-page';
-import { NotFoundPage } from '@/pages/not-found/not-found-page';
-import { ProfilePage } from '@/pages/profile/profile-page';
-import { ResetPasswordPage } from '@/pages/reset-password/reset-password-page';
-import { SettingsPage } from '@/pages/settings/settings-page';
-import { SignupPage } from '@/pages/signup/signup-page';
-import { VerifyEmailPage } from '@/pages/verify-email/verify-email-page';
+import { HomePage } from '@/pages/home-page';
+import { LoginPage } from '@/pages/login-page';
+import { NotFoundPage } from '@/pages/not-found-page';
+import { ProfilePage } from '@/pages/profile-page';
+import { ResetPasswordPage } from '@/pages/reset-password-page';
+import { SettingsPage } from '@/pages/settings-page';
+import { SignupPage } from '@/pages/signup-page';
+import { VerifyEmailPage } from '@/pages/verify-email-page';
 
 import { AppLayout } from './layouts/app-layout';
 import { AuthLayout } from './layouts/auth-layout';
