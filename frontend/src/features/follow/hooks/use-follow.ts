@@ -1,4 +1,5 @@
 import type { Reference } from '@apollo/client';
+import type { ModifierDetails } from '@apollo/client/cache';
 import { useMutation } from '@apollo/client/react';
 
 import { useAuth } from '@/features/auth/hooks/use-auth';
@@ -104,6 +105,17 @@ export function useFollow(): UseFollowResult {
   };
 
   const removeFollower = async (userId: string): Promise<void> => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const updateGetUserFollowers = (existing: any, { readField }: ModifierDetails) => {
+      if (!existing?.edges) return existing;
+      return {
+        ...existing,
+        edges: existing.edges.filter(
+          (edge: Reference) => readField('id', readField('node', edge) as Reference) !== userId,
+        ),
+      };
+    };
+
     try {
       const result = await removeFollowerMutation({
         variables: { userId },
@@ -117,17 +129,7 @@ export function useFollow(): UseFollowResult {
         },
         update(cache, { data }) {
           cache.modify({
-            fields: {
-              getUserFollowers(existing, { readField }) {
-                if (!existing?.edges) return existing;
-                return {
-                  ...existing,
-                  edges: existing.edges.filter(
-                    (edge: Reference) => readField('id', readField('node', edge)) !== userId,
-                  ),
-                };
-              },
-            },
+            fields: { getUserFollowers: updateGetUserFollowers },
           });
           if (viewerId) {
             const serverUser = data?.removeFollower.user;

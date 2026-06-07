@@ -46,6 +46,7 @@ export function FollowersFollowingModal({
   onRemoveFollower,
   onToggleFollow,
 }: FollowersFollowingModalProps) {
+  'use no memo';
   const [search, setSearch] = useState('');
   const [sentinelEl, setSentinelEl] = useState<HTMLDivElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
