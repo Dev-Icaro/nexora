@@ -19,6 +19,8 @@ export const postResolver: Resolvers = {
       dataSources.postService.getFeed({ first: first ?? 10, after: after ?? undefined }),
     getUserPosts: (_, { userId, first, after }, { dataSources }) =>
       dataSources.postService.getByUserId(userId, { first: first ?? 10, after: after ?? undefined }),
+    getBookmarked: (_, { first, after }, { dataSources, currentUser }) =>
+      dataSources.postService.getBookmarked(currentUser!.userId, { first: first ?? 10, after: after ?? undefined }),
   },
   Mutation: {
     getUploadUrl: async (_, { request }, { dataSources, currentUser }) => {

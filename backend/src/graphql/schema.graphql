@@ -124,6 +124,7 @@ type Query {
   getUserFollowers(userId: ID!, first: Int, after: String): UserConnection!
   getUserFollowings(userId: ID!, first: Int, after: String): UserConnection!
   validatePasswordResetToken(token: String!): ValidatePasswordResetTokenResponse!
+  getBookmarked(first: Int, after: String): PostConnection!
 }
 
 

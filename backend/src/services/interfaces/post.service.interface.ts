@@ -71,4 +71,13 @@ export interface IPostService {
    * @returns A promise resolving to a {@link PostConnectionDto} with edges and page info.
    */
   getByUserId(userId: string, params: PaginationParams): Promise<PostConnectionDto>;
+
+  /**
+   * Returns a paginated connection of posts bookmarked by the given user, ordered by most recently bookmarked first.
+   *
+   * @param userId - The authenticated user's ID.
+   * @param params - Cursor-based pagination parameters.
+   * @returns A promise resolving to a {@link PostConnectionDto} with edges and page info.
+   */
+  getBookmarked(userId: string, params: PaginationParams): Promise<PostConnectionDto>;
 }

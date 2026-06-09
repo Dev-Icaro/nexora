@@ -4,6 +4,7 @@ import settings from '@/config/settings';
 import type { CreatePostDto, GetPostUploadUrlDto, PostConnectionDto, PostDto } from '@/dtos/post';
 import type { PaginationParams, UploadUrlDto } from '@/dtos/shared';
 import { BadRequestException, ForbiddenException, NotFoundException } from '@/exceptions';
+import { Bookmark } from '@/models/bookmark.model';
 import { Comment } from '@/models/comment.model';
 import { Like } from '@/models/like.model';
 import { MediaUpload } from '@/models/media-upload.model';
@@ -43,6 +44,43 @@ export class PostService implements IPostService {
 
   async getByUserId(userId: string, { first = 10, after }: PaginationParams): Promise<PostConnectionDto> {
     return this.paginatePosts({ first, after }, { user: userId });
+  }
+
+  async getBookmarked(userId: string, { first = 10, after }: PaginationParams): Promise<PostConnectionDto> {
+    const bookmarkQuery: Record<string, unknown> = { userId };
+
+    if (after) {
+      const cursorId = decodeCursor(after);
+      if (cursorId) bookmarkQuery._id = { $lt: cursorId };
+    }
+
+    const bookmarks = await Bookmark.find(bookmarkQuery)
+      .sort({ _id: -1 })
+      .limit(first + 1);
+
+    const hasNextPage = bookmarks.length > first;
+    const nodes = hasNextPage ? bookmarks.slice(0, first) : bookmarks;
+
+    const postIds = nodes.map(b => b.postId);
+    const posts = await Post.find({ _id: { $in: postIds } });
+    const postMap = new Map(posts.map(p => [p._id.toString(), p]));
+
+    const edges = nodes
+      .filter(b => postMap.has(b.postId.toString()))
+      .map(bookmark => ({
+        node: this.toDto(postMap.get(bookmark.postId.toString())!),
+        cursor: encodeCursor(bookmark._id.toString()),
+      }));
+
+    return {
+      edges,
+      pageInfo: {
+        startCursor: edges[0]?.cursor ?? null,
+        endCursor: edges[edges.length - 1]?.cursor ?? null,
+        hasNextPage,
+        hasPreviousPage: !!after,
+      },
+    };
   }
 
   async getUploadUrl({ userId, filename, contentType, fileSizeBytes }: GetPostUploadUrlDto): Promise<UploadUrlDto> {
