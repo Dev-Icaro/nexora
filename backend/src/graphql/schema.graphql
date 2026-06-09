@@ -14,6 +14,7 @@ type Post {
   likes: [Like]!
   likeCount: Int!
   commentCount: Int!
+  isBookmarked: Boolean
 }
 
 type Comment {
@@ -215,6 +216,20 @@ type RemoveFollowerResponse {
   user: User
 }
 
+type AddBookmarkResponse {
+  code: Int!
+  success: Boolean!
+  message: String!
+  post: Post
+}
+
+type RemoveBookmarkResponse {
+  code: Int!
+  success: Boolean!
+  message: String!
+  post: Post
+}
+
 input RequestPasswordResetRequest {
   email: String!
 }
@@ -278,6 +293,9 @@ type Mutation {
   followUser(userId: ID!): FollowUserResponse!
   unfollowUser(userId: ID!): UnfollowUserResponse!
   removeFollower(userId: ID!): RemoveFollowerResponse!
+
+  addBookmark(postId: ID!): AddBookmarkResponse!
+  removeBookmark(postId: ID!): RemoveBookmarkResponse!
 }
 
 type Subscription {

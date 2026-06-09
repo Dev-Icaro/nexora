@@ -2,11 +2,13 @@ import type { Request as ExpressRequest, Response as ExpressResponse } from 'exp
 
 import { UnauthorizedException } from '@/exceptions';
 import { AuthService } from '@/services/auth.service';
+import { BookmarkService } from '@/services/bookmark.service';
 import S3StorageProvider from '@/services/cloud/s3-storage.provider';
 import { CommentService } from '@/services/comment.service';
 import { ResendEmailService } from '@/services/email/resend-email.service';
 import { FollowService } from '@/services/follow.service';
 import type { IAuthService } from '@/services/interfaces/auth.service.interface';
+import type { IBookmarkService } from '@/services/interfaces/bookmark.service.interface';
 import type { ICommentService } from '@/services/interfaces/comment.service.interface';
 import type { IFollowService } from '@/services/interfaces/follow.service.interface';
 import type { IPostService } from '@/services/interfaces/post.service.interface';
@@ -26,6 +28,7 @@ type DataSources = {
   postService: IPostService;
   commentService: ICommentService;
   followService: IFollowService;
+  bookmarkService: IBookmarkService;
   storageProvider: IStorageProvider;
 };
 
@@ -67,6 +70,7 @@ const dataSources: DataSources = {
   postService: new PostService(userService, storageProvider),
   commentService: new CommentService(userService),
   followService: new FollowService(userService),
+  bookmarkService: new BookmarkService(),
   storageProvider,
 };
 

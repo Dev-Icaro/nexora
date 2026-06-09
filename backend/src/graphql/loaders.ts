@@ -4,6 +4,7 @@ import settings from '@/config/settings';
 import type { CommentDto } from '@/dtos/comment/comment.dto';
 import type { LikeDto } from '@/dtos/post/like.dto';
 import type { UserDto } from '@/dtos/user/user.dto';
+import { Bookmark } from '@/models/bookmark.model';
 import { Comment } from '@/models/comment.model';
 import { Follow } from '@/models/follow.model';
 import { Like } from '@/models/like.model';
@@ -69,6 +70,15 @@ export function createLoaders(viewerId: string | null = null) {
       const follows = await Follow.find({ followerId: viewerId, followingId: { $in: followingIds } });
       const followingSet = new Set(follows.map(f => String(f.followingId)));
       return followingIds.map(id => followingSet.has(id));
+    }),
+
+    isBookmarkedLoader: new DataLoader(async (postIds: readonly string[]) => {
+      if (!viewerId) {
+        return postIds.map(() => null);
+      }
+      const bookmarks = await Bookmark.find({ userId: viewerId, postId: { $in: postIds } });
+      const bookmarkedSet = new Set(bookmarks.map(b => String(b.postId)));
+      return postIds.map(id => bookmarkedSet.has(id));
     }),
   };
 }

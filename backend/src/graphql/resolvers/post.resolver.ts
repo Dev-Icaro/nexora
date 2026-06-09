@@ -66,6 +66,18 @@ export const postResolver: Resolvers = {
       const comment = await dataSources.commentService.delete({ userId: currentUser!.userId, postId, commentId });
       return { code: 200, success: true, message: 'Comment deleted successfully', comment };
     },
+
+    addBookmark: async (_, { postId }, { dataSources, currentUser }) => {
+      await dataSources.bookmarkService.add(currentUser!.userId, postId);
+      const post = await dataSources.postService.getById(postId);
+      return { code: 200, success: true, message: 'Post bookmarked successfully', post };
+    },
+
+    removeBookmark: async (_, { postId }, { dataSources, currentUser }) => {
+      await dataSources.bookmarkService.remove(currentUser!.userId, postId);
+      const post = await dataSources.postService.getById(postId);
+      return { code: 200, success: true, message: 'Post unbookmarked successfully', post };
+    },
   },
   Post: {
     author: (parent, _, { loaders }) => loadAuthor(parent.authorId, loaders),
@@ -73,6 +85,7 @@ export const postResolver: Resolvers = {
     likes: (parent, _, { loaders }) => loaders.likesLoader.load(parent.id),
     likeCount: parent => parent.likeCount,
     commentCount: parent => parent.commentCount,
+    isBookmarked: (parent, _, { loaders }) => loaders.isBookmarkedLoader.load(parent.id),
     mediaUrl: async parent => {
       if (parent.mediaKey) return signMediaUrl(parent.mediaKey);
       return parent.mediaUrl ?? null;
