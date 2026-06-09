@@ -20,14 +20,13 @@ import { cn } from '@/shared/lib/utils';
 
 import { CREATE_COMMENT, LIKE_POST } from '../api/post.mutations';
 import { GET_POST_BY_ID } from '../api/post.queries';
+import { useBookmark } from '../hooks/use-bookmark';
 import { usePostDetail } from '../hooks/use-post-detail';
 
 dayjs.extend(relativeTime);
 
 type PostDetail = NonNullable<GetPostQuery['getPost']>;
 type CommentDetail = NonNullable<PostDetail['comments'][number]>;
-
-// ── Sub-components ────────────────────────────────────────────────
 
 function PostDetailSkeleton() {
   return (
@@ -352,7 +351,7 @@ export function PostDetailModal({ postId, open, onClose }: PostDetailModalProps)
 
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
-  const [saved, setSaved] = useState(false);
+  const { bookmarked, toggleBookmark } = useBookmark(postId ?? '', post?.isBookmarked);
   const [comments, setComments] = useState<(CommentDetail & { localLiked?: boolean })[]>([]);
   const [commentInput, setCommentInput] = useState('');
   const [sending, setSending] = useState(false);
@@ -512,9 +511,9 @@ export function PostDetailModal({ postId, open, onClose }: PostDetailModalProps)
               post={post}
               liked={liked}
               likeCount={likeCount}
-              saved={saved}
+              saved={bookmarked}
               onLike={handleLike}
-              onSave={() => setSaved(v => !v)}
+              onSave={toggleBookmark}
               onAuthorClick={handleAuthorClick}
             />
           )}
@@ -551,9 +550,9 @@ export function PostDetailModal({ postId, open, onClose }: PostDetailModalProps)
                   post={post}
                   liked={liked}
                   likeCount={likeCount}
-                  saved={saved}
+                  saved={bookmarked}
                   onLike={handleLike}
-                  onSave={() => setSaved(v => !v)}
+                  onSave={toggleBookmark}
                   onAuthorClick={handleAuthorClick}
                 />
                 <button

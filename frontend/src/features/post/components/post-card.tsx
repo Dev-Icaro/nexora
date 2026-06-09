@@ -22,6 +22,7 @@ import { cn } from '@/shared/lib/utils';
 
 import { LIKE_POST } from '../api/post.mutations';
 import type { PostNode } from '../api/post.queries';
+import { useBookmark } from '../hooks/use-bookmark';
 
 dayjs.extend(relativeTime);
 
@@ -47,6 +48,7 @@ export function PostCard({ post, onOpenModal, onFollow }: PostCardProps) {
   const showFollowButton = post.author.isFollowing === false && post.author.id !== userId;
 
   const [likePost] = useMutation(LIKE_POST);
+  const { bookmarked, toggleBookmark } = useBookmark(post.id, post.isBookmarked);
 
   const handleLike = async () => {
     const next = !liked;
@@ -129,8 +131,9 @@ export function PostCard({ post, onOpenModal, onFollow }: PostCardProps) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem>Save post</DropdownMenuItem>
-              <DropdownMenuItem className="text-destructive">Report</DropdownMenuItem>
+              <DropdownMenuItem onClick={toggleBookmark}>
+                {bookmarked ? 'Remove bookmark' : 'Save post'}
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -198,10 +201,14 @@ export function PostCard({ post, onOpenModal, onFollow }: PostCardProps) {
             </button>
           </div>
           <button
-            className="text-muted-foreground hover:text-primary transition-colors cursor-pointer"
-            aria-label="Bookmark"
+            onClick={toggleBookmark}
+            className={cn(
+              'transition-colors cursor-pointer',
+              bookmarked ? 'text-primary' : 'text-muted-foreground hover:text-primary',
+            )}
+            aria-label={bookmarked ? 'Remove bookmark' : 'Bookmark'}
           >
-            <Bookmark className="size-4" />
+            <Bookmark className={cn('size-4', bookmarked && 'fill-current')} />
           </button>
         </div>
       </CardContent>

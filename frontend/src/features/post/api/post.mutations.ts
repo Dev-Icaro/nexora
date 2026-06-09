@@ -65,3 +65,23 @@ export const CREATE_COMMENT = graphql(`
     }
   }
 `);
+
+export const ADD_BOOKMARK = graphql(`
+  mutation AddBookmark($postId: ID!) {
+    addBookmark(postId: $postId) {
+      code
+      message
+      success
+    }
+  }
+`);
+
+export const REMOVE_BOOKMARK = graphql(`
+  mutation RemoveBookmark($postId: ID!) {
+    removeBookmark(postId: $postId) {
+      code
+      message
+      success
+    }
+  }
+`);

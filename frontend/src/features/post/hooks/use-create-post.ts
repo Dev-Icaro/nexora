@@ -30,6 +30,7 @@ export function useCreatePost(): UseCreatePostResult {
         ...responseData.createPost.post,
         author: { ...responseData.createPost.post.author, isFollowing: null },
         likes: [],
+        isBookmarked: null,
       };
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to create post');

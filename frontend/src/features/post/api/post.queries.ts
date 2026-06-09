@@ -17,6 +17,7 @@ export const GET_POST_BY_ID = graphql(`
       }
       likeCount
       commentCount
+      isBookmarked
       comments {
         id
         body
@@ -56,6 +57,7 @@ export const GET_USER_POSTS = graphql(`
           }
           likeCount
           commentCount
+          isBookmarked
           likes {
             id
             author {
@@ -116,6 +118,7 @@ export const GET_FEED = graphql(`
           }
           likeCount
           commentCount
+          isBookmarked
           likes {
             id
             author {
