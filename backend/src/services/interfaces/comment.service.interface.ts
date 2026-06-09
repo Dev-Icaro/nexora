@@ -25,4 +25,22 @@ export interface ICommentService {
    * @returns A promise resolving to an array of {@link CommentDto}.
    */
   getByPostId(postId: string): Promise<CommentDto[]>;
+
+  /**
+   * Adds a like to a comment. Throws if the user has already liked it.
+   *
+   * @param userId - The authenticated user's ID.
+   * @param commentId - The ID of the comment to like.
+   * @returns A promise resolving to the updated {@link CommentDto}.
+   */
+  like(userId: string, commentId: string): Promise<CommentDto>;
+
+  /**
+   * Removes a like from a comment. Throws if the user has not liked it.
+   *
+   * @param userId - The authenticated user's ID.
+   * @param commentId - The ID of the comment to unlike.
+   * @returns A promise resolving to the updated {@link CommentDto}.
+   */
+  unlike(userId: string, commentId: string): Promise<CommentDto>;
 }

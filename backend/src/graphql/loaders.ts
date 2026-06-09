@@ -21,6 +21,7 @@ export function createLoaders(viewerId: string | null = null) {
           postId: c.postId.toString(),
           body: c.body,
           authorId: c.userId.toString(),
+          likeCount: c.likeCount ?? 0,
           createdAt: c.createdAt.toISOString(),
         });
       }

@@ -7,6 +7,7 @@ export interface ICommentDocument {
   userId: Types.ObjectId;
   username: string;
   body: string;
+  likeCount: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -17,6 +18,7 @@ const commentSchema = new Schema<ICommentDocument>(
     userId: { type: Schema.Types.ObjectId, ref: 'users', required: true },
     username: { type: String, required: true },
     body: { type: String, required: true },
+    likeCount: { type: Number, default: 0 },
   },
   { timestamps: true },
 );

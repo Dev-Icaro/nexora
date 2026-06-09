@@ -1,6 +1,9 @@
+import mongoose from 'mongoose';
+
 import type { CommentDto, CreateCommentDto, DeleteCommentDto } from '@/dtos/comment';
-import { ForbiddenException, NotFoundException } from '@/exceptions';
+import { ConflictException, ForbiddenException, NotFoundException } from '@/exceptions';
 import { Comment, type CommentDocument } from '@/models/comment.model';
+import { CommentLike } from '@/models/comment-like.model';
 import { Post } from '@/models/post.model';
 
 import type { ICommentService } from './interfaces/comment.service.interface';
@@ -39,12 +42,69 @@ export class CommentService implements ICommentService {
     return comments.map(c => this.toDto(c));
   }
 
+  async like(userId: string, commentId: string): Promise<CommentDto> {
+    const user = await this.userService.getById(userId);
+    if (!user) throw new NotFoundException('User not found');
+
+    const alreadyLiked = await CommentLike.findOne({ commentId, userId });
+    if (alreadyLiked) throw new ConflictException('Comment already liked');
+
+    const session = await mongoose.startSession();
+    try {
+      session.startTransaction();
+
+      await CommentLike.create([{ commentId, userId, username: user.username }], { session });
+      const comment = await Comment.findByIdAndUpdate(
+        commentId,
+        { $inc: { likeCount: 1 } },
+        { returnDocument: 'after', session },
+      );
+
+      if (!comment) throw new NotFoundException('Comment not found');
+
+      await session.commitTransaction();
+      return this.toDto(comment);
+    } catch (err) {
+      await session.abortTransaction();
+      throw err;
+    } finally {
+      await session.endSession();
+    }
+  }
+
+  async unlike(userId: string, commentId: string): Promise<CommentDto> {
+    const session = await mongoose.startSession();
+    try {
+      session.startTransaction();
+
+      const like = await CommentLike.findOneAndDelete({ commentId, userId }, { session });
+      if (!like) throw new NotFoundException('Like not found');
+
+      const comment = await Comment.findByIdAndUpdate(
+        commentId,
+        { $inc: { likeCount: -1 } },
+        { returnDocument: 'after', session },
+      );
+
+      if (!comment) throw new NotFoundException('Comment not found');
+
+      await session.commitTransaction();
+      return this.toDto(comment);
+    } catch (err) {
+      await session.abortTransaction();
+      throw err;
+    } finally {
+      await session.endSession();
+    }
+  }
+
   private toDto(doc: CommentDocument): CommentDto {
     return {
       id: doc._id.toString(),
       postId: doc.postId.toString(),
       body: doc.body,
       authorId: doc.userId.toString(),
+      likeCount: doc.likeCount ?? 0,
       createdAt: doc.createdAt.toISOString(),
     };
   }

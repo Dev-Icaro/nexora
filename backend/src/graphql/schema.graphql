@@ -22,6 +22,7 @@ type Comment {
   createdAt: String!
   author: User!
   body: String!
+  likeCount: Int!
 }
 
 type Like {
@@ -175,6 +176,13 @@ type LikePostResponse {
   post: Post
 }
 
+type LikeCommentResponse {
+  code: Int!
+  message: String!
+  success: Boolean!
+  comment: Comment
+}
+
 input UpdateProfileRequest {
   bio: String
   position: String
@@ -284,6 +292,9 @@ type Mutation {
   deleteComment(postId: ID!, commentId: ID!): DeleteCommentResponse!
 
   likePost(postId: ID!): LikePostResponse!
+
+  likeComment(commentId: ID!): LikeCommentResponse!
+  unlikeComment(commentId: ID!): LikeCommentResponse!
 
   updateProfile(updateProfileRequest: UpdateProfileRequest!): UpdateProfileResponse!
   updateThemePreference(theme: ThemePreference!): UpdateThemePreferenceResponse!

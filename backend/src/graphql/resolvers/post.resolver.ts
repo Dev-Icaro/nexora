@@ -67,6 +67,16 @@ export const postResolver: Resolvers = {
       return { code: 200, success: true, message: 'Comment deleted successfully', comment };
     },
 
+    likeComment: async (_, { commentId }, { dataSources, currentUser }) => {
+      const comment = await dataSources.commentService.like(currentUser!.userId, commentId);
+      return { code: 200, success: true, message: 'Comment liked successfully', comment };
+    },
+
+    unlikeComment: async (_, { commentId }, { dataSources, currentUser }) => {
+      const comment = await dataSources.commentService.unlike(currentUser!.userId, commentId);
+      return { code: 200, success: true, message: 'Comment unliked successfully', comment };
+    },
+
     addBookmark: async (_, { postId }, { dataSources, currentUser }) => {
       await dataSources.bookmarkService.add(currentUser!.userId, postId);
       const post = await dataSources.postService.getById(postId);
@@ -93,6 +103,7 @@ export const postResolver: Resolvers = {
   },
   Comment: {
     author: (parent, _, { loaders }) => loadAuthor(parent.authorId, loaders),
+    likeCount: parent => parent.likeCount,
   },
   Like: {
     author: (parent, _, { loaders }) => loadAuthor(parent.authorId, loaders),
