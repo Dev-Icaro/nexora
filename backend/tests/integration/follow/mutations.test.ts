@@ -6,6 +6,16 @@ import { clearDb } from '../../setup/db';
 import { createTestUser } from '../../setup/factories/user.factory';
 import { createTestServer, singleResult } from '../../setup/server';
 
+const REMOVE_FOLLOWER = `
+  mutation RemoveFollower($userId: ID!) {
+    removeFollower(userId: $userId) {
+      code
+      success
+      message
+    }
+  }
+`;
+
 const FOLLOW_USER = `
   mutation FollowUser($userId: ID!) {
     followUser(userId: $userId) {
@@ -158,5 +168,85 @@ describe('unfollowUser', () => {
 
     const aDoc = await User.findById(a.id);
     expect(aDoc?.followingCount).toBe(0);
+  });
+});
+
+describe('removeFollower', () => {
+  const { server, buildContext } = createTestServer();
+
+  beforeEach(clearDb);
+
+  it('removes the follow document and decrements counters on both users', async () => {
+    const target = await createTestUser();
+    const follower = await createTestUser();
+
+    await server.executeOperation(
+      { query: FOLLOW_USER, variables: { userId: target.id } },
+      { contextValue: buildContext({ userId: follower.id }) },
+    );
+
+    const { data, errors } = singleResult(
+      await server.executeOperation(
+        { query: REMOVE_FOLLOWER, variables: { userId: follower.id } },
+        { contextValue: buildContext({ userId: target.id }) },
+      ),
+    );
+
+    expect(errors).toBeUndefined();
+    expect(data?.removeFollower).toMatchObject({ code: 200, success: true });
+
+    expect(await Follow.findOne({ followerId: follower.id, followingId: target.id })).toBeNull();
+
+    const followerDoc = await User.findById(follower.id);
+    const targetDoc = await User.findById(target.id);
+    expect(followerDoc?.followingCount).toBe(0);
+    expect(targetDoc?.followersCount).toBe(0);
+  });
+
+  it('is a no-op when the user is not a follower', async () => {
+    const target = await createTestUser();
+    const notAFollower = await createTestUser();
+
+    const { data, errors } = singleResult(
+      await server.executeOperation(
+        { query: REMOVE_FOLLOWER, variables: { userId: notAFollower.id } },
+        { contextValue: buildContext({ userId: target.id }) },
+      ),
+    );
+
+    expect(errors).toBeUndefined();
+    expect(data?.removeFollower).toMatchObject({ code: 200, success: true });
+  });
+
+  it('only removes the targeted follower and leaves other followers intact', async () => {
+    const target = await createTestUser();
+    const followerA = await createTestUser();
+    const followerB = await createTestUser();
+
+    await server.executeOperation(
+      { query: FOLLOW_USER, variables: { userId: target.id } },
+      { contextValue: buildContext({ userId: followerA.id }) },
+    );
+    await server.executeOperation(
+      { query: FOLLOW_USER, variables: { userId: target.id } },
+      { contextValue: buildContext({ userId: followerB.id }) },
+    );
+
+    await server.executeOperation(
+      { query: REMOVE_FOLLOWER, variables: { userId: followerA.id } },
+      { contextValue: buildContext({ userId: target.id }) },
+    );
+
+    expect(await Follow.findOne({ followerId: followerA.id, followingId: target.id })).toBeNull();
+    expect(await Follow.findOne({ followerId: followerB.id, followingId: target.id })).not.toBeNull();
+
+    const targetDoc = await User.findById(target.id);
+    expect(targetDoc?.followersCount).toBe(1);
+
+    const followerADoc = await User.findById(followerA.id);
+    expect(followerADoc?.followingCount).toBe(0);
+
+    const followerBDoc = await User.findById(followerB.id);
+    expect(followerBDoc?.followingCount).toBe(1);
   });
 });
