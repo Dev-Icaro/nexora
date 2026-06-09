@@ -13,6 +13,7 @@ import { typeDefs } from '@/graphql/typeDefs';
 import type { IEmailService } from '@/services/email/email.service.interface';
 import type { IStorageProvider } from '@/services/interfaces/storage-provider.interface';
 import { AuthService } from '@/services/auth.service';
+import { BookmarkService } from '@/services/bookmark.service';
 import { CommentService } from '@/services/comment.service';
 import { FollowService } from '@/services/follow.service';
 import { PostService } from '@/services/post.service';
@@ -80,6 +81,7 @@ export function createTestServer(overrides: TestServerOverrides = {}) {
         authService: new AuthService(userService, emailService),
         userService,
         postService: new PostService(userService, storageProvider),
+        bookmarkService: new BookmarkService(),
         commentService: new CommentService(userService),
         followService: new FollowService(userService),
         storageProvider,

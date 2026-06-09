@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { Post } from '@/models/post.model';
 import { Like } from '@/models/like.model';
 import { Comment } from '@/models/comment.model';
+import { Bookmark } from '@/models/bookmark.model';
 import { clearDb } from '../../setup/db';
 import { createTestPost } from '../../setup/factories/post.factory';
 import { createTestUser } from '../../setup/factories/user.factory';
@@ -178,6 +179,144 @@ describe('likePost', () => {
     expect(result.message).toMatch(/unliked/i);
     expect(result.post.likeCount).toBe(0);
     expect(await Like.findOne({ postId: post.id, userId: user.id })).toBeNull();
+  });
+});
+
+const ADD_BOOKMARK = `
+  mutation AddBookmark($postId: ID!) {
+    addBookmark(postId: $postId) {
+      code
+      success
+      message
+      post { id isBookmarked }
+    }
+  }
+`;
+
+const REMOVE_BOOKMARK = `
+  mutation RemoveBookmark($postId: ID!) {
+    removeBookmark(postId: $postId) {
+      code
+      success
+      message
+      post { id isBookmarked }
+    }
+  }
+`;
+
+describe('addBookmark', () => {
+  const { server, buildContext } = createTestServer();
+
+  beforeEach(clearDb);
+
+  it('bookmarks a post and returns isBookmarked true', async () => {
+    const user = await createTestUser();
+    const post = await createTestPost(user.id);
+
+    const { data, errors } = singleResult(
+      await server.executeOperation(
+        { query: ADD_BOOKMARK, variables: { postId: post.id } },
+        { contextValue: buildContext({ userId: user.id }) },
+      ),
+    );
+
+    expect(errors).toBeUndefined();
+    const result = data?.addBookmark as {
+      code: number;
+      success: boolean;
+      message: string;
+      post: { id: string; isBookmarked: boolean };
+    };
+    expect(result.code).toBe(200);
+    expect(result.success).toBe(true);
+    expect(result.message).toMatch(/bookmarked/i);
+    expect(result.post.isBookmarked).toBe(true);
+
+    const bookmark = await Bookmark.findOne({ postId: post.id, userId: user.id });
+    expect(bookmark).not.toBeNull();
+  });
+
+  it('is idempotent — bookmarking the same post twice does not error', async () => {
+    const user = await createTestUser();
+    const post = await createTestPost(user.id);
+    const ctx = () => buildContext({ userId: user.id });
+
+    await server.executeOperation({ query: ADD_BOOKMARK, variables: { postId: post.id } }, { contextValue: ctx() });
+
+    const { data, errors } = singleResult(
+      await server.executeOperation({ query: ADD_BOOKMARK, variables: { postId: post.id } }, { contextValue: ctx() }),
+    );
+
+    expect(errors).toBeUndefined();
+    expect((data?.addBookmark as { success: boolean }).success).toBe(true);
+
+    const count = await Bookmark.countDocuments({ postId: post.id, userId: user.id });
+    expect(count).toBe(1);
+  });
+
+  it('returns NOT_FOUND for a non-existent post', async () => {
+    const user = await createTestUser();
+
+    const { errors } = singleResult(
+      await server.executeOperation(
+        { query: ADD_BOOKMARK, variables: { postId: '000000000000000000000000' } },
+        { contextValue: buildContext({ userId: user.id }) },
+      ),
+    );
+
+    expect(errors).toBeDefined();
+    expect(errors![0].extensions?.code).toBe('NOT_FOUND');
+  });
+});
+
+describe('removeBookmark', () => {
+  const { server, buildContext } = createTestServer();
+
+  beforeEach(clearDb);
+
+  it('removes a bookmark and returns isBookmarked false', async () => {
+    const user = await createTestUser();
+    const post = await createTestPost(user.id);
+    const ctx = () => buildContext({ userId: user.id });
+
+    await server.executeOperation({ query: ADD_BOOKMARK, variables: { postId: post.id } }, { contextValue: ctx() });
+
+    const { data, errors } = singleResult(
+      await server.executeOperation(
+        { query: REMOVE_BOOKMARK, variables: { postId: post.id } },
+        { contextValue: ctx() },
+      ),
+    );
+
+    expect(errors).toBeUndefined();
+    const result = data?.removeBookmark as {
+      code: number;
+      success: boolean;
+      message: string;
+      post: { id: string; isBookmarked: boolean };
+    };
+    expect(result.code).toBe(200);
+    expect(result.success).toBe(true);
+    expect(result.message).toMatch(/unbookmarked/i);
+    expect(result.post.isBookmarked).toBe(false);
+
+    const bookmark = await Bookmark.findOne({ postId: post.id, userId: user.id });
+    expect(bookmark).toBeNull();
+  });
+
+  it('is idempotent — removing a non-existent bookmark does not error', async () => {
+    const user = await createTestUser();
+    const post = await createTestPost(user.id);
+
+    const { data, errors } = singleResult(
+      await server.executeOperation(
+        { query: REMOVE_BOOKMARK, variables: { postId: post.id } },
+        { contextValue: buildContext({ userId: user.id }) },
+      ),
+    );
+
+    expect(errors).toBeUndefined();
+    expect((data?.removeBookmark as { success: boolean }).success).toBe(true);
   });
 });
 
