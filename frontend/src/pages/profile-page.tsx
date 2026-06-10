@@ -12,6 +12,7 @@ import { ProfileHeader } from '@/features/profile/components/profile-header';
 import { useProfile } from '@/features/profile/hooks/use-profile';
 import { useUploadAvatar } from '@/features/profile/hooks/use-upload-avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
+import { usePageTitle } from '@/shared/hooks/use-page-title';
 
 export function ProfilePage() {
   const { userId = '' } = useParams<{ userId: string }>();
@@ -25,6 +26,7 @@ export function ProfilePage() {
   const followings = useFollowings();
 
   const { user: userData, updateProfile } = useProfile(userId);
+  usePageTitle(userData?.username ? `@${userData.username}` : 'Profile');
   const { uploadAvatar, loading: avatarLoading } = useUploadAvatar();
   const { follow, unfollow, removeFollower, followLoading, unfollowLoading } = useFollow();
   const { posts, loading, isFetchingNextPage, error, paginationError, refetch, fetchNextPage, hasNextPage } =

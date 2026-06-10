@@ -11,8 +11,10 @@ import { useCreatePost } from '@/features/post/hooks/use-create-post';
 import { useFeed } from '@/features/post/hooks/use-feed';
 import { useNewPostsNotification } from '@/features/post/hooks/use-new-posts-notification';
 import { useUploadPostMedia } from '@/features/post/hooks/use-upload-post-media';
+import { usePageTitle } from '@/shared/hooks/use-page-title';
 
 export function HomePage() {
+  usePageTitle('Feed');
   const { state } = useAuth();
   const username = state.user?.username ?? '';
   const { id: selectedPostId } = useParams<{ id?: string }>();

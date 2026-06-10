@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { usePageTitle } from '@/shared/hooks/use-page-title';
+
 function BrokenGraph({ size = 300 }: { size?: number }) {
   const [tick, setTick] = useState(0);
 
@@ -125,6 +127,7 @@ function BrokenGraph({ size = 300 }: { size?: number }) {
 }
 
 export function NotFoundPage() {
+  usePageTitle('Page not found');
   const navigate = useNavigate();
 
   return (

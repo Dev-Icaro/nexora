@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { PostFeed } from '@/features/post/components/post-feed';
 import { useBookmarkedPosts } from '@/features/post/hooks/use-bookmark';
 import { Separator } from '@/shared/components/ui/separator';
+import { usePageTitle } from '@/shared/hooks/use-page-title';
 
 function BookmarksEmptyState() {
   return (
@@ -22,6 +23,7 @@ function BookmarksEmptyState() {
 }
 
 export function BookmarksPage() {
+  usePageTitle('Bookmarks');
   const navigate = useNavigate();
   const { posts, loading, isFetchingNextPage, hasNextPage, fetchNextPage, refetch } = useBookmarkedPosts();
 

@@ -7,8 +7,10 @@ import { ResetPasswordSuccess } from '@/features/auth/components/reset-password-
 import { useApplyPasswordReset } from '@/features/auth/hooks/use-apply-password-reset';
 import { useValidatePasswordResetToken } from '@/features/auth/hooks/use-validate-password-reset-token';
 import { Spinner } from '@/shared/components/ui/spinner';
+import { usePageTitle } from '@/shared/hooks/use-page-title';
 
 export function ResetPasswordPage() {
+  usePageTitle('Reset password');
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
   const navigate = useNavigate();

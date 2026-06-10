@@ -7,10 +7,12 @@ import { useAuth } from '@/features/auth/hooks/use-auth';
 import { useResendVerificationEmail } from '@/features/auth/hooks/use-resend-verification-email';
 import { useVerifyEmail } from '@/features/auth/hooks/use-verify-email';
 import { Spinner } from '@/shared/components/ui/spinner';
+import { usePageTitle } from '@/shared/hooks/use-page-title';
 
 type Session = NonNullable<Awaited<ReturnType<ReturnType<typeof useVerifyEmail>['verify']>>>;
 
 export function VerifyEmailPage() {
+  usePageTitle('Verify email');
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
   const email = searchParams.get('email');

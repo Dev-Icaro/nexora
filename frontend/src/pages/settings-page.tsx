@@ -4,9 +4,11 @@ import { useUploadAvatar } from '@/features/profile/hooks/use-upload-avatar';
 import { AppearanceSection } from '@/features/settings/components/appearance-section';
 import { PersonalInformationForm } from '@/features/settings/components/personal-information-form';
 import { StorageSection } from '@/features/settings/components/storage-section';
+import { usePageTitle } from '@/shared/hooks/use-page-title';
 import { useTheme } from '@/shared/hooks/use-theme';
 
 export function SettingsPage() {
+  usePageTitle('Settings');
   const { preference, setTheme } = useTheme();
 
   const {

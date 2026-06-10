@@ -5,8 +5,10 @@ import { LoginForm } from '@/features/auth/components/login-form';
 import { useLogin } from '@/features/auth/hooks/use-login';
 import { useRequestPasswordReset } from '@/features/auth/hooks/use-request-password-reset';
 import { useResendVerificationEmail } from '@/features/auth/hooks/use-resend-verification-email';
+import { usePageTitle } from '@/shared/hooks/use-page-title';
 
 export function LoginPage() {
+  usePageTitle('Sign in');
   const { login, loading, error, errorCode } = useLogin();
   const { requestReset, loading: resetLoading, error: resetError, isSuccess: resetSuccess } = useRequestPasswordReset();
   const { resend, loading: resendLoading, cooldownRemaining } = useResendVerificationEmail();
