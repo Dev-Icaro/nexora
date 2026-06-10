@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
-import { Bell, Home, MessageSquare, Settings2 } from 'lucide-react';
+import { Bell, Bookmark, Home, MessageSquare, Settings2 } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 
 import { cn } from '@/shared/lib/utils';
@@ -38,6 +38,7 @@ export function BottomNav() {
       <BottomNavItem to="/" icon={Home} label="Feed" end />
       <BottomNavItem to="/messages" icon={MessageSquare} label="Messages" />
       <BottomNavItem to="/notifications" icon={Bell} label="Alerts" />
+      <BottomNavItem to="/bookmarks" icon={Bookmark} label="Bookmarks" />
       <BottomNavItem to="/settings" icon={Settings2} label="Settings" />
     </nav>
   );

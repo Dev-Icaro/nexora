@@ -100,6 +100,42 @@ export const NEW_POST_SUBSCRIPTION = graphql(`
   }
 `);
 
+export const GET_BOOKMARKED = graphql(`
+  query GetBookmarked($first: Int, $after: String) {
+    getBookmarked(first: $first, after: $after) {
+      edges {
+        cursor
+        node {
+          id
+          body
+          mediaUrl
+          createdAt
+          author {
+            id
+            username
+            avatarUrl
+            isFollowing
+          }
+          likeCount
+          commentCount
+          isBookmarked
+          likes {
+            id
+            author {
+              id
+              username
+            }
+          }
+        }
+      }
+      pageInfo {
+        endCursor
+        hasNextPage
+      }
+    }
+  }
+`);
+
 export const GET_FEED = graphql(`
   query GetFeed($first: Int, $after: String) {
     feed(first: $first, after: $after) {

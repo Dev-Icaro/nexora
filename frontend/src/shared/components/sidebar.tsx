@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
-import { Home, LogOut, Settings2 } from 'lucide-react';
+import { Bookmark, Home, LogOut, Settings2 } from 'lucide-react';
 import { Link, NavLink } from 'react-router-dom';
 
 import { useAuth } from '@/features/auth/hooks/use-auth';
@@ -103,6 +103,7 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
       {/* Nav */}
       <nav className={cn('flex flex-col gap-0.5', collapsed ? 'mt-2' : 'mt-6')}>
         <NavItem to="/" icon={Home} label="Feed" end collapsed={collapsed} />
+        <NavItem to="/bookmarks" icon={Bookmark} label="Bookmarks" collapsed={collapsed} />
         <NavItem to="/settings" icon={Settings2} label="Settings" collapsed={collapsed} />
       </nav>
 
