@@ -63,15 +63,19 @@ export const LIKE_POST = graphql(`
 export const CREATE_COMMENT = graphql(`
   mutation CreateComment($postId: String!, $body: String!) {
     createComment(postId: $postId, body: $body) {
+      __typename
       code
       message
       success
       comment {
+        __typename
         id
         body
         createdAt
         likeCount
+        isLiked
         author {
+          __typename
           id
           username
           avatarUrl

@@ -1,6 +1,8 @@
 import { type ApolloCache } from '@apollo/client';
 import { useMutation, useQuery } from '@apollo/client/react';
 
+import { useAuth } from '@/features/auth/hooks/use-auth';
+
 import { CREATE_COMMENT, LIKE_COMMENT, LIKE_POST, UNLIKE_COMMENT } from '../api/post.mutations';
 import { GET_POST_BY_ID } from '../api/post.queries';
 
@@ -12,6 +14,9 @@ function writeCommentLikeFields(cache: ApolloCache, commentId: string, likeCount
 }
 
 export function usePost(postId: string | null) {
+  const {
+    state: { user },
+  } = useAuth();
   const { data, loading, error } = useQuery(GET_POST_BY_ID, {
     variables: { postId: postId! },
     skip: !postId,
@@ -46,6 +51,28 @@ export function usePost(postId: string | null) {
   const createComment = (body: string) =>
     createCommentMutation({
       variables: { postId: postId!, body },
+      optimisticResponse: {
+        createComment: {
+          __typename: 'CreateCommentResponse',
+          code: 200,
+          message: '',
+          success: true,
+          comment: {
+            __typename: 'Comment',
+            id: `optimistic-${Date.now()}`,
+            body,
+            createdAt: new Date().toISOString(),
+            likeCount: 0,
+            isLiked: false,
+            author: {
+              __typename: 'User',
+              id: user?.id ?? '',
+              username: user?.username ?? '',
+              avatarUrl: user?.avatarUrl ?? null,
+            },
+          },
+        },
+      },
       update(cache, { data: mutationData }) {
         const newComment = mutationData?.createComment.comment;
         if (!newComment) return;
