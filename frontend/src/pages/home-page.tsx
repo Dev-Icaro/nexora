@@ -10,8 +10,10 @@ import { PostFeed } from '@/features/post/components/post-feed';
 import { useCreatePost } from '@/features/post/hooks/use-create-post';
 import { useFeed } from '@/features/post/hooks/use-feed';
 import { useNewPostsNotification } from '@/features/post/hooks/use-new-posts-notification';
+import { usePostDetail } from '@/features/post/hooks/use-post-detail';
 import { useUploadPostMedia } from '@/features/post/hooks/use-upload-post-media';
 import { usePageTitle } from '@/shared/hooks/use-page-title';
+import { useProfileNavigation } from '@/shared/hooks/use-profile-navigation';
 
 export function HomePage() {
   usePageTitle('Feed');
@@ -19,6 +21,8 @@ export function HomePage() {
   const username = state.user?.username ?? '';
   const { id: selectedPostId } = useParams<{ id?: string }>();
   const navigate = useNavigate();
+  const { navigateToProfile } = useProfileNavigation();
+  const postDetail = usePostDetail(selectedPostId ?? null);
 
   const { follow } = useFollow();
   const { createPost } = useCreatePost();
@@ -77,7 +81,13 @@ export function HomePage() {
           onFollow={follow}
         />
       </div>
-      <PostDetailModal postId={selectedPostId ?? null} open={!!selectedPostId} onClose={() => navigate(-1)} />
+      <PostDetailModal
+        postId={selectedPostId ?? null}
+        open={!!selectedPostId}
+        onClose={() => navigate(-1)}
+        {...postDetail}
+        onAuthorClick={navigateToProfile}
+      />
     </main>
   );
 }

@@ -39,9 +39,16 @@ export const CREATE_POST = graphql(`
 export const LIKE_POST = graphql(`
   mutation LikePost($postId: ID!) {
     likePost(postId: $postId) {
+      __typename
       code
       message
       success
+      post {
+        __typename
+        id
+        isLiked
+        likeCount
+      }
     }
   }
 `);
@@ -56,6 +63,7 @@ export const CREATE_COMMENT = graphql(`
         id
         body
         createdAt
+        likeCount
         author {
           id
           username
@@ -82,6 +90,34 @@ export const REMOVE_BOOKMARK = graphql(`
       code
       message
       success
+    }
+  }
+`);
+
+export const LIKE_COMMENT = graphql(`
+  mutation LikeComment($commentId: ID!) {
+    likeComment(commentId: $commentId) {
+      code
+      success
+      message
+      comment {
+        id
+        likeCount
+      }
+    }
+  }
+`);
+
+export const UNLIKE_COMMENT = graphql(`
+  mutation UnlikeComment($commentId: ID!) {
+    unlikeComment(commentId: $commentId) {
+      code
+      success
+      message
+      comment {
+        id
+        likeCount
+      }
     }
   }
 `);

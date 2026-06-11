@@ -1,4 +1,3 @@
-import { useMutation } from '@apollo/client/react';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { ArrowLeft, Bookmark, Heart, MessageCircle, Send, X } from 'lucide-react';
@@ -14,14 +13,7 @@ import { Dialog, DialogContent } from '@/shared/components/ui/dialog';
 import { ScrollArea } from '@/shared/components/ui/scroll-area';
 import { Separator } from '@/shared/components/ui/separator';
 import { Skeleton } from '@/shared/components/ui/skeleton';
-import { useProfileNavigation } from '@/shared/hooks/use-profile-navigation';
-import { toast } from '@/shared/lib/toast';
 import { cn } from '@/shared/lib/utils';
-
-import { CREATE_COMMENT, LIKE_POST } from '../api/post.mutations';
-import { GET_POST_BY_ID } from '../api/post.queries';
-import { useBookmark } from '../hooks/use-bookmark';
-import { usePostDetail } from '../hooks/use-post-detail';
 
 dayjs.extend(relativeTime);
 
@@ -87,7 +79,7 @@ function NotFoundState({ onClose }: { onClose: () => void }) {
 }
 
 interface CommentItemProps {
-  comment: CommentDetail & { localLiked?: boolean };
+  comment: CommentDetail & { isLiked?: boolean };
   onLike: (id: string) => void;
   onAuthorClick: (userId: string) => void;
 }
@@ -124,10 +116,11 @@ function CommentItem({ comment, onLike, onAuthorClick }: CommentItemProps) {
           onClick={() => onLike(comment.id)}
           className={cn(
             'inline-flex items-center gap-1.5 text-xs transition-colors bg-transparent border-none cursor-pointer p-0 min-h-8',
-            comment.localLiked ? 'text-primary' : 'text-muted-foreground hover:text-foreground',
+            comment.isLiked ? 'text-primary' : 'text-muted-foreground hover:text-foreground',
           )}
         >
-          <Heart className={cn('size-3.5', comment.localLiked && 'fill-current')} />
+          <Heart className={cn('size-3.5', comment.isLiked && 'fill-current')} />
+          {comment.likeCount > 0 && <span>{comment.likeCount}</span>}
         </button>
       </div>
     </div>
@@ -145,8 +138,10 @@ interface PostContentPanelProps {
 }
 
 function PostContentPanel({ post, liked, likeCount, saved, onLike, onSave, onAuthorClick }: PostContentPanelProps) {
+  const [expanded, setExpanded] = useState(false);
   const hashtags = post.body.match(/#\w+/g) ?? [];
   const bodyText = post.body.replace(/#\w+/g, '').trim();
+  const isLong = bodyText.length > 200;
   const initials = post.author.username.slice(0, 2).toUpperCase();
   const timestamp = dayjs(post.createdAt).fromNow();
 
@@ -182,7 +177,17 @@ function PostContentPanel({ post, liked, likeCount, saved, onLike, onSave, onAut
       )}
 
       {/* Body */}
-      <p className="text-sm leading-relaxed">{bodyText}</p>
+      <div>
+        <p className={cn('text-sm leading-relaxed', !expanded && 'line-clamp-3')}>{bodyText}</p>
+        {isLong && (
+          <button
+            onClick={() => setExpanded(v => !v)}
+            className="text-xs text-primary hover:underline mt-0.5 cursor-pointer"
+          >
+            {expanded ? 'show less' : 'read more'}
+          </button>
+        )}
+      </div>
 
       {/* Hashtags */}
       {hashtags.length > 0 && (
@@ -233,7 +238,7 @@ function PostContentPanel({ post, liked, likeCount, saved, onLike, onSave, onAut
 }
 
 interface CommentsPanelProps {
-  comments: (CommentDetail & { localLiked?: boolean })[];
+  comments: (CommentDetail & { isLiked?: boolean })[];
   loading: boolean;
   onLike: (id: string) => void;
   commentInput: string;
@@ -337,84 +342,58 @@ interface PostDetailModalProps {
   postId: string | null;
   open: boolean;
   onClose: () => void;
+  post: PostDetail | null;
+  loading: boolean;
+  error?: string;
+  liked: boolean;
+  likeCount: number;
+  bookmarked: boolean;
+  comments: (CommentDetail & { isLiked: boolean })[];
+  sending: boolean;
+  onLikePost: () => void;
+  onLikeComment: (id: string) => void;
+  onSendComment: (body: string) => Promise<boolean>;
+  onToggleBookmark: () => void;
+  onAuthorClick: (userId: string) => void;
 }
 
-export function PostDetailModal({ postId, open, onClose }: PostDetailModalProps) {
-  const { post, loading, error } = usePostDetail(postId);
-  const { state } = useAuth();
-  const userId = state.user?.id;
-  const { navigateToProfile } = useProfileNavigation();
-
-  const handleAuthorClick = (authorId: string) => {
-    navigateToProfile(authorId);
-  };
-
-  const [liked, setLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(0);
-  const { bookmarked, toggleBookmark } = useBookmark(postId ?? '', post?.isBookmarked);
-  const [comments, setComments] = useState<(CommentDetail & { localLiked?: boolean })[]>([]);
+export function PostDetailModal({
+  postId,
+  open,
+  onClose,
+  post,
+  loading,
+  error,
+  liked,
+  likeCount,
+  bookmarked,
+  comments,
+  sending,
+  onLikePost,
+  onLikeComment,
+  onSendComment,
+  onToggleBookmark,
+  onAuthorClick,
+}: PostDetailModalProps) {
   const [commentInput, setCommentInput] = useState('');
-  const [sending, setSending] = useState(false);
   const [mobileTab, setMobileTab] = useState<'post' | 'comments'>('post');
   const [scrollToBottomTrigger, setScrollToBottomTrigger] = useState(0);
+  const [prevOpen, setPrevOpen] = useState(open);
 
-  const [likePost] = useMutation(LIKE_POST, {
-    refetchQueries: [{ query: GET_POST_BY_ID, variables: { postId } }],
-  });
-
-  const [createComment] = useMutation(CREATE_COMMENT, {
-    refetchQueries: [{ query: GET_POST_BY_ID, variables: { postId } }],
-  });
-
-  // Sync state when post data loads
-  useEffect(() => {
-    if (!post) return;
-    const isLiked = !!userId && post.likes.some(l => l?.author.id === userId);
-    setLiked(isLiked);
-    setLikeCount(post.likeCount);
-    setComments(post.comments.filter(c => c !== null).map(c => ({ ...c, localLiked: false })));
-  }, [post, userId]);
-
-  // Reset tab on open
-  useEffect(() => {
+  if (prevOpen !== open) {
+    setPrevOpen(open);
     if (open) setMobileTab('post');
-  }, [open]);
-
-  const handleLike = async () => {
-    if (!postId) return;
-    const next = !liked;
-    setLiked(next);
-    setLikeCount(c => c + (next ? 1 : -1));
-    try {
-      await likePost({ variables: { postId } });
-    } catch {
-      setLiked(!next);
-      setLikeCount(c => c + (next ? -1 : 1));
-      toast.error('Failed to update like');
-    }
-  };
-
-  const handleCommentLike = (id: string) => {
-    setComments(prev => prev.map(c => (c.id === id ? { ...c, localLiked: !c.localLiked } : c)));
-  };
+  }
 
   const handleSend = async () => {
-    if (!commentInput.trim() || sending || !postId) return;
+    if (!commentInput.trim() || sending) return;
     const body = commentInput.trim();
-    setSending(true);
     setCommentInput('');
-    try {
-      const result = await createComment({ variables: { postId, body } });
-      const newComment = result.data?.createComment.comment;
-      if (newComment) {
-        setComments(prev => [...prev, { ...newComment, localLiked: false }]);
-        setScrollToBottomTrigger(t => t + 1);
-      }
-    } catch {
+    const success = await onSendComment(body);
+    if (success) {
+      setScrollToBottomTrigger(t => t + 1);
+    } else {
       setCommentInput(body);
-      toast.error('Failed to post comment');
-    } finally {
-      setSending(false);
     }
   };
 
@@ -512,9 +491,9 @@ export function PostDetailModal({ postId, open, onClose }: PostDetailModalProps)
               liked={liked}
               likeCount={likeCount}
               saved={bookmarked}
-              onLike={handleLike}
-              onSave={toggleBookmark}
-              onAuthorClick={handleAuthorClick}
+              onLike={onLikePost}
+              onSave={onToggleBookmark}
+              onAuthorClick={onAuthorClick}
             />
           )}
         </div>
@@ -525,13 +504,13 @@ export function PostDetailModal({ postId, open, onClose }: PostDetailModalProps)
         <CommentsPanel
           comments={comments}
           loading={loading}
-          onLike={handleCommentLike}
+          onLike={onLikeComment}
           commentInput={commentInput}
           onCommentChange={setCommentInput}
           onSend={handleSend}
           sending={sending}
           scrollToBottomTrigger={scrollToBottomTrigger}
-          onAuthorClick={handleAuthorClick}
+          onAuthorClick={onAuthorClick}
         />
       </div>
     </div>
@@ -551,9 +530,9 @@ export function PostDetailModal({ postId, open, onClose }: PostDetailModalProps)
                   liked={liked}
                   likeCount={likeCount}
                   saved={bookmarked}
-                  onLike={handleLike}
-                  onSave={toggleBookmark}
-                  onAuthorClick={handleAuthorClick}
+                  onLike={onLikePost}
+                  onSave={onToggleBookmark}
+                  onAuthorClick={onAuthorClick}
                 />
                 <button
                   onClick={() => setMobileTab('comments')}
@@ -569,13 +548,13 @@ export function PostDetailModal({ postId, open, onClose }: PostDetailModalProps)
         <CommentsPanel
           comments={comments}
           loading={loading}
-          onLike={handleCommentLike}
+          onLike={onLikeComment}
           commentInput={commentInput}
           onCommentChange={setCommentInput}
           onSend={handleSend}
           sending={sending}
           scrollToBottomTrigger={scrollToBottomTrigger}
-          onAuthorClick={handleAuthorClick}
+          onAuthorClick={onAuthorClick}
         />
       )}
     </div>

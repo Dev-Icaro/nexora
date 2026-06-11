@@ -40,10 +40,7 @@ export function PostCard({ post, onOpenModal, onFollow }: PostCardProps) {
   const userId = state.user?.id;
   const { navigateToProfile } = useProfileNavigation();
 
-  const baseLiked = !!userId && post.likes.some(l => l?.author.id === userId);
-  const [optimisticLike, setOptimisticLike] = useState<{ postId: string; liked: boolean; count: number } | null>(null);
-  const liked = optimisticLike?.postId === post.id ? optimisticLike.liked : baseLiked;
-  const likeCount = optimisticLike?.postId === post.id ? optimisticLike.count : post.likeCount;
+  const liked = post.isLiked ?? false;
 
   const showFollowButton = post.author.isFollowing === false && post.author.id !== userId;
 
@@ -51,12 +48,25 @@ export function PostCard({ post, onOpenModal, onFollow }: PostCardProps) {
   const { bookmarked, toggleBookmark } = useBookmark(post.id, post.isBookmarked);
 
   const handleLike = async () => {
-    const next = !liked;
-    setOptimisticLike({ postId: post.id, liked: next, count: likeCount + (next ? 1 : -1) });
     try {
-      await likePost({ variables: { postId: post.id } });
+      await likePost({
+        variables: { postId: post.id },
+        optimisticResponse: {
+          likePost: {
+            __typename: 'LikePostResponse',
+            code: 200,
+            message: '',
+            success: true,
+            post: {
+              __typename: 'Post',
+              id: post.id,
+              isLiked: !liked,
+              likeCount: Math.max(0, post.likeCount + (liked ? -1 : 1)),
+            },
+          },
+        },
+      });
     } catch {
-      setOptimisticLike(null);
       toast.error('Failed to update like');
     }
   };
@@ -187,7 +197,7 @@ export function PostCard({ post, onOpenModal, onFollow }: PostCardProps) {
               )}
             >
               <Heart className={cn('size-4', liked && 'fill-current')} />
-              <span className={cn('font-semibold', liked ? 'text-primary' : 'text-foreground')}>{likeCount}</span>
+              <span className={cn('font-semibold', liked ? 'text-primary' : 'text-foreground')}>{post.likeCount}</span>
             </button>
             <button
               onClick={() => onOpenModal?.(post.id)}
@@ -196,7 +206,10 @@ export function PostCard({ post, onOpenModal, onFollow }: PostCardProps) {
               <MessageCircle className="size-4" />
               {post.commentCount}
             </button>
-            <button className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors cursor-pointer">
+            <button
+              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors cursor-pointer"
+              onClick={() => toast.info('Coming soon!')}
+            >
               <Send className="size-4" />0
             </button>
           </div>

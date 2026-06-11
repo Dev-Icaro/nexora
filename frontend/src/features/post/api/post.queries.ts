@@ -18,21 +18,16 @@ export const GET_POST_BY_ID = graphql(`
       likeCount
       commentCount
       isBookmarked
+      isLiked
       comments {
         id
         body
         createdAt
+        likeCount
         author {
           id
           username
           avatarUrl
-        }
-      }
-      likes {
-        id
-        author {
-          id
-          username
         }
       }
     }
@@ -58,13 +53,7 @@ export const GET_USER_POSTS = graphql(`
           likeCount
           commentCount
           isBookmarked
-          likes {
-            id
-            author {
-              id
-              username
-            }
-          }
+          isLiked
         }
       }
       pageInfo {
@@ -89,13 +78,7 @@ export const NEW_POST_SUBSCRIPTION = graphql(`
       }
       likeCount
       commentCount
-      likes {
-        id
-        author {
-          id
-          username
-        }
-      }
+      isLiked
     }
   }
 `);
@@ -119,13 +102,7 @@ export const GET_BOOKMARKED = graphql(`
           likeCount
           commentCount
           isBookmarked
-          likes {
-            id
-            author {
-              id
-              username
-            }
-          }
+          isLiked
         }
       }
       pageInfo {
@@ -155,13 +132,7 @@ export const GET_FEED = graphql(`
           likeCount
           commentCount
           isBookmarked
-          likes {
-            id
-            author {
-              id
-              username
-            }
-          }
+          isLiked
         }
       }
       pageInfo {
