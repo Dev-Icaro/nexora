@@ -81,6 +81,15 @@ export function createLoaders(viewerId: string | null = null) {
       const bookmarkedSet = new Set(bookmarks.map(b => String(b.postId)));
       return postIds.map(id => bookmarkedSet.has(id));
     }),
+
+    isLikedLoader: new DataLoader(async (postIds: readonly string[]) => {
+      if (!viewerId) {
+        return postIds.map(() => null);
+      }
+      const likes = await Like.find({ userId: viewerId, postId: { $in: postIds } });
+      const likedSet = new Set(likes.map(l => String(l.postId)));
+      return postIds.map(id => likedSet.has(id));
+    }),
   };
 }
 

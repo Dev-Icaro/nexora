@@ -15,6 +15,7 @@ type Post {
   likeCount: Int!
   commentCount: Int!
   isBookmarked: Boolean
+  isLiked: Boolean
 }
 
 type Comment {

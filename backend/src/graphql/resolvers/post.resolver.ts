@@ -98,6 +98,7 @@ export const postResolver: Resolvers = {
     likeCount: parent => parent.likeCount,
     commentCount: parent => parent.commentCount,
     isBookmarked: (parent, _, { loaders }) => loaders.isBookmarkedLoader.load(parent.id),
+    isLiked: (parent, _, { loaders }) => loaders.isLikedLoader.load(parent.id),
     mediaUrl: async parent => {
       if (parent.mediaKey) return signMediaUrl(parent.mediaKey);
       return parent.mediaUrl ?? null;
