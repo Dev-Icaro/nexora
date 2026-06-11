@@ -1,4 +1,4 @@
-import { useMutation } from '@apollo/client/react';
+import { useFragment, useMutation } from '@apollo/client/react';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { Bookmark, Heart, MessageCircle, MoreHorizontal, Send, UserPlus } from 'lucide-react';
@@ -20,7 +20,7 @@ import { useProfileNavigation } from '@/shared/hooks/use-profile-navigation';
 import { toast } from '@/shared/lib/toast';
 import { cn } from '@/shared/lib/utils';
 
-import { LIKE_POST } from '../api/post.mutations';
+import { LIKE_POST, POST_LIKE_FIELDS } from '../api/post.mutations';
 import type { PostNode } from '../api/post.queries';
 import { useBookmark } from '../hooks/use-bookmark';
 
@@ -40,7 +40,13 @@ export function PostCard({ post, onOpenModal, onFollow }: PostCardProps) {
   const userId = state.user?.id;
   const { navigateToProfile } = useProfileNavigation();
 
-  const liked = post.isLiked ?? false;
+  const { data: likeData, complete: likeComplete } = useFragment({
+    fragment: POST_LIKE_FIELDS,
+    fragmentName: 'PostLikeFields',
+    from: { __typename: 'Post', id: post.id },
+  });
+  const liked = likeComplete ? (likeData.isLiked ?? false) : (post.isLiked ?? false);
+  const likeCount = likeComplete ? likeData.likeCount : post.likeCount;
 
   const showFollowButton = post.author.isFollowing === false && post.author.id !== userId;
 
@@ -61,7 +67,7 @@ export function PostCard({ post, onOpenModal, onFollow }: PostCardProps) {
               __typename: 'Post',
               id: post.id,
               isLiked: !liked,
-              likeCount: Math.max(0, post.likeCount + (liked ? -1 : 1)),
+              likeCount: Math.max(0, likeCount + (liked ? -1 : 1)),
             },
           },
         },
@@ -197,7 +203,7 @@ export function PostCard({ post, onOpenModal, onFollow }: PostCardProps) {
               )}
             >
               <Heart className={cn('size-4', liked && 'fill-current')} />
-              <span className={cn('font-semibold', liked ? 'text-primary' : 'text-foreground')}>{post.likeCount}</span>
+              <span className={cn('font-semibold', liked ? 'text-primary' : 'text-foreground')}>{likeCount}</span>
             </button>
             <button
               onClick={() => onOpenModal?.(post.id)}

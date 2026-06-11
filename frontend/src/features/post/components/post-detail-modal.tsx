@@ -79,7 +79,7 @@ function NotFoundState({ onClose }: { onClose: () => void }) {
 }
 
 interface CommentItemProps {
-  comment: CommentDetail & { isLiked?: boolean };
+  comment: CommentDetail;
   onLike: (id: string) => void;
   onAuthorClick: (userId: string) => void;
 }
@@ -238,7 +238,7 @@ function PostContentPanel({ post, liked, likeCount, saved, onLike, onSave, onAut
 }
 
 interface CommentsPanelProps {
-  comments: (CommentDetail & { isLiked?: boolean })[];
+  comments: CommentDetail[];
   loading: boolean;
   onLike: (id: string) => void;
   commentInput: string;
@@ -348,7 +348,7 @@ interface PostDetailModalProps {
   liked: boolean;
   likeCount: number;
   bookmarked: boolean;
-  comments: (CommentDetail & { isLiked: boolean })[];
+  comments: CommentDetail[];
   sending: boolean;
   onLikePost: () => void;
   onLikeComment: (id: string) => void;

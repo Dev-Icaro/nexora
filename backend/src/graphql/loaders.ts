@@ -6,6 +6,7 @@ import type { LikeDto } from '@/dtos/post/like.dto';
 import type { UserDto } from '@/dtos/user/user.dto';
 import { Bookmark } from '@/models/bookmark.model';
 import { Comment } from '@/models/comment.model';
+import { CommentLike } from '@/models/comment-like.model';
 import { Follow } from '@/models/follow.model';
 import { Like } from '@/models/like.model';
 import { User } from '@/models/user.model';
@@ -89,6 +90,15 @@ export function createLoaders(viewerId: string | null = null) {
       const likes = await Like.find({ userId: viewerId, postId: { $in: postIds } });
       const likedSet = new Set(likes.map(l => String(l.postId)));
       return postIds.map(id => likedSet.has(id));
+    }),
+
+    isCommentLikedLoader: new DataLoader(async (commentIds: readonly string[]) => {
+      if (!viewerId) {
+        return commentIds.map(() => null);
+      }
+      const likes = await CommentLike.find({ userId: viewerId, commentId: { $in: commentIds } });
+      const likedSet = new Set(likes.map(l => String(l.commentId)));
+      return commentIds.map(id => likedSet.has(id));
     }),
   };
 }

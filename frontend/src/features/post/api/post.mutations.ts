@@ -1,5 +1,12 @@
 import { graphql } from '@/gql';
 
+export const POST_LIKE_FIELDS = graphql(`
+  fragment PostLikeFields on Post {
+    isLiked
+    likeCount
+  }
+`);
+
 export const GET_UPLOAD_URL = graphql(`
   mutation GetUploadUrl($request: GetUploadUrlRequest!) {
     getUploadUrl(request: $request) {
@@ -97,12 +104,15 @@ export const REMOVE_BOOKMARK = graphql(`
 export const LIKE_COMMENT = graphql(`
   mutation LikeComment($commentId: ID!) {
     likeComment(commentId: $commentId) {
+      __typename
       code
       success
       message
       comment {
+        __typename
         id
         likeCount
+        isLiked
       }
     }
   }
@@ -111,12 +121,15 @@ export const LIKE_COMMENT = graphql(`
 export const UNLIKE_COMMENT = graphql(`
   mutation UnlikeComment($commentId: ID!) {
     unlikeComment(commentId: $commentId) {
+      __typename
       code
       success
       message
       comment {
+        __typename
         id
         likeCount
+        isLiked
       }
     }
   }

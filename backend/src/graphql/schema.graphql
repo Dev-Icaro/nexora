@@ -24,6 +24,7 @@ type Comment {
   author: User!
   body: String!
   likeCount: Int!
+  isLiked: Boolean
 }
 
 type Like {

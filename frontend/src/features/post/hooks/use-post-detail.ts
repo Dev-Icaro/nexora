@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { toast } from '@/shared/lib/toast';
 
@@ -9,18 +9,11 @@ export function usePostDetail(postId: string | null) {
   const { post, loading, error, likePost, createComment, likeComment, unlikeComment } = usePost(postId);
   const { bookmarked, toggleBookmark } = useBookmark(postId ?? '', post?.isBookmarked);
 
-  const [likedCommentIds, setLikedCommentIds] = useState<Set<string>>(new Set());
   const [sending, setSending] = useState(false);
-
-  useEffect(() => {
-    setLikedCommentIds(new Set());
-  }, [postId]);
 
   const liked = post?.isLiked ?? false;
   const likeCount = post?.likeCount ?? 0;
-  const comments = (post?.comments ?? [])
-    .filter((c): c is NonNullable<typeof c> => c !== null)
-    .map(c => ({ ...c, isLiked: likedCommentIds.has(c.id) }));
+  const comments = (post?.comments ?? []).filter((c): c is NonNullable<typeof c> => c !== null);
 
   const onLikePost = async () => {
     if (!postId) return;
@@ -32,26 +25,16 @@ export function usePostDetail(postId: string | null) {
   };
 
   const onLikeComment = async (commentId: string) => {
-    const isCurrentlyLiked = likedCommentIds.has(commentId);
-    setLikedCommentIds(prev => {
-      const next = new Set(prev);
-      if (isCurrentlyLiked) next.delete(commentId);
-      else next.add(commentId);
-      return next;
-    });
+    const comment = comments.find(c => c.id === commentId);
+    if (!comment) return;
+    const isCurrentlyLiked = comment.isLiked ?? false;
     try {
       if (isCurrentlyLiked) {
-        await unlikeComment(commentId);
+        await unlikeComment(commentId, comment.likeCount);
       } else {
-        await likeComment(commentId);
+        await likeComment(commentId, comment.likeCount);
       }
     } catch {
-      setLikedCommentIds(prev => {
-        const next = new Set(prev);
-        if (isCurrentlyLiked) next.add(commentId);
-        else next.delete(commentId);
-        return next;
-      });
       toast.error('Failed to update comment like');
     }
   };

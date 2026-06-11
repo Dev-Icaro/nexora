@@ -107,6 +107,7 @@ export const postResolver: Resolvers = {
   Comment: {
     author: (parent, _, { loaders }) => loadAuthor(parent.authorId, loaders),
     likeCount: parent => parent.likeCount,
+    isLiked: (parent, _, { loaders }) => loaders.isCommentLikedLoader.load(parent.id),
   },
   Like: {
     author: (parent, _, { loaders }) => loadAuthor(parent.authorId, loaders),

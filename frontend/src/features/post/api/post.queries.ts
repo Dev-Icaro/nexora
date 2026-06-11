@@ -24,6 +24,7 @@ export const GET_POST_BY_ID = graphql(`
         body
         createdAt
         likeCount
+        isLiked
         author {
           id
           username

@@ -4,10 +4,10 @@ import { useMutation, useQuery } from '@apollo/client/react';
 import { CREATE_COMMENT, LIKE_COMMENT, LIKE_POST, UNLIKE_COMMENT } from '../api/post.mutations';
 import { GET_POST_BY_ID } from '../api/post.queries';
 
-function writeCommentLikeCount(cache: ApolloCache, commentId: string, likeCount: number) {
+function writeCommentLikeFields(cache: ApolloCache, commentId: string, likeCount: number, isLiked: boolean) {
   cache.modify({
     id: cache.identify({ __typename: 'Comment', id: commentId }),
-    fields: { likeCount: () => likeCount },
+    fields: { likeCount: () => likeCount, isLiked: () => isLiked },
   });
 }
 
@@ -61,21 +61,44 @@ export function usePost(postId: string | null) {
       },
     });
 
-  const likeComment = (commentId: string) =>
+  const likeComment = (commentId: string, currentLikeCount: number) =>
     likeCommentMutation({
       variables: { commentId },
+      optimisticResponse: {
+        likeComment: {
+          __typename: 'LikeCommentResponse',
+          code: 200,
+          message: '',
+          success: true,
+          comment: { __typename: 'Comment', id: commentId, likeCount: currentLikeCount + 1, isLiked: true },
+        },
+      },
       update(cache, { data }) {
         const comment = data?.likeComment?.comment;
-        if (comment) writeCommentLikeCount(cache, commentId, comment.likeCount);
+        if (comment) writeCommentLikeFields(cache, commentId, comment.likeCount, true);
       },
     });
 
-  const unlikeComment = (commentId: string) =>
+  const unlikeComment = (commentId: string, currentLikeCount: number) =>
     unlikeCommentMutation({
       variables: { commentId },
+      optimisticResponse: {
+        unlikeComment: {
+          __typename: 'LikeCommentResponse',
+          code: 200,
+          message: '',
+          success: true,
+          comment: {
+            __typename: 'Comment',
+            id: commentId,
+            likeCount: Math.max(0, currentLikeCount - 1),
+            isLiked: false,
+          },
+        },
+      },
       update(cache, { data }) {
         const comment = data?.unlikeComment?.comment;
-        if (comment) writeCommentLikeCount(cache, commentId, comment.likeCount);
+        if (comment) writeCommentLikeFields(cache, commentId, comment.likeCount, false);
       },
     });
 
